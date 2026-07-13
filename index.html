@@ -79,7 +79,12 @@
   .b-verm{background:var(--verm-bg);color:var(--verm)}
   .camp{display:flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.2}
   .pill-ativa{background:var(--ativa-bg);color:var(--ativa);border:1px solid #bcd9f5;
-    padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block}
+    padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block;
+    text-decoration:none;cursor:pointer}
+  .pill-ativa:hover{background:var(--ativa);color:#fff}
+  .check{display:flex;align-items:center;gap:6px;padding-bottom:7px}
+  .check input{width:15px;height:15px}
+  .check label{font-size:12px;color:var(--txt);cursor:pointer}
   .periodo{font-size:10px;color:var(--sub)}
   .total td{background:#e9eff7!important;font-weight:700;
     border-top:2px solid var(--azul);position:sticky;bottom:0}
@@ -104,10 +109,12 @@
 
   <div class="barra">
     <div class="filtros">
-      <div class="campo"><label>Período — de</label><input type="date" id="fIni" value="2026-07-01"></div>
-      <div class="campo"><label>até</label><input type="date" id="fFim" value="2026-07-12"></div>
+      <div class="campo"><label>Período — de</label><input type="date" id="fIni"></div>
+      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
+      <div class="check"><input type="checkbox" id="fAtivas"><label for="fAtivas">Só campanhas ativas</label></div>
       <button class="btn" onclick="carregar()">Aplicar</button>
     </div>
+    <div class="tag" id="atualizado"></div>
   </div>
 
   <div id="erro"></div>
@@ -137,7 +144,7 @@
       <span class="badge b-amar">Estável</span> ·
       <span class="badge b-verm">Abaixo</span> ·
       <span class="badge" style="background:var(--claro);color:var(--sub)">— sem histórico ainda</span>.
-      Linhas com barra azul e selo ATIVA têm campanha em andamento no período escolhido.</div>
+      Linhas com barra azul e selo <b>ATIVA</b> (clicável, abre a campanha no Monday) têm campanha em andamento no período escolhido.</div>
     <div style="margin-top:4px">Dados ao vivo do Supabase (base <code>communitas</code>). Edição de conversões, turma e investimento ainda não estão nesta versão — leitura apenas.</div>
   </div>
 </div>
@@ -148,10 +155,19 @@ const SUPABASE_URL = "https://ltasijrhkotyyrxnavab.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const MONDAY_BOARD = "935301050";
 const tipoOrder = {MBA:0, Curso:1, Institucional:2};
 const rotulos = {MBA:'MBAs', Curso:'Cursos', Institucional:'Campanha de captação'};
 const fmt = n => Number(n||0).toLocaleString('pt-BR');
 const fmtDate = iso => iso ? iso.split('-').reverse().slice(0,2).join('/') : '';
+
+(function setDefaultDates(){
+  const hoje = new Date();
+  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const toISO = d => d.toISOString().slice(0,10);
+  document.getElementById('fIni').value = toISO(inicioMes);
+  document.getElementById('fFim').value = toISO(hoje);
+})();
 
 function situacao(media, mediana){
   media = Number(media); mediana = Number(mediana);
@@ -177,9 +193,12 @@ async function carregar(){
     return;
   }
   document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos no período`;
+  document.getElementById('atualizado').textContent =
+    `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
 
+  const soAtivas = document.getElementById('fAtivas').checked;
   const rows = data
-    .filter(r => r.leads > 0 || r.campanha_ativa)
+    .filter(r => soAtivas ? r.campanha_ativa : (r.leads > 0 || r.campanha_ativa))
     .sort((a,b)=>{
       if(tipoOrder[a.tipo]!==tipoOrder[b.tipo]) return tipoOrder[a.tipo]-tipoOrder[b.tipo];
       if(a.campanha_ativa!==b.campanha_ativa) return a.campanha_ativa?-1:1;
@@ -208,8 +227,11 @@ async function carregar(){
     const dpct = r.delta_pct;
     const dstr = (dpct===null||dpct===undefined) ? '<span class="z">—</span>'
         : `<span class="${dpct>=0?'up':'down'}">${dpct>=0?'+':''}${dpct}%</span>`;
+    const pill = r.monday_item_id
+        ? `<a class="pill-ativa" href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${r.monday_item_id}" target="_blank" rel="noopener" title="Abrir no Monday">ATIVA</a>`
+        : `<span class="pill-ativa">ATIVA</span>`;
     const camp = r.campanha_ativa
-        ? `<div class="camp"><span class="pill-ativa">ATIVA</span>
+        ? `<div class="camp">${pill}
            <span class="periodo">${fmtDate(r.campanha_inicio)}–${fmtDate(r.campanha_fim)}</span></div>`
         : '<span class="z">—</span>';
     const med = Number(r.mediana_dia) ? fmt(r.mediana_dia) : '<span class="z">—</span>';
@@ -238,14 +260,14 @@ async function carregar(){
     </tr>`);
 
   document.getElementById('cards').innerHTML = `
-    <div class="kpi"><div class="lbl">Leads · campanhas ativas</div><div class="val">${fmt(leadsAtivos)}</div>
-      <div class="delta muted">soma só dos ${ativos} cursos ativos no período</div></div>
+    <div class="kpi"><div class="lbl">Leads · ativas</div><div class="val">${fmt(leadsAtivos)}</div>
+      <div class="delta muted">${ativos} cursos</div></div>
     <div class="kpi"><div class="lbl">Campanhas ativas</div><div class="val">${ativos}</div>
-      <div class="delta muted">com sobreposição no período escolhido</div></div>
+      <div class="delta muted">no período</div></div>
     <div class="kpi"><div class="lbl">Canal líder</div><div class="val">Meta</div>
-      <div class="delta muted">${fmt(soma.meta_ads)} leads nos ativos${soma.leads?` (${Math.round(100*soma.meta_ads/soma.leads)}%)`:''}</div></div>
+      <div class="delta muted">${soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos ativos`:'—'}</div></div>
     <div class="kpi"><div class="lbl">Investimento / CPL</div><div class="val" style="font-size:15px;color:var(--sub)">não carregado</div>
-      <div class="delta muted">previsto pra v2.0</div></div>`;
+      <div class="delta muted">v2.0</div></div>`;
 
   const alertaBox = document.getElementById('alerta');
   alertaBox.style.display = 'flex';
