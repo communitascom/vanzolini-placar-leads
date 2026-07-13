@@ -16,11 +16,12 @@
     background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
   .wrap{max-width:1320px;margin:0 auto}
   header{display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:14px;flex-wrap:wrap;gap:12px}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{width:40px;height:40px;border-radius:9px;background:var(--azul);
-    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
-  h1{font-size:18px;color:var(--azul);font-weight:700}
+    margin-bottom:14px;flex-wrap:wrap;gap:12px;background:var(--claro);
+    border:1px solid #dfe9f5;border-radius:14px;padding:14px 20px}
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{height:34px;width:auto;display:block}
+  .brand .divisor{width:1px;align-self:stretch;background:#cfdcec}
+  h1{font-size:16px;color:var(--azul);font-weight:700}
   .brand small{color:var(--sub);font-size:11px;display:block}
   .tag{background:#fff;border:1px solid var(--linha);border-radius:20px;
     padding:5px 12px;font-size:11px;color:var(--sub)}
@@ -82,9 +83,12 @@
     padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block;
     text-decoration:none;cursor:pointer}
   .pill-ativa:hover{background:var(--ativa);color:#fff}
-  .check{display:flex;align-items:center;gap:6px;padding-bottom:7px}
-  .check input{width:15px;height:15px}
-  .check label{font-size:12px;color:var(--txt);cursor:pointer}
+  .toggle{border:1px solid var(--linha);background:#fff;color:var(--sub);
+    border-radius:20px;padding:8px 15px 8px 12px;font-size:12.5px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;gap:7px}
+  .toggle .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;transition:background .15s}
+  .toggle.on{background:var(--ativa-bg);border-color:#bcd9f5;color:var(--ativa)}
+  .toggle.on .dot{background:var(--ativa)}
   .periodo{font-size:10px;color:var(--sub)}
   .total td{background:#e9eff7!important;font-weight:700;
     border-top:2px solid var(--azul);position:sticky;bottom:0}
@@ -100,9 +104,10 @@
 
   <header>
     <div class="brand">
-      <div class="logo">VZ</div>
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div class="divisor"></div>
       <div><h1>Placar de Leads</h1>
-        <small>Fundação Vanzolini · leitura em tempo real do Supabase</small></div>
+        <small>leitura em tempo real do Supabase</small></div>
     </div>
     <div class="tag" id="tagTopo">conectando…</div>
   </header>
@@ -111,7 +116,7 @@
     <div class="filtros">
       <div class="campo"><label>Período — de</label><input type="date" id="fIni"></div>
       <div class="campo"><label>até</label><input type="date" id="fFim"></div>
-      <div class="check"><input type="checkbox" id="fAtivas"><label for="fAtivas">Só campanhas ativas</label></div>
+      <button class="toggle" id="fAtivas" onclick="alternarAtivas()"><span class="dot"></span>Só campanhas ativas</button>
       <button class="btn" onclick="carregar()">Aplicar</button>
     </div>
     <div class="tag" id="atualizado"></div>
@@ -177,6 +182,15 @@ function situacao(media, mediana){
   return ['Abaixo','b-verm'];
 }
 
+let ultimoData = null;
+let soAtivas = false;
+
+function alternarAtivas(){
+  soAtivas = !soAtivas;
+  document.getElementById('fAtivas').classList.toggle('on', soAtivas);
+  if(ultimoData) renderizar(ultimoData);
+}
+
 async function carregar(){
   const ini = document.getElementById('fIni').value;
   const fim = document.getElementById('fFim').value;
@@ -192,11 +206,15 @@ async function carregar(){
     document.getElementById('tagTopo').textContent = 'erro de conexão';
     return;
   }
+  ultimoData = data;
   document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos no período`;
   document.getElementById('atualizado').textContent =
     `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  renderizar(data);
+}
 
-  const soAtivas = document.getElementById('fAtivas').checked;
+function renderizar(data){
+  const corpo = document.getElementById('corpo');
   const rows = data
     .filter(r => soAtivas ? r.campanha_ativa : (r.leads > 0 || r.campanha_ativa))
     .sort((a,b)=>{
