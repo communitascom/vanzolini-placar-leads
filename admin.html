@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Placar de Leads · Gestão</title>
+<style>
+  :root{
+    --azul:#003a70; --azul2:#0060b0; --claro:#eef3f8; --linha:#e2e8f0;
+    --txt:#1f2b3a; --sub:#64748b; --verde:#1a9d5a; --verde-bg:#e7f6ee;
+    --verm:#c73a3a; --verm-bg:#fbe9e9; --zebra:#f7fafd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
+  .wrap{max-width:1100px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;background:var(--claro);border:1px solid #dfe9f5;
+    border-radius:14px;padding:14px 20px}
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{height:30px}
+  h1{font-size:16px;color:var(--azul);font-weight:700}
+  .sub{color:var(--sub);font-size:11px}
+  .btn{background:var(--azul);color:#fff;border:none;border-radius:8px;
+    padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--azul2)}
+  .btn.ghost{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+  .btn.danger{background:#fff;color:var(--verm);border:1px solid var(--verm)}
+
+  .card{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:20px;max-width:420px;margin:60px auto}
+  .card h2{color:var(--azul);font-size:16px;margin-bottom:6px}
+  .card p{color:var(--sub);font-size:12.5px;margin-bottom:16px;line-height:1.5}
+  .card input{width:100%;border:1px solid var(--linha);border-radius:8px;
+    padding:9px 11px;font-size:14px;margin-bottom:10px}
+  .msg{font-size:12.5px;padding:8px 10px;border-radius:8px;margin-bottom:10px}
+  .msg.ok{background:var(--verde-bg);color:var(--verde)}
+  .msg.err{background:var(--verm-bg);color:var(--verm)}
+
+  .barra{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .barra input{flex:1;min-width:200px;border:1px solid var(--linha);border-radius:8px;padding:8px 11px;font-size:13px}
+
+  .tabela{background:#fff;border:1px solid var(--linha);border-radius:12px;overflow:auto}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  th,td{padding:8px 10px;text-align:left;white-space:nowrap;font-size:12.5px}
+  th{background:var(--azul);color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  tbody tr:hover{background:#eef4fb}
+  .z{color:#cbd5e1}
+  .acoes{display:flex;gap:6px}
+  .ico{border:1px solid var(--linha);background:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px}
+  .ico:hover{background:var(--claro)}
+
+  .overlay{position:fixed;inset:0;background:rgba(15,30,50,.45);display:none;align-items:center;justify-content:center;z-index:50}
+  .overlay.on{display:flex}
+  .modal{background:#fff;border-radius:14px;width:480px;max-width:92vw;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .modal h3{color:var(--azul);font-size:16px;margin-bottom:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fld{margin-bottom:10px}
+  .fld label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);margin-bottom:3px}
+  .fld input,.fld select{width:100%;border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:13px}
+  .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+  .loading{padding:30px;text-align:center;color:var(--sub)}
+</style>
+</head>
+<body>
+
+<div id="telaLogin" class="wrap">
+  <div class="card">
+    <h2>Placar de Leads · Gestão</h2>
+    <p>Acesso da equipe Communitas. Digite seu e-mail cadastrado e enviamos um link de acesso (sem senha).</p>
+    <div id="loginMsg"></div>
+    <input type="email" id="loginEmail" placeholder="seuemail@communitas.com.br">
+    <button class="btn" style="width:100%" onclick="enviarLink()">Enviar link de acesso</button>
+  </div>
+</div>
+
+<div id="telaApp" class="wrap" style="display:none">
+  <header>
+    <div class="brand">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div><h1>Placar de Leads · Gestão</h1><div class="sub" id="usuarioLogado"></div></div>
+    </div>
+    <button class="btn ghost" onclick="sair()">Sair</button>
+  </header>
+
+  <div class="barra">
+    <input type="text" id="busca" placeholder="Buscar por e-mail ou nome..." oninput="renderizar()">
+    <button class="btn" onclick="abrirNovo()">+ Nova conversão</button>
+  </div>
+
+  <div class="tabela">
+    <table>
+      <thead><tr>
+        <th>Data</th><th>Email</th><th>Nome</th><th>Conversão RD</th><th>Curso</th><th>Canal</th><th>Ações</th>
+      </tr></thead>
+      <tbody id="corpo"><tr><td colspan="7" class="loading">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="overlay" id="ovForm">
+  <div class="modal">
+    <h3 id="formTitulo">Nova conversão</h3>
+    <div class="grid2">
+      <div class="fld"><label>Email</label><input id="fEmail" type="email"></div>
+      <div class="fld"><label>Nome</label><input id="fNome" type="text"></div>
+      <div class="fld"><label>Data</label><input id="fData" type="date"></div>
+      <div class="fld"><label>Hora</label><input id="fHora" type="time" value="12:00"></div>
+      <div class="fld" style="grid-column:1/-1"><label>Conversão RD (código bruto)</label><input id="fConversao" type="text"></div>
+      <div class="fld"><label>Curso</label><select id="fCurso"><option value="">— sem curso —</option></select></div>
+      <div class="fld"><label>Canal</label><select id="fCanal"><option value="">— sem canal —</option></select></div>
+    </div>
+    <div class="foot">
+      <button class="btn ghost" onclick="fechar()">Cancelar</button>
+      <button class="btn" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://ltasijrhkotyyrxnavab.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let cursos = [], canais = [], registros = [], editandoId = null;
+
+async function enviarLink(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const msg = document.getElementById('loginMsg');
+  if(!email){ msg.innerHTML = '<div class="msg err">Digite um e-mail.</div>'; return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
+  msg.innerHTML = error
+    ? `<div class="msg err">Erro: ${error.message}</div>`
+    : `<div class="msg ok">Link enviado para ${email}. Confira seu e-mail.</div>`;
+}
+
+async function sair(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function iniciar(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('telaLogin').style.display = 'block';
+    document.getElementById('telaApp').style.display = 'none';
+    return;
+  }
+  document.getElementById('telaLogin').style.display = 'none';
+  document.getElementById('telaApp').style.display = 'block';
+  document.getElementById('usuarioLogado').textContent = session.user.email;
+
+  const [{ data: cu }, { data: ca }] = await Promise.all([
+    sb.from('cursos').select('id, nome').order('nome'),
+    sb.from('canais').select('id, nome').order('nome')
+  ]);
+  cursos = cu || []; canais = ca || [];
+  document.getElementById('fCurso').innerHTML = '<option value="">— sem curso —</option>' +
+    cursos.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  document.getElementById('fCanal').innerHTML = '<option value="">— sem canal —</option>' +
+    canais.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+
+  await carregar();
+}
+
+async function carregar(){
+  const corpo = document.getElementById('corpo');
+  corpo.innerHTML = '<tr><td colspan="7" class="loading">Carregando…</td></tr>';
+  const { data, error } = await sb
+    .from('conversoes')
+    .select('id, email, nome, data_conversao, conversao_rd, curso_id, canal_id, cursos(nome), canais(nome)')
+    .order('data_conversao', { ascending: false })
+    .limit(300);
+  if(error){
+    corpo.innerHTML = `<tr><td colspan="7">Erro: ${error.message}</td></tr>`;
+    return;
+  }
+  registros = data || [];
+  renderizar();
+}
+
+function renderizar(){
+  const termo = document.getElementById('busca').value.trim().toLowerCase();
+  const corpo = document.getElementById('corpo');
+  const filtrados = registros.filter(r =>
+    !termo || (r.email||'').toLowerCase().includes(termo) || (r.nome||'').toLowerCase().includes(termo)
+  );
+  if(filtrados.length === 0){
+    corpo.innerHTML = '<tr><td colspan="7" class="loading">Nada encontrado.</td></tr>';
+    return;
+  }
+  corpo.innerHTML = filtrados.slice(0, 200).map(r => `
+    <tr>
+      <td>${new Date(r.data_conversao).toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'})}</td>
+      <td>${r.email}</td>
+      <td>${r.nome || '<span class="z">—</span>'}</td>
+      <td>${r.conversao_rd || '<span class="z">—</span>'}</td>
+      <td>${r.cursos?.nome || '<span class="z">sem curso</span>'}</td>
+      <td>${r.canais?.nome || '<span class="z">sem canal</span>'}</td>
+      <td class="acoes">
+        <button class="ico" onclick="abrirEdicao('${r.id}')">✎ editar</button>
+        <button class="ico" onclick="apagar('${r.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function abrirNovo(){
+  editandoId = null;
+  document.getElementById('formTitulo').textContent = 'Nova conversão';
+  document.getElementById('fEmail').value = '';
+  document.getElementById('fNome').value = '';
+  document.getElementById('fData').value = new Date().toISOString().slice(0,10);
+  document.getElementById('fHora').value = new Date().toTimeString().slice(0,5);
+  document.getElementById('fConversao').value = '';
+  document.getElementById('fCurso').value = '';
+  document.getElementById('fCanal').value = '';
+  document.getElementById('ovForm').classList.add('on');
+}
+
+function abrirEdicao(id){
+  const r = registros.find(x => x.id == id);
+  if(!r) return;
+  editandoId = id;
+  const dt = new Date(r.data_conversao);
+  document.getElementById('formTitulo').textContent = 'Editar conversão';
+  document.getElementById('fEmail').value = r.email || '';
+  document.getElementById('fNome').value = r.nome || '';
+  document.getElementById('fData').value = dt.toISOString().slice(0,10);
+  document.getElementById('fHora').value = dt.toTimeString().slice(0,5);
+  document.getElementById('fConversao').value = r.conversao_rd || '';
+  document.getElementById('fCurso').value = r.curso_id || '';
+  document.getElementById('fCanal').value = r.canal_id || '';
+  document.getElementById('ovForm').classList.add('on');
+}
+
+function fechar(){
+  document.getElementById('ovForm').classList.remove('on');
+}
+
+async function salvar(){
+  const email = document.getElementById('fEmail').value.trim().toLowerCase();
+  const nome = document.getElementById('fNome').value.trim();
+  const data = document.getElementById('fData').value;
+  const hora = document.getElementById('fHora').value;
+  const conversao_rd = document.getElementById('fConversao').value.trim();
+  const curso_id = document.getElementById('fCurso').value || null;
+  const canal_id = document.getElementById('fCanal').value || null;
+  if(!email || !data){ alert('Email e data são obrigatórios.'); return; }
+
+  const payload = {
+    email, nome: nome || null,
+    data_conversao: `${data}T${hora || '00:00'}:00-03:00`,
+    conversao_rd: conversao_rd || null,
+    curso_id, canal_id
+  };
+
+  const { error } = editandoId
+    ? await sb.from('conversoes').update(payload).eq('id', editandoId)
+    : await sb.from('conversoes').insert(payload);
+
+  if(error){ alert('Erro ao salvar: ' + error.message); return; }
+  fechar();
+  await carregar();
+}
+
+async function apagar(id){
+  if(!confirm('Apagar esta conversão? Não tem como desfazer.')) return;
+  const { error } = await sb.from('conversoes').delete().eq('id', id);
+  if(error){ alert('Erro ao apagar: ' + error.message); return; }
+  await carregar();
+}
+
+sb.auth.onAuthStateChange((_event, _session) => { iniciar(); });
+iniciar();
+</script>
+</body>
+</html>
