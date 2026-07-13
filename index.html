@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Placar de Leads · Vanzolini</title>
+<style>
+  :root{
+    --azul:#003a70; --azul2:#0060b0; --claro:#eef3f8; --linha:#e2e8f0;
+    --txt:#1f2b3a; --sub:#64748b; --verde:#1a9d5a; --verde-bg:#e7f6ee;
+    --amar:#b5820a; --amar-bg:#fdf5e3; --verm:#c73a3a; --verm-bg:#fbe9e9;
+    --ativa:#0060b0; --ativa-bg:#eaf3fc; --zebra:#f7fafd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
+  .wrap{max-width:1320px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;flex-wrap:wrap;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:40px;height:40px;border-radius:9px;background:var(--azul);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  h1{font-size:18px;color:var(--azul);font-weight:700}
+  .brand small{color:var(--sub);font-size:11px;display:block}
+  .tag{background:#fff;border:1px solid var(--linha);border-radius:20px;
+    padding:5px 12px;font-size:11px;color:var(--sub)}
+  .tag b{color:var(--verde)}
+
+  .alerta{display:flex;align-items:center;gap:10px;background:#fff7ed;
+    border:1px solid #fcd9a8;border-left:4px solid #e08a1e;border-radius:10px;
+    padding:10px 14px;margin:14px 0;font-size:12.5px;color:#8a5410}
+  .alerta.ok{background:var(--verde-bg);border-color:#bfe6cf;border-left-color:var(--verde);color:#175c3a}
+  .alerta b{color:inherit}
+  .alerta .sino{font-size:16px}
+
+  .barra{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;
+    justify-content:space-between;margin-bottom:14px}
+  .filtros{background:#fff;border:1px solid var(--linha);border-radius:12px;
+    padding:12px 14px;display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+  .campo label{display:block;font-size:10px;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--sub);margin-bottom:4px}
+  .campo input,.campo select{border:1px solid var(--linha);border-radius:8px;
+    padding:7px 9px;font-size:13px;color:var(--txt);background:#fff}
+  .btn{background:var(--azul);color:#fff;border:none;border-radius:8px;
+    padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--azul2)}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  .kpi{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px 16px}
+  .kpi .lbl{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-size:25px;font-weight:700;color:var(--azul);margin-top:4px}
+  .kpi .delta{font-size:12px;margin-top:2px;font-weight:600}
+  .down{color:var(--verm)} .up{color:var(--verde)} .muted{color:var(--sub)}
+
+  .tabela{background:#fff;border:1px solid var(--linha);border-radius:12px;
+    overflow:auto;max-height:70vh}
+  table{width:100%;border-collapse:collapse;min-width:1180px}
+  th,td{padding:7px 9px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  th{background:var(--azul);color:#fff;font-size:10px;text-transform:uppercase;
+    letter-spacing:.3px;font-weight:600;position:sticky;top:0;z-index:2}
+  td.curso,th.curso{text-align:left;white-space:normal;min-width:250px;
+    max-width:320px;position:sticky;left:0}
+  th.curso{background:var(--azul);z-index:3}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  tbody tr:nth-child(even) td.curso{background:var(--zebra)}
+  tbody tr:nth-child(odd) td.curso{background:#fff}
+  tbody tr:hover{background:#eef4fb}
+  tbody tr:hover td.curso{background:#eef4fb}
+  tbody tr.ativa{box-shadow:inset 4px 0 0 var(--ativa)}
+  .grupo td{background:var(--claro)!important;color:var(--azul);font-weight:700;
+    font-size:11px;text-transform:uppercase;letter-spacing:.8px;text-align:left;
+    position:sticky;left:0}
+  .curso .nome{font-weight:600;display:block}
+  .leads{font-weight:700;color:var(--azul)}
+  .z{color:#cbd5e1}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600}
+  .b-verde{background:var(--verde-bg);color:var(--verde)}
+  .b-amar{background:var(--amar-bg);color:var(--amar)}
+  .b-verm{background:var(--verm-bg);color:var(--verm)}
+  .camp{display:flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.2}
+  .pill-ativa{background:var(--ativa-bg);color:var(--ativa);border:1px solid #bcd9f5;
+    padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block}
+  .periodo{font-size:10px;color:var(--sub)}
+  .total td{background:#e9eff7!important;font-weight:700;
+    border-top:2px solid var(--azul);position:sticky;bottom:0}
+  .total td.curso{background:#e9eff7!important}
+  .rodape{margin-top:12px;color:var(--sub);font-size:11px;line-height:1.7}
+  .rodape b{color:var(--txt)}
+  .loading{padding:40px;text-align:center;color:var(--sub)}
+  .erro{padding:14px;background:var(--verm-bg);color:var(--verm);border-radius:10px;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">VZ</div>
+      <div><h1>Placar de Leads</h1>
+        <small>Fundação Vanzolini · leitura em tempo real do Supabase</small></div>
+    </div>
+    <div class="tag" id="tagTopo">conectando…</div>
+  </header>
+
+  <div class="barra">
+    <div class="filtros">
+      <div class="campo"><label>Período — de</label><input type="date" id="fIni" value="2026-07-01"></div>
+      <div class="campo"><label>até</label><input type="date" id="fFim" value="2026-07-12"></div>
+      <button class="btn" onclick="carregar()">Aplicar</button>
+    </div>
+  </div>
+
+  <div id="erro"></div>
+  <div class="cards" id="cards"></div>
+
+  <div class="tabela">
+    <table>
+      <thead><tr>
+        <th class="curso">Curso</th>
+        <th>Campanha</th><th>Meta</th><th>LinkedIn</th><th>Form Prog.</th>
+        <th>Form Pág.</th><th>Popup</th><th>WhatsApp</th><th>Outros</th>
+        <th>Leads</th><th>Δ%</th><th>Média/dia</th><th>Mediana/dia</th>
+        <th>Situação</th>
+      </tr></thead>
+      <tbody id="corpo"><tr><td colspan="14" class="loading">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="alerta ok" id="alerta" style="display:none">
+    <span class="sino">✓</span>
+    <span id="alertaTxt"></span>
+  </div>
+
+  <div class="rodape">
+    <div><b>Situação</b> compara média/dia do período com a mediana histórica/dia:
+      <span class="badge b-verde">Acima</span> ·
+      <span class="badge b-amar">Estável</span> ·
+      <span class="badge b-verm">Abaixo</span> ·
+      <span class="badge" style="background:var(--claro);color:var(--sub)">— sem histórico ainda</span>.
+      Linhas com barra azul e selo ATIVA têm campanha em andamento no período escolhido.</div>
+    <div style="margin-top:4px">Dados ao vivo do Supabase (base <code>communitas</code>). Edição de conversões, turma e investimento ainda não estão nesta versão — leitura apenas.</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://ltasijrhkotyyrxnavab.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const tipoOrder = {MBA:0, Curso:1, Institucional:2};
+const rotulos = {MBA:'MBAs', Curso:'Cursos', Institucional:'Campanha de captação'};
+const fmt = n => Number(n||0).toLocaleString('pt-BR');
+const fmtDate = iso => iso ? iso.split('-').reverse().slice(0,2).join('/') : '';
+
+function situacao(media, mediana){
+  media = Number(media); mediana = Number(mediana);
+  if(!mediana) return ['— sem histórico',''];
+  if(media >= mediana) return ['Acima','b-verde'];
+  if(media >= mediana*0.7) return ['Estável','b-amar'];
+  return ['Abaixo','b-verm'];
+}
+
+async function carregar(){
+  const ini = document.getElementById('fIni').value;
+  const fim = document.getElementById('fFim').value;
+  const corpo = document.getElementById('corpo');
+  const erroBox = document.getElementById('erro');
+  corpo.innerHTML = '<tr><td colspan="14" class="loading">Carregando…</td></tr>';
+  erroBox.innerHTML = '';
+
+  const { data, error } = await sb.rpc('placar', { p_inicio: ini, p_fim: fim });
+  if(error){
+    erroBox.innerHTML = `<div class="erro">Erro ao carregar: ${error.message}</div>`;
+    corpo.innerHTML = '';
+    document.getElementById('tagTopo').textContent = 'erro de conexão';
+    return;
+  }
+  document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos no período`;
+
+  const rows = data
+    .filter(r => r.leads > 0 || r.campanha_ativa)
+    .sort((a,b)=>{
+      if(tipoOrder[a.tipo]!==tipoOrder[b.tipo]) return tipoOrder[a.tipo]-tipoOrder[b.tipo];
+      if(a.campanha_ativa!==b.campanha_ativa) return a.campanha_ativa?-1:1;
+      return b.leads-a.leads;
+    });
+
+  corpo.innerHTML = '';
+  let tipoAtual='';
+  const soma={meta_ads:0,linkedin:0,form_prog:0,form_pagina:0,popup:0,whatsapp:0,outros:0,leads:0};
+  let ativos=0, leadsAtivos=0, semLeadAtiva=0;
+
+  rows.forEach(r=>{
+    if(r.tipo!==tipoAtual){
+      tipoAtual=r.tipo;
+      corpo.insertAdjacentHTML('beforeend',
+        `<tr class="grupo"><td class="curso" colspan="14">${rotulos[r.tipo]||r.tipo}</td></tr>`);
+    }
+    if(r.campanha_ativa){
+      soma.meta_ads+=r.meta_ads; soma.linkedin+=r.linkedin; soma.form_prog+=r.form_prog;
+      soma.form_pagina+=r.form_pagina; soma.popup+=r.popup; soma.whatsapp+=r.whatsapp;
+      soma.outros+=r.outros; soma.leads+=r.leads;
+      ativos++; leadsAtivos+=r.leads;
+      if(r.leads===0) semLeadAtiva++;
+    }
+    const [sit,cls] = situacao(r.media_dia, r.mediana_dia);
+    const dpct = r.delta_pct;
+    const dstr = (dpct===null||dpct===undefined) ? '<span class="z">—</span>'
+        : `<span class="${dpct>=0?'up':'down'}">${dpct>=0?'+':''}${dpct}%</span>`;
+    const camp = r.campanha_ativa
+        ? `<div class="camp"><span class="pill-ativa">ATIVA</span>
+           <span class="periodo">${fmtDate(r.campanha_inicio)}–${fmtDate(r.campanha_fim)}</span></div>`
+        : '<span class="z">—</span>';
+    const med = Number(r.mediana_dia) ? fmt(r.mediana_dia) : '<span class="z">—</span>';
+    const cel = v => v ? fmt(v) : '<span class="z">0</span>';
+    corpo.insertAdjacentHTML('beforeend', `
+      <tr class="${r.campanha_ativa?'ativa':''}">
+        <td class="curso"><span class="nome">${r.curso}</span></td>
+        <td>${camp}</td>
+        <td>${cel(r.meta_ads)}</td><td>${cel(r.linkedin)}</td>
+        <td>${cel(r.form_prog)}</td><td>${cel(r.form_pagina)}</td>
+        <td>${cel(r.popup)}</td><td>${cel(r.whatsapp)}</td><td>${cel(r.outros)}</td>
+        <td class="leads">${fmt(r.leads)}</td>
+        <td>${dstr}</td>
+        <td>${fmt(r.media_dia)}</td>
+        <td>${med}</td>
+        <td>${cls?`<span class="badge ${cls}">${sit}</span>`:`<span class="z">${sit}</span>`}</td>
+      </tr>`);
+  });
+
+  corpo.insertAdjacentHTML('beforeend', `
+    <tr class="total">
+      <td class="curso">Total · campanhas ativas (${ativos})</td><td></td>
+      <td>${fmt(soma.meta_ads)}</td><td>${fmt(soma.linkedin)}</td><td>${fmt(soma.form_prog)}</td>
+      <td>${fmt(soma.form_pagina)}</td><td>${fmt(soma.popup)}</td><td>${fmt(soma.whatsapp)}</td><td>${fmt(soma.outros)}</td>
+      <td class="leads">${fmt(soma.leads)}</td><td></td><td></td><td></td><td></td>
+    </tr>`);
+
+  document.getElementById('cards').innerHTML = `
+    <div class="kpi"><div class="lbl">Leads · campanhas ativas</div><div class="val">${fmt(leadsAtivos)}</div>
+      <div class="delta muted">soma só dos ${ativos} cursos ativos no período</div></div>
+    <div class="kpi"><div class="lbl">Campanhas ativas</div><div class="val">${ativos}</div>
+      <div class="delta muted">com sobreposição no período escolhido</div></div>
+    <div class="kpi"><div class="lbl">Canal líder</div><div class="val">Meta</div>
+      <div class="delta muted">${fmt(soma.meta_ads)} leads nos ativos${soma.leads?` (${Math.round(100*soma.meta_ads/soma.leads)}%)`:''}</div></div>
+    <div class="kpi"><div class="lbl">Investimento / CPL</div><div class="val" style="font-size:15px;color:var(--sub)">não carregado</div>
+      <div class="delta muted">previsto pra v2.0</div></div>`;
+
+  const alertaBox = document.getElementById('alerta');
+  alertaBox.style.display = 'flex';
+  document.getElementById('alertaTxt').innerHTML = semLeadAtiva>0
+    ? `<b>${semLeadAtiva} campanha(s) ativa(s) sem lead</b> no período selecionado.`
+    : `<b>Todas as ${ativos} campanhas ativas tiveram lead</b> em algum dia do período selecionado.`;
+}
+
+carregar();
+</script>
+</body>
+</html>
