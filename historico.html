@@ -3,265 +3,327 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Histórico &amp; Investimento · Vanzolini</title>
+<title>Painel de Captação de Leads · Fundação Vanzolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --azul:#003a70; --azul2:#0060b0; --claro:#eef3f8; --linha:#e2e8f0;
-    --txt:#1f2b3a; --sub:#64748b; --verde:#1a9d5a; --verde-bg:#e7f6ee;
-    --amar:#b5820a; --amar-bg:#fdf5e3; --verm:#c73a3a; --verm-bg:#fbe9e9;
-    --zebra:#f7fafd;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
-  .wrap{max-width:1320px;margin:0 auto}
-  header{display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:14px;flex-wrap:wrap;gap:12px;background:var(--claro);
-    border:1px solid #dfe9f5;border-radius:14px;padding:14px 20px}
-  .brand{display:flex;align-items:center;gap:16px}
-  .logo{height:34px;width:auto;display:block}
-  .brand .divisor{width:1px;align-self:stretch;background:#cfdcec}
-  h1{font-size:16px;color:var(--azul);font-weight:700}
-  .brand small{color:var(--sub);font-size:11px;display:block}
-  .voltar{color:var(--azul2);text-decoration:none;font-size:12.5px;font-weight:600;
-    border:1px solid var(--linha);background:#fff;border-radius:20px;padding:8px 15px}
-  .voltar:hover{background:var(--claro)}
-
-  .barra{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;
-    justify-content:space-between;margin-bottom:14px}
-  .filtros{background:#fff;border:1px solid var(--linha);border-radius:12px;
-    padding:12px 14px;display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
-  .campo label{display:block;font-size:10px;text-transform:uppercase;
-    letter-spacing:.6px;color:var(--sub);margin-bottom:4px}
-  .campo input,.campo select{border:1px solid var(--linha);border-radius:8px;
-    padding:7px 9px;font-size:13px;color:var(--txt);background:#fff}
-  .btn{background:var(--azul);color:#fff;border:none;border-radius:8px;
-    padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer}
-  .btn:hover{background:var(--azul2)}
-
-  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-  .kpi{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px 16px}
-  .kpi .lbl{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
-  .kpi .val{font-size:22px;font-weight:700;color:var(--azul);margin-top:4px}
-  .kpi .delta{font-size:12px;margin-top:2px;font-weight:600;color:var(--sub)}
-
-  .sec{margin-bottom:16px}
-  .sec h2{font-size:13px;color:var(--azul);margin-bottom:8px;display:flex;align-items:center;gap:8px}
-  .tag{background:#fff;border:1px solid var(--linha);border-radius:20px;
-    padding:3px 10px;font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .card{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:16px}
-  .chartbox{position:relative;height:340px}
-  .chartbox.tall{height:420px}
-
-  .tabela{background:#fff;border:1px solid var(--linha);border-radius:12px;
-    overflow:auto;max-height:600px}
-  table{width:100%;border-collapse:collapse;min-width:900px}
-  th,td{padding:7px 9px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-  th{background:var(--azul);color:#fff;font-size:10px;text-transform:uppercase;
-    letter-spacing:.3px;font-weight:600;position:sticky;top:0;z-index:2}
-  td.curso,th.curso{text-align:left;white-space:normal;min-width:240px;
-    max-width:320px;position:sticky;left:0;background:#fff}
-  th.curso{background:var(--azul);z-index:3}
-  tbody tr:nth-child(even){background:var(--zebra)}
-  tbody tr:nth-child(even) td.curso{background:var(--zebra)}
-  tbody tr:hover{background:#eef4fb}
-  tbody tr:hover td.curso{background:#eef4fb}
-  .z{color:#cbd5e1}
-  .cpl-bom{color:var(--verde);font-weight:700}
-  .cpl-alto{color:var(--verm);font-weight:700}
-  input.busca{border:1px solid var(--linha);border-radius:8px;padding:7px 10px;
-    font-size:13px;width:260px;margin-bottom:10px}
-  .loading{padding:40px;text-align:center;color:var(--sub)}
-  .erro{padding:14px;background:var(--verm-bg);color:var(--verm);border-radius:10px;margin-bottom:14px}
-  .rodape{margin-top:12px;color:var(--sub);font-size:11px;line-height:1.7}
+:root{--navy:#060653;--azul:#4848B5;--azul2:#6a6ad4;--off:#F3F3FB;--txt:#1a1a2e;--mut:#7a7a93;--verde:#2e9e5b;--verm:#d64545;--borda:#e4e4f1;--card:#ffffff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--off);color:var(--txt);line-height:1.45;}
+h1,h2,h3,.v{font-family:'Inter Tight','Work Sans',sans-serif;}
+header{background:var(--navy);color:#fff;padding:24px 32px;position:relative;overflow:hidden;}
+header .tri{position:absolute;right:-30px;top:-30px;width:170px;height:170px;background:var(--azul);clip-path:polygon(100% 0,0 0,100% 100%);opacity:.35;}
+header .tri2{position:absolute;right:40px;bottom:-50px;width:110px;height:110px;background:var(--azul2);clip-path:polygon(0 100%,100% 100%,0 0);opacity:.25;}
+header h1{font-size:30px;font-weight:700;letter-spacing:-.5px;line-height:1.1;}
+header p{font-size:13.5px;opacity:.85;margin-top:6px;font-weight:500;}
+header .slogan{font-size:11px;opacity:.65;margin-top:8px;font-style:italic;}
+header .voltar{position:relative;z-index:2;display:inline-block;margin-top:14px;font-size:12px;color:#fff;opacity:.8;text-decoration:none;border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 13px;}
+header .voltar:hover{opacity:1;background:rgba(255,255,255,.1);}
+.wrap{max-width:1300px;margin:0 auto;padding:22px 32px 60px;}
+.filterbar{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:16px 18px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;box-shadow:0 1px 3px rgba(6,6,83,.04);margin-bottom:20px;position:sticky;top:0;z-index:20;}
+.fgrp{display:flex;flex-direction:column;gap:4px;}
+.fgrp label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);font-weight:600;}
+.fgrp select{padding:8px 12px;border:1px solid var(--borda);border-radius:9px;font-size:13px;font-family:inherit;background:#fff;color:var(--txt);min-width:150px;cursor:pointer;}
+.fgrp select:focus{outline:none;border-color:var(--azul);}
+.fgrp.wide select{min-width:300px;}
+#limpar{padding:8px 16px;border:1px solid var(--azul);background:#fff;color:var(--azul);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+#limpar:hover{background:var(--azul);color:#fff;}
+.activeflt{font-size:12px;color:var(--azul);font-weight:600;margin-left:auto;align-self:center;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;}
+.kpi{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;}
+.kpi:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--azul);}
+.kpi .v{font-size:25px;font-weight:700;color:var(--navy);}
+.kpi .l{font-size:11.5px;color:var(--mut);margin-top:2px;}
+.kpi .s{font-size:11px;margin-top:6px;font-weight:600;color:var(--mut);}
+.up{color:var(--verde);} .down{color:var(--verm);}
+.sec{margin-top:28px;}
+.sec h2{font-size:14px;color:var(--navy);margin-bottom:3px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.sec h2 .tag{font-size:9.5px;background:var(--azul);color:#fff;padding:3px 9px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
+.sec .hint{font-size:12px;color:var(--mut);margin-bottom:12px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(6,6,83,.03);}
+.card h3{font-size:12.5px;font-weight:600;margin-bottom:12px;color:var(--txt);}
+.chartbox{position:relative;height:300px;}
+.chartbox.tall{height:430px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--borda);}
+th:first-child,td:first-child{text-align:left;}
+th{background:var(--navy);color:#fff;font-weight:600;cursor:pointer;position:sticky;top:0;font-size:11px;}
+th:hover{background:var(--azul);}
+tbody tr:hover{background:#eeeefb;}
+.scrollt{max-height:430px;overflow:auto;border:1px solid var(--borda);border-radius:11px;}
+.bad{color:var(--verm);font-weight:600;} .good{color:var(--verde);font-weight:600;}
+.note{background:#eeeefb;border:1px solid #c9c9ee;border-radius:11px;padding:12px 16px;font-size:12.5px;color:var(--navy);margin-top:16px;}
+.tsearch{padding:7px 11px;border:1px solid var(--borda);border-radius:9px;font-size:12px;margin-bottom:10px;width:260px;font-family:inherit;}
+.empty{padding:40px;text-align:center;color:var(--mut);font-size:13px;}
+.foot{font-size:11px;color:var(--mut);margin-top:30px;text-align:center;}
+@media(max-width:880px){.grid2{grid-template-columns:1fr;}.wrap{padding:16px;}.filterbar{position:static;}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
 <body>
+<header>
+<div class="tri"></div><div class="tri2"></div>
+<h1>Painel de Captação de Leads</h1>
+<p>Visão de Marketing e Vendas · jan/2025 a jun/2026</p>
+<a class="voltar" href="index.html">← Voltar ao placar</a>
+</header>
 <div class="wrap">
 
-  <header>
-    <div class="brand">
-      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
-      <div class="divisor"></div>
-      <div><h1>Histórico &amp; Investimento</h1>
-        <small>turmas, mídia e CPL · leitura em tempo real do Supabase</small></div>
-    </div>
-    <a class="voltar" href="index.html">← Voltar ao placar</a>
-  </header>
-
-  <div class="barra">
-    <div class="filtros">
-      <div class="campo"><label>Período — de</label><input type="date" id="fIni"></div>
-      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
-      <button class="btn" onclick="carregar()">Aplicar</button>
-    </div>
-    <div class="tag" id="atualizado"></div>
-  </div>
-
-  <div id="erro"></div>
-  <div class="cards" id="cards"></div>
-
-  <div class="grid2 sec">
-    <div class="card">
-      <h2>Melhores CPL <span class="tag">mais barato por lead</span></h2>
-      <div class="chartbox"><canvas id="cMelhores"></canvas></div>
-    </div>
-    <div class="card">
-      <h2>Piores CPL <span class="tag">mais caro por lead</span></h2>
-      <div class="chartbox"><canvas id="cPiores"></canvas></div>
-    </div>
-  </div>
-
-  <div class="sec">
-    <h2>Turmas no período <span class="tag" id="tagTurmas"></span></h2>
-    <input class="busca" id="busca" placeholder="Buscar curso…" oninput="renderTabela()">
-    <div class="tabela">
-      <table>
-        <thead><tr>
-          <th class="curso">Curso</th><th>Tipo</th><th>Turma</th>
-          <th>Início</th><th>Fim</th><th>Investimento</th><th>Leads</th><th>CPL</th>
-        </tr></thead>
-        <tbody id="corpoTurmas"><tr><td colspan="8" class="loading">Carregando…</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="rodape">
-    <div>Investimento por turma vem do histórico compilado em <b>Historico_Leads_Vanzolini.xlsx</b> (turmas até mai/2026); leads e CPL são recalculados ao vivo contra o Supabase, não os números congelados da planilha.</div>
-    <div>* O Supabase só tem dado de lead a partir de 29/03/2026 (é todo o histórico que a planilha de origem manteve). Turmas anteriores a essa data mostram investimento real mas leads "sem dado" — não significa que a campanha não performou, só que não há como medir aqui.</div>
-    <div style="margin-top:4px">Fonte de atualização mensal do investimento ainda em avaliação (Monday × planilha de mídia semanal).</div>
-  </div>
+<div class="filterbar">
+ <div class="fgrp"><label>Tema</label><select id="f-tema"></select></div>
+ <div class="fgrp wide"><label>Curso</label><select id="f-curso"></select></div>
+ <div class="fgrp"><label>Mês de</label><select id="f-ini"></select></div>
+ <div class="fgrp"><label>Mês até</label><select id="f-fim"></select></div>
+ <button id="limpar">Limpar filtros</button>
+ <span class="activeflt" id="activeflt"></span>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<div class="kpis" id="kpis"></div>
+
+<div class="sec">
+<h2><span class="tag">Marketing</span> <span id="tit-mensal">Evolução mensal de leads</span></h2>
+<div class="hint" id="hint-mensal">Volume de leads por mês no período selecionado.</div>
+<div class="card"><div class="chartbox" id="bx-mensal"><canvas id="c-mensal"></canvas></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Marketing</span> Desempenho por curso</h2>
+<div class="card"><h3>Top cursos por leads (no período)</h3><div class="chartbox tall"><canvas id="c-topcursos"></canvas></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Marketing</span> Concentração de leads (Pareto)</h2>
+<div class="hint">Quantos cursos respondem pela maior parte dos leads. Barras = leads · linha = % acumulado.</div>
+<div class="card"><div class="chartbox tall"><canvas id="c-pareto"></canvas></div><div id="pareto-nota" class="note" style="margin-top:14px;"></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Marketing</span> Cursos em alta e em queda</h2>
+<div class="hint">Variação de leads jan–jun: 2026 vs 2025 (mesmos meses). Verde = crescimento · vermelho = queda.</div>
+<div class="card"><div class="chartbox tall"><canvas id="c-altaqueda"></canvas></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Marketing</span> Cursos mais perenes</h2>
+<div class="hint">Cursos recorrentes: várias turmas no período, presença em muitos meses e investimento contínuo. Índice = recorrência (turmas) + continuidade (meses ativos). Bolha = leads.</div>
+<div class="card"><div class="chartbox tall"><canvas id="c-perene"></canvas></div></div>
+<div class="card" style="margin-top:18px;"><div class="scrollt" id="t-perene"></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Marketing</span> Eficiência de investimento</h2>
+<div class="hint">Cada ponto é uma turma. X = investimento (escala log), Y = leads. Bolha maior = CPL mais alto (lead mais caro).</div>
+<div class="card"><div class="chartbox tall" id="bx-disp"><canvas id="c-disp"></canvas></div></div>
+<div class="grid2" style="margin-top:18px;">
+<div class="card"><h3>Melhores CPL (mais barato)</h3><div class="scrollt" id="t-best"></div></div>
+<div class="card"><h3>Piores CPL (mais caro)</h3><div class="scrollt" id="t-worst"></div></div>
+</div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Vendas</span> Pipeline por turma</h2>
+<div class="hint">Base para dimensionar o pipeline antes de cada turma. Clique no cabeçalho para ordenar.</div>
+<input type="text" class="tsearch" id="busca" placeholder="Buscar curso na tabela...">
+<div class="card"><div class="scrollt" id="t-camp"></div></div>
+</div>
+
+<div class="note"><b>Para a visão de vendas completa</b> (conversão lead&#8594;matrícula, CAC e ROI por curso) é necessário cruzar com matrículas/receita do CRM (RD Station). Este painel cobre captação, custo e potencial de pipeline.</div>
+
+<div class="foot">Gerado a partir de Historico_Leads_Vanzolini.xlsx · Fundação Vanzolini</div>
+</div>
+
 <script>
-const SUPABASE_URL = "https://ltasijrhkotyyrxnavab.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const DATA = {"months": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "regua": [{"curso": "MBA em IA Aplicada à Gestão Estratégica de Projetos", "edicoes": 1.0, "leads_ed": 2946.0, "leads_dia": 18.0, "cpl": 23.76, "l2025": 886.0, "l2026": 2339.0}, {"curso": "MBA em Gestão Ágil, Inovação e Liderança", "edicoes": 3.0, "leads_ed": 2797.0, "leads_dia": 19.3, "cpl": 25.06, "l2025": 5902.0, "l2026": 1652.0}, {"curso": "MBA em Engenharia da Qualidade", "edicoes": 3.0, "leads_ed": 2104.0, "leads_dia": 16.2, "cpl": 28.11, "l2025": 4465.0, "l2026": 1591.0}, {"curso": "MBA em Gestão de Negócios", "edicoes": 1.0, "leads_ed": 1365.0, "leads_dia": 9.3, "cpl": 73.26, "l2025": 752.0, "l2026": 0}, {"curso": "Gestão de Projetos", "edicoes": 3.0, "leads_ed": 746.0, "leads_dia": 7.5, "cpl": 12.55, "l2025": 1331.0, "l2026": 594.0}, {"curso": "IQNET: ISO 9001 - Auditor Líder", "edicoes": 4.0, "leads_ed": 534.0, "leads_dia": 10.7, "cpl": 7.18, "l2025": 1188.0, "l2026": 1062.0}, {"curso": "Gestão por Processos, Melhoria dos Processos", "edicoes": 7.0, "leads_ed": 534.0, "leads_dia": 11.0, "cpl": 5.44, "l2025": 2567.0, "l2026": 1266.0}, {"curso": "Logística e Supply Chain com Ênfase em Ferramentas Analíticas e Novas Tecnologias", "edicoes": 3.0, "leads_ed": 529.0, "leads_dia": 9.1, "cpl": 6.24, "l2025": 1366.0, "l2026": 479.0}, {"curso": "IA para Operações Industriais", "edicoes": 2.0, "leads_ed": 472.0, "leads_dia": 7.0, "cpl": 13.29, "l2025": 776.0, "l2026": 646.0}, {"curso": "Green Belt Lean Seis Sigma", "edicoes": 8.0, "leads_ed": 462.0, "leads_dia": 9.4, "cpl": 11.35, "l2025": 2781.0, "l2026": 1249.0}, {"curso": "Customer Experience e Gestão da Qualidade", "edicoes": 3.0, "leads_ed": 462.0, "leads_dia": 9.8, "cpl": 5.2, "l2025": 707.0, "l2026": 709.0}, {"curso": "Aplicações de IA em Finanças", "edicoes": 1.0, "leads_ed": 444.0, "leads_dia": 5.5, "cpl": 13.51, "l2025": 155.0, "l2026": 310.0}, {"curso": "IA nas Operações Industriais Farmacêuticas", "edicoes": 1.0, "leads_ed": 401.0, "leads_dia": 14.3, "cpl": 9.48, "l2025": 0, "l2026": 482.0}, {"curso": "Gestão de Mudanças Aplicada a Qualidade", "edicoes": 3.0, "leads_ed": 361.0, "leads_dia": 5.9, "cpl": 8.02, "l2025": 592.0, "l2026": 371.0}, {"curso": "Storytelling e Técnicas de Oratória", "edicoes": 6.0, "leads_ed": 340.0, "leads_dia": 7.5, "cpl": 6.21, "l2025": 1250.0, "l2026": 813.0}, {"curso": "Inteligência Artificial na Gestão de Projetos", "edicoes": 8.0, "leads_ed": 324.0, "leads_dia": 8.0, "cpl": 7.65, "l2025": 2006.0, "l2026": 817.0}, {"curso": "Gerenciamento da Rotina e Ferramentas da Qualidade", "edicoes": 1.0, "leads_ed": 319.0, "leads_dia": 8.2, "cpl": 6.58, "l2025": 59.0, "l2026": 339.0}, {"curso": "Inteligência Artificial aplicada ao RH", "edicoes": 1.0, "leads_ed": 316.0, "leads_dia": 6.7, "cpl": 8.23, "l2025": 0, "l2026": 352.0}, {"curso": "MBA em Estratégia e Inovação com Aplicação de IA", "edicoes": 1.0, "leads_ed": 309.0, "leads_dia": 2.8, "cpl": null, "l2025": 636.0, "l2026": 0}, {"curso": "Autoconhecimento, Liderança e Gestão de Pessoas", "edicoes": 4.0, "leads_ed": 289.0, "leads_dia": 6.5, "cpl": 6.77, "l2025": 870.0, "l2026": 433.0}, {"curso": "ISO 7101 - Auditor Interno", "edicoes": 1.0, "leads_ed": 283.0, "leads_dia": 4.9, "cpl": 12.72, "l2025": 283.0, "l2026": 1.0}, {"curso": "Inteligência Emocional: Como usar a razão para equilibrar a emoção", "edicoes": 3.0, "leads_ed": 275.0, "leads_dia": 6.1, "cpl": 6.27, "l2025": 913.0, "l2026": 15.0}, {"curso": "IA para Projetos de Melhoria e Gestão de Portfólio", "edicoes": 1.0, "leads_ed": 267.0, "leads_dia": 7.2, "cpl": 9.74, "l2025": 0, "l2026": 267.0}, {"curso": "Básico em Gestão de Projetos - 24 horas", "edicoes": 3.0, "leads_ed": 254.0, "leads_dia": 5.2, "cpl": 9.21, "l2025": 763.0, "l2026": 26.0}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "edicoes": 6.0, "leads_ed": 200.0, "leads_dia": 4.5, "cpl": 9.64, "l2025": 879.0, "l2026": 438.0}, {"curso": "Agile Scrum - Product Owner", "edicoes": 4.0, "leads_ed": 195.0, "leads_dia": 6.0, "cpl": 9.26, "l2025": 547.0, "l2026": 218.0}, {"curso": "Indústria 4.0: Conceito, Método e Aplicação Prática", "edicoes": 2.0, "leads_ed": 190.0, "leads_dia": 4.4, "cpl": 15.29, "l2025": 422.0, "l2026": 0}, {"curso": "Gestão de Operações", "edicoes": 2.0, "leads_ed": 186.0, "leads_dia": 3.3, "cpl": 24.31, "l2025": 436.0, "l2026": 0}, {"curso": "IQNET: ISO 45001 - Auditor Interno", "edicoes": 1.0, "leads_ed": 186.0, "leads_dia": 6.9, "cpl": 12.9, "l2025": 8.0, "l2026": 8.0}, {"curso": "Dominando a IA: Ferramentas e Aplicações para Negócios", "edicoes": 2.0, "leads_ed": 184.0, "leads_dia": 3.4, "cpl": 13.64, "l2025": 420.0, "l2026": 12.0}, {"curso": "Agile Scrum Foundation - Preparatório para a certificação EXIN", "edicoes": 4.0, "leads_ed": 154.0, "leads_dia": 4.5, "cpl": 11.69, "l2025": 365.0, "l2026": 322.0}, {"curso": "AI Sigma Belt", "edicoes": 1.0, "leads_ed": 150.0, "leads_dia": 2.5, "cpl": 22.5, "l2025": 153.0, "l2026": 0}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "edicoes": 7.0, "leads_ed": 141.0, "leads_dia": 4.3, "cpl": 10.64, "l2025": 703.0, "l2026": 343.0}, {"curso": "Como potencializar a agilidade organizacional com OKRs", "edicoes": 4.0, "leads_ed": 139.0, "leads_dia": 3.8, "cpl": 11.37, "l2025": 527.0, "l2026": 191.0}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "edicoes": 5.0, "leads_ed": 132.0, "leads_dia": 3.5, "cpl": 13.64, "l2025": 451.0, "l2026": 173.0}, {"curso": "Agile Coach", "edicoes": 2.0, "leads_ed": 132.0, "leads_dia": 2.4, "cpl": 19.39, "l2025": 280.0, "l2026": 2.0}, {"curso": "Liderança Assertiva: Um Estilo que Constrói Relações Maduras com Foco em Resultados", "edicoes": 3.0, "leads_ed": 106.0, "leads_dia": 2.1, "cpl": 16.27, "l2025": 195.0, "l2026": 373.0}, {"curso": "Yellow Belt Lean Seis Sigma", "edicoes": 6.0, "leads_ed": 96.0, "leads_dia": 3.4, "cpl": 17.52, "l2025": 612.0, "l2026": 316.0}, {"curso": "Easy PMP® - Preparatório para a Certificação do PMI®", "edicoes": 3.0, "leads_ed": 88.0, "leads_dia": 1.6, "cpl": 42.61, "l2025": 120.0, "l2026": 257.0}, {"curso": "ISO 7101 - Auditor Líder", "edicoes": 1.0, "leads_ed": 33.0, "leads_dia": 2.2, "cpl": 201.21, "l2025": 40.0, "l2026": 1.0}, {"curso": "Tecnologias para os controles da ISO 27001", "edicoes": 3.0, "leads_ed": 8.0, "leads_dia": 0.2, "cpl": 232.5, "l2025": 29.0, "l2026": 4.0}], "hist": [{"curso": "MBA em Gestão Ágil, Inovação e Liderança", "vals": [997.0, 1390.0, 422.0, 15.0, 205.0, 734.0, 694.0, 188.0, 23.0, 301.0, 545.0, 388.0, 682.0, 490.0, 399.0, 56.0, 17.0, 8.0], "t2025": 5902.0, "t2026": 1652.0}, {"curso": "MBA em Engenharia da Qualidade", "vals": [1598.0, 502.0, 40.0, 26.0, 273.0, 534.0, 574.0, 56.0, 56.0, 92.0, 405.0, 309.0, 671.0, 444.0, 227.0, 33.0, 117.0, 99.0], "t2025": 4465.0, "t2026": 1591.0}, {"curso": "Green Belt Lean Seis Sigma", "vals": [176.0, 262.0, 201.0, 351.0, 142.0, 194.0, 209.0, 218.0, 289.0, 376.0, 179.0, 184.0, 290.0, 307.0, 130.0, 170.0, 335.0, 17.0], "t2025": 2781.0, "t2026": 1249.0}, {"curso": "Gestão por Processos, Melhoria dos Processos", "vals": [225.0, 274.0, 277.0, 6.0, 290.0, 268.0, 15.0, 292.0, 286.0, 126.0, 383.0, 125.0, 379.0, 54.0, 495.0, 7.0, 192.0, 139.0], "t2025": 2567.0, "t2026": 1266.0}, {"curso": "MBA em IA Aplicada à Gestão Estratégica de Projetos", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 161.0, 361.0, 364.0, 908.0, 548.0, 608.0, 30.0, 117.0, 128.0], "t2025": 886.0, "t2026": 2339.0}, {"curso": "Inteligência Artificial na Gestão de Projetos", "vals": [132.0, 39.0, 211.0, 157.0, 112.0, 240.0, 319.0, 143.0, 291.0, 92.0, 203.0, 67.0, 197.0, 41.0, 191.0, 62.0, 320.0, 6.0], "t2025": 2006.0, "t2026": 817.0}, {"curso": "IQNET: ISO 9001 - Auditor Líder", "vals": [0, 2.0, 10.0, 291.0, 130.0, 0, 1.0, 186.0, 351.0, 216.0, 1.0, 0, 146.0, 238.0, 302.0, 366.0, 10.0, 0], "t2025": 1188.0, "t2026": 1062.0}, {"curso": "Storytelling e Técnicas de Oratória", "vals": [148.0, 100.0, 50.0, 186.0, 64.0, 3.0, 176.0, 145.0, 76.0, 294.0, 6.0, 2.0, 264.0, 124.0, 3.0, 297.0, 125.0, 0], "t2025": 1250.0, "t2026": 813.0}, {"curso": "Gestão de Projetos", "vals": [250.0, 139.0, 13.0, 7.0, 107.0, 265.0, 302.0, 122.0, 18.0, 12.0, 6.0, 90.0, 279.0, 264.0, 22.0, 12.0, 17.0, 0], "t2025": 1331.0, "t2026": 594.0}, {"curso": "Logística e Supply Chain com Ênfase em Ferramentas Analíticas e Novas Tecnologias", "vals": [9.0, 87.0, 225.0, 177.0, 10.0, 13.0, 85.0, 230.0, 230.0, 11.0, 12.0, 277.0, 372.0, 72.0, 21.0, 8.0, 5.0, 1.0], "t2025": 1366.0, "t2026": 479.0}, {"curso": "IA para Operações Industriais", "vals": [0, 0, 0, 203.0, 214.0, 20.0, 3.0, 6.0, 6.0, 3.0, 172.0, 149.0, 208.0, 3.0, 6.0, 177.0, 252.0, 0], "t2025": 776.0, "t2026": 646.0}, {"curso": "Customer Experience e Gestão da Qualidade", "vals": [0, 0, 0, 0, 0, 0, 34.0, 215.0, 252.0, 0, 4.0, 202.0, 240.0, 0, 38.0, 336.0, 95.0, 0], "t2025": 707.0, "t2026": 709.0}, {"curso": "Introdução a Sustentabilidade em Gestão de Operações", "vals": [129.0, 231.0, 93.0, 0, 0, 0, 217.0, 201.0, 0, 0, 0, 145.0, 347.0, 0, 0, 0, 0, 0], "t2025": 1016.0, "t2026": 347.0}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "vals": [116.0, 45.0, 25.0, 28.0, 180.0, 8.0, 60.0, 213.0, 50.0, 133.0, 10.0, 11.0, 113.0, 100.0, 45.0, 123.0, 55.0, 2.0], "t2025": 879.0, "t2026": 438.0}, {"curso": "Autoconhecimento, Liderança e Gestão de Pessoas", "vals": [117.0, 158.0, 1.0, 121.0, 191.0, 1.0, 2.0, 123.0, 148.0, 5.0, 1.0, 2.0, 183.0, 241.0, 9.0, 0, 0, 0], "t2025": 870.0, "t2026": 433.0}, {"curso": "Liderança e Gestão de Pessoas", "vals": [41.0, 134.0, 178.0, 63.0, 0, 55.0, 224.0, 297.0, 165.0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 1157.0, "t2026": 0}, {"curso": "Diretrizes para Gestão de Riscos Psicossociais - ISO 45003", "vals": [0, 0, 0, 0, 0, 45.0, 229.0, 69.0, 170.0, 0, 0, 169.0, 118.0, 0, 0, 211.0, 20.0, 51.0], "t2025": 682.0, "t2026": 400.0}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "vals": [11.0, 14.0, 15.0, 122.0, 60.0, 68.0, 29.0, 94.0, 8.0, 140.0, 37.0, 105.0, 72.0, 1.0, 90.0, 156.0, 24.0, 0], "t2025": 703.0, "t2026": 343.0}, {"curso": "Gestão de Mudanças Aplicada a Qualidade", "vals": [200.0, 72.0, 1.0, 2.0, 6.0, 2.0, 2.0, 89.0, 211.0, 4.0, 1.0, 2.0, 203.0, 158.0, 3.0, 2.0, 3.0, 2.0], "t2025": 592.0, "t2026": 371.0}, {"curso": "Inteligência Emocional: Como usar a razão para equilibrar a emoção", "vals": [3.0, 55.0, 203.0, 16.0, 3.0, 1.0, 236.0, 116.0, 0, 90.0, 189.0, 1.0, 4.0, 3.0, 0, 3.0, 4.0, 1.0], "t2025": 913.0, "t2026": 15.0}, {"curso": "Yellow Belt Lean Seis Sigma", "vals": [96.0, 13.0, 30.0, 98.0, 10.0, 5.0, 107.0, 111.0, 21.0, 83.0, 5.0, 33.0, 65.0, 4.0, 92.0, 14.0, 136.0, 5.0], "t2025": 612.0, "t2026": 316.0}, {"curso": "Upgrade para Black Belt", "vals": [9.0, 47.0, 108.0, 84.0, 17.0, 56.0, 76.0, 116.0, 10.0, 10.0, 7.0, 11.0, 66.0, 69.0, 150.0, 8.0, 16.0, 3.0], "t2025": 551.0, "t2026": 312.0}, {"curso": "Básico em Gestão de Projetos - 24 horas", "vals": [17.0, 93.0, 68.0, 7.0, 34.0, 179.0, 74.0, 2.0, 72.0, 183.0, 32.0, 2.0, 3.0, 6.0, 7.0, 5.0, 4.0, 1.0], "t2025": 763.0, "t2026": 26.0}, {"curso": "Agile Scrum - Product Owner", "vals": [105.0, 3.0, 6.0, 29.0, 159.0, 60.0, 163.0, 5.0, 2.0, 3.0, 8.0, 4.0, 1.0, 2.0, 208.0, 3.0, 3.0, 1.0], "t2025": 547.0, "t2026": 218.0}, {"curso": "MBA em Gestão de Negócios", "vals": [546.0, 206.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 752.0, "t2026": 0}, {"curso": "Como potencializar a agilidade organizacional com OKRs", "vals": [93.0, 42.0, 12.0, 130.0, 79.0, 0, 119.0, 38.0, 4.0, 5.0, 1.0, 4.0, 1.0, 0, 14.0, 154.0, 22.0, 0], "t2025": 527.0, "t2026": 191.0}, {"curso": "Agile Scrum Foundation - Preparatório para a certificação EXIN", "vals": [43.0, 39.0, 122.0, 1.0, 14.0, 146.0, 0, 0, 0, 0, 0, 0, 0, 160.0, 36.0, 27.0, 99.0, 0], "t2025": 365.0, "t2026": 322.0}, {"curso": "MBA em Estratégia e Inovação com Aplicação de IA", "vals": [35.0, 145.0, 269.0, 117.0, 54.0, 16.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 636.0, "t2026": 0}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "vals": [44.0, 10.0, 94.0, 20.0, 0, 54.0, 78.0, 1.0, 94.0, 55.0, 0, 1.0, 0, 1.0, 50.0, 122.0, 0, 0], "t2025": 451.0, "t2026": 173.0}, {"curso": "Liderança Assertiva: Um Estilo que Constrói Relações Maduras com Foco em Resultados", "vals": [81.0, 5.0, 18.0, 27.0, 39.0, 4.0, 2.0, 2.0, 7.0, 2.0, 7.0, 1.0, 0, 36.0, 331.0, 1.0, 5.0, 0], "t2025": 195.0, "t2026": 373.0}, {"curso": "LEAN MANUFACTURING: Ferramentas para produção enxuta", "vals": [0, 28.0, 51.0, 0, 44.0, 36.0, 0, 2.0, 92.0, 61.0, 55.0, 0, 0, 0, 0, 0, 83.0, 39.0], "t2025": 369.0, "t2026": 122.0}, {"curso": "IA nas Operações Industriais Farmacêuticas", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 70.0, 365.0, 47.0], "t2025": 0, "t2026": 482.0}, {"curso": "IQNET: ISO 27001 - Auditor Líder", "vals": [57.0, 3.0, 2.0, 2.0, 6.0, 25.0, 136.0, 6.0, 5.0, 5.0, 2.0, 1.0, 1.0, 1.0, 2.0, 123.0, 100.0, 0], "t2025": 250.0, "t2026": 227.0}, {"curso": "Aplicações de IA em Finanças", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 89.0, 66.0, 291.0, 1.0, 6.0, 6.0, 6.0, 0], "t2025": 155.0, "t2026": 310.0}, {"curso": "Gestão de Operações", "vals": [37.0, 60.0, 49.0, 21.0, 14.0, 0, 47.0, 208.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 436.0, "t2026": 0}, {"curso": "Dominando a IA: Ferramentas e Aplicações para Negócios", "vals": [0, 0, 58.0, 129.0, 46.0, 71.0, 89.0, 11.0, 3.0, 4.0, 6.0, 3.0, 2.0, 0, 10.0, 0, 0, 0], "t2025": 420.0, "t2026": 12.0}, {"curso": "Indústria 4.0: Conceito, Método e Aplicação Prática", "vals": [83.0, 96.0, 6.0, 1.0, 75.0, 99.0, 57.0, 5.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 422.0, "t2026": 0}, {"curso": "Gerenciamento da Rotina e Ferramentas da Qualidade", "vals": [3.0, 4.0, 7.0, 6.0, 3.0, 3.0, 6.0, 14.0, 2.0, 3.0, 6.0, 2.0, 0, 28.0, 264.0, 41.0, 6.0, 0], "t2025": 59.0, "t2026": 339.0}, {"curso": "Easy PMP® - Preparatório para a Certificação do PMI®", "vals": [6.0, 23.0, 3.0, 0, 0, 0, 55.0, 33.0, 0, 0, 0, 0, 0, 32.0, 176.0, 49.0, 0, 0], "t2025": 120.0, "t2026": 257.0}, {"curso": "Inteligência Artificial aplicada ao RH", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19.0, 242.0, 64.0, 7.0, 17.0, 3.0], "t2025": 0, "t2026": 352.0}, {"curso": "Experimentos na Prática para Melhoria de Produtos e Processos (JASP)", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19.0, 275.0, 48.0, 0], "t2025": 0, "t2026": 342.0}, {"curso": "Atualização Novo Manual OPSS ONA", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 55.0, 64.0, 7.0, 0, 137.0, 20.0, 2.0, 2.0, 1.0, 24.0], "t2025": 126.0, "t2026": 186.0}, {"curso": "Segurança da Informação e Privacidade de Dados Pessoais, conforme a norma internacional ISO 27701:2019", "vals": [0, 1.0, 1.0, 0, 3.0, 3.0, 0, 3.0, 1.0, 79.0, 19.0, 0, 0, 0, 5.0, 190.0, 0, 0], "t2025": 110.0, "t2026": 195.0}, {"curso": "Interpretação dos Requisitos ISO/IEC 42001", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 135.0, 151.0, 0], "t2025": 0, "t2026": 286.0}, {"curso": "ISO 7101 - Auditor Interno", "vals": [0, 0, 0, 0, 0, 44.0, 196.0, 43.0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0], "t2025": 283.0, "t2026": 1.0}, {"curso": "Agile Coach", "vals": [4.0, 1.0, 2.0, 24.0, 83.0, 25.0, 0, 48.0, 87.0, 2.0, 3.0, 1.0, 2.0, 0, 0, 0, 0, 0], "t2025": 280.0, "t2026": 2.0}, {"curso": "ONA - Acreditação para organizações de saúde: Avaliador interno (2026/2029)", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120.0, 158.0], "t2025": 0, "t2026": 278.0}, {"curso": "IA para Projetos de Melhoria e Gestão de Portfólio", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40.0, 227.0, 0, 0], "t2025": 0, "t2026": 267.0}, {"curso": "IQNet: ISO 45001 - Auditor Interno", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 159.0, 38.0, 0], "t2025": 0, "t2026": 197.0}, {"curso": "Interpretações dos Requisitos ISO 7101", "vals": [0, 0, 0, 7.0, 126.0, 29.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 162.0, "t2026": 0}, {"curso": "AI Sigma Belt", "vals": [3.0, 107.0, 43.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 153.0, "t2026": 0}, {"curso": "Sistema de Gestão Integrado: Formação de auditor interno - ISO 9001, ISO 14001 e ISO 45001", "vals": [1.0, 0, 0, 0, 0, 4.0, 13.0, 11.0, 15.0, 13.0, 12.0, 11.0, 5.0, 9.0, 10.0, 13.0, 17.0, 2.0], "t2025": 80.0, "t2026": 56.0}, {"curso": "IQNET: ISO 9001 - Auditor Interno", "vals": [0, 0, 0, 0, 0, 0, 16.0, 7.0, 6.0, 7.0, 12.0, 4.0, 9.0, 11.0, 8.0, 13.0, 20.0, 12.0], "t2025": 52.0, "t2026": 73.0}, {"curso": "Gestão da Qualidade e Gestão por Processos", "vals": [15.0, 20.0, 24.0, 9.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 68.0, "t2026": 0}, {"curso": "Pesquisa Operacional", "vals": [3.0, 5.0, 5.0, 3.0, 7.0, 3.0, 7.0, 3.0, 3.0, 1.0, 4.0, 4.0, 3.0, 0, 5.0, 1.0, 3.0, 0], "t2025": 48.0, "t2026": 12.0}, {"curso": "Gestão de Customer Success: estratégias para reter e fidelizar clientes", "vals": [2.0, 3.0, 6.0, 3.0, 2.0, 4.0, 3.0, 5.0, 1.0, 0, 3.0, 5.0, 1.0, 0, 2.0, 1.0, 2.0, 0], "t2025": 37.0, "t2026": 6.0}, {"curso": "ISO 7101 - Auditor Líder", "vals": [0, 0, 0, 0, 0, 0, 0, 33.0, 3.0, 1.0, 3.0, 0, 0, 1.0, 0, 0, 0, 0], "t2025": 40.0, "t2026": 1.0}, {"curso": "Métricas Ágeis", "vals": [1.0, 1.0, 3.0, 2.0, 1.0, 5.0, 4.0, 6.0, 2.0, 3.0, 3.0, 3.0, 2.0, 2.0, 1.0, 0, 1.0, 1.0], "t2025": 34.0, "t2026": 7.0}, {"curso": "Liderança Feminina", "vals": [4.0, 3.0, 6.0, 0, 2.0, 3.0, 3.0, 3.0, 2.0, 3.0, 1.0, 1.0, 3.0, 1.0, 0, 2.0, 1.0, 1.0], "t2025": 31.0, "t2026": 8.0}, {"curso": "Interpretação dos Requisitos ISO 45001:2018", "vals": [1.0, 2.0, 4.0, 2.0, 3.0, 3.0, 3.0, 6.0, 8.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 33.0, "t2026": 0}, {"curso": "Tecnologias para os controles da ISO 27001", "vals": [14.0, 0, 2.0, 0, 2.0, 3.0, 5.0, 0, 1.0, 2.0, 0, 0, 0, 0, 1.0, 0, 3.0, 0], "t2025": 29.0, "t2026": 4.0}, {"curso": "Interpretação dos Requisitos ISO 14001:2015", "vals": [4.0, 2.0, 1.0, 1.0, 4.0, 1.0, 1.0, 1.0, 2.0, 4.0, 1.0, 0, 0, 2.0, 1.0, 0, 4.0, 2.0], "t2025": 22.0, "t2026": 9.0}, {"curso": "PPP e Concessões: Conceitos e Práticas", "vals": [2.0, 2.0, 2.0, 1.0, 1.0, 2.0, 1.0, 0, 3.0, 3.0, 3.0, 0, 1.0, 2.0, 2.0, 3.0, 1.0, 0], "t2025": 20.0, "t2026": 9.0}, {"curso": "IQNET: ISO 45001 - Auditor Líder", "vals": [0, 0, 0, 0, 1.0, 0, 2.0, 3.0, 1.0, 5.0, 0, 2.0, 1.0, 2.0, 4.0, 3.0, 4.0, 0], "t2025": 14.0, "t2026": 14.0}, {"curso": "ONA - Acreditação para organizações de saúde: Formação de Avaliador interno para Acreditação de OPSS (2018/2022)", "vals": [0, 0, 0, 0, 0, 0, 1.0, 4.0, 5.0, 3.0, 6.0, 0, 0, 6.0, 0, 0, 0, 0], "t2025": 19.0, "t2026": 6.0}, {"curso": "Sistema de Gerenciamento de Continuidade de Negócios - Requisitos ISO 22301", "vals": [0, 0, 0, 0, 0, 0, 11.0, 3.0, 1.0, 4.0, 1.0, 1.0, 0, 1.0, 0, 2.0, 0, 0], "t2025": 21.0, "t2026": 3.0}, {"curso": "Interpretação dos Requisitos ISO 27001:2022", "vals": [3.0, 3.0, 5.0, 1.0, 2.0, 6.0, 2.0, 0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 24.0, "t2026": 0}, {"curso": "IQNET: ISO 14001 - Auditor Interno", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 4.0, 5.0, 0, 0, 1.0, 1.0, 6.0, 2.0, 2.0, 1.0], "t2025": 9.0, "t2026": 13.0}, {"curso": "Lógica de Programação para Análise de Dados", "vals": [1.0, 1.0, 3.0, 0, 1.0, 3.0, 0, 1.0, 1.0, 3.0, 4.0, 0, 2.0, 0, 1.0, 0, 1.0, 0], "t2025": 18.0, "t2026": 4.0}, {"curso": "Introdução ao Agile Scrum Master", "vals": [0, 1.0, 3.0, 2.0, 1.0, 3.0, 2.0, 2.0, 1.0, 1.0, 1.0, 0, 0, 0, 1.0, 2.0, 1.0, 0], "t2025": 17.0, "t2026": 4.0}, {"curso": "LGPD para DPO ou Encarregado de Dados", "vals": [0, 1.0, 3.0, 0, 2.0, 1.0, 0, 0, 1.0, 1.0, 3.0, 0, 1.0, 2.0, 1.0, 0, 3.0, 0], "t2025": 12.0, "t2026": 7.0}, {"curso": "Qualidade para indústria automotiva: Formação de Auditor interno - IATF 16949 Versão 2016", "vals": [0, 0, 1.0, 0, 0, 1.0, 3.0, 1.0, 1.0, 3.0, 0, 3.0, 1.0, 0, 0, 3.0, 1.0, 0], "t2025": 13.0, "t2026": 5.0}, {"curso": "IQNET: ISO 45001 - Auditor Interno", "vals": [1.0, 0, 2.0, 0, 0, 0, 0, 3.0, 2.0, 0, 0, 0, 0, 1.0, 1.0, 2.0, 3.0, 1.0], "t2025": 8.0, "t2026": 8.0}, {"curso": "LGPD para área de Compliance", "vals": [0, 0, 0, 1.0, 3.0, 0, 0, 0, 1.0, 3.0, 0, 1.0, 2.0, 0, 1.0, 0, 2.0, 0], "t2025": 9.0, "t2026": 5.0}, {"curso": "Agile Business Analysis", "vals": [2.0, 3.0, 6.0, 1.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 14.0, "t2026": 0}, {"curso": "LGPD para área de Tecnologia da Informação", "vals": [1.0, 0, 1.0, 2.0, 0, 0, 0, 2.0, 1.0, 2.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0, 0], "t2025": 9.0, "t2026": 4.0}, {"curso": "IQNET: ISO 14001 - Auditor Líder", "vals": [0, 0, 0, 0, 0, 0, 1.0, 0, 0, 1.0, 3.0, 0, 0, 0, 2.0, 2.0, 0, 1.0], "t2025": 5.0, "t2026": 5.0}, {"curso": "Kanban Foundation", "vals": [4.0, 1.0, 5.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 10.0, "t2026": 0}, {"curso": "Atualização da ISO/IEC 27001:2022", "vals": [0, 0, 1.0, 4.0, 1.0, 2.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 8.0, "t2026": 0}, {"curso": "LGPD para área de Recursos Humanos", "vals": [1.0, 0, 2.0, 0, 0, 1.0, 0, 0, 1.0, 0, 1.0, 0, 0, 0, 0, 0, 0, 1.0], "t2025": 6.0, "t2026": 1.0}, {"curso": "LGPD para área Jurídica", "vals": [0, 0, 0, 3.0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 0], "t2025": 3.0, "t2026": 1.0}, {"curso": "LGPD para áreas Administrativas e Financeiras", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0, 1.0, 1.0, 0, 0, 0], "t2025": 1.0, "t2026": 2.0}, {"curso": "Análise dos Modos de Falha e seus efeitos: Metodologia para detectar falhas - FMEA", "vals": [0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 0, 2.0, 0, 0, 0, 0], "t2025": 1.0, "t2026": 2.0}, {"curso": "LGPD para áreas com Relacionamento com Clientes ou Fornecedores", "vals": [0, 0, 0, 0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0], "t2025": 1.0, "t2026": 1.0}, {"curso": "Mentoria para Líderes do Futuro em Operações", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Interpretação dos Requisitos ISO 37001:2016", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Trilha Agile (com Scrum Foundation)", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "ESG e Gestão da Sustentabilidade", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Melhoria de Eficiência nos Processos de Negócios", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Trilha Agile Expert", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Negócios Sociais e B-Corporations", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Gestão da Qualidade no Design de Serviços: projetando serviços centrados no usuário", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Estratégias para Melhoria de Produtos e Controle de Processo", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}, {"curso": "Manutenção Produtiva Total - Metodologia TPM", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "t2025": 0, "t2026": 0}], "camp": [{"curso": "AI Sigma Belt", "mes": "2025-04", "ini": "2025-02-03", "fim": "2025-04-02", "dias": 59.0, "leads": 150.0, "inv": 3375.0, "cpl": 22.5, "leads_dia": 2.54}, {"curso": "Agile Coach", "mes": "2025-06", "ini": "2025-04-15", "fim": "2025-06-13", "dias": 60.0, "leads": 130.0, "inv": 2550.0, "cpl": 19.62, "leads_dia": 2.17}, {"curso": "Agile Coach", "mes": "2025-10", "ini": "2025-08-04", "fim": "2025-09-24", "dias": 52.0, "leads": 133.0, "inv": 2550.0, "cpl": 19.17, "leads_dia": 2.56}, {"curso": "Agile Scrum - Product Owner", "mes": "2025-04", "ini": "2024-12-09", "fim": "2025-01-30", "dias": 53.0, "leads": 150.0, "inv": 1800.0, "cpl": 12.0, "leads_dia": 2.83}, {"curso": "Agile Scrum - Product Owner", "mes": "2025-06", "ini": "2025-04-22", "fim": "2025-05-27", "dias": 36.0, "leads": 184.0, "inv": 1800.0, "cpl": 9.78, "leads_dia": 5.11}, {"curso": "Agile Scrum - Product Owner", "mes": "2025-07", "ini": "2025-06-23", "fim": "2025-07-22", "dias": 30.0, "leads": 206.0, "inv": 1800.0, "cpl": 8.74, "leads_dia": 6.87}, {"curso": "Agile Scrum - Product Owner", "mes": "2026-04", "ini": "2026-03-02", "fim": "2026-03-31", "dias": 30.0, "leads": 208.0, "inv": 1800.0, "cpl": 8.65, "leads_dia": 6.93}, {"curso": "Agile Scrum Foundation - Preparatório para a certificação EXIN", "mes": "2025-01", "ini": "2024-12-03", "fim": "2025-01-15", "dias": 44.0, "leads": 92.0, "inv": 1800.0, "cpl": 19.57, "leads_dia": 2.09}, {"curso": "Agile Scrum Foundation - Preparatório para a certificação EXIN", "mes": "2025-04", "ini": "2025-02-17", "fim": "2025-03-26", "dias": 38.0, "leads": 152.0, "inv": 1800.0, "cpl": 11.84, "leads_dia": 4.0}, {"curso": "Agile Scrum Foundation - Preparatório para a certificação EXIN", "mes": "2025-10", "ini": "2025-05-27", "fim": "2025-06-26", "dias": 31.0, "leads": 156.0, "inv": 1800.0, "cpl": 11.54, "leads_dia": 5.03}, {"curso": "Agile Scrum Foundation - Preparatório para a certificação EXIN", "mes": "2026-03", "ini": "2026-01-28", "fim": "2026-03-07", "dias": 39.0, "leads": 196.0, "inv": 1890.0, "cpl": 9.64, "leads_dia": 5.03}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "mes": "2025-01", "ini": "2024-12-02", "fim": "2025-01-15", "dias": 45.0, "leads": 100.0, "inv": 1800.0, "cpl": 18.0, "leads_dia": 2.22}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "mes": "2025-04", "ini": "2025-02-26", "fim": "2025-04-05", "dias": 39.0, "leads": 118.0, "inv": 1800.0, "cpl": 15.25, "leads_dia": 3.03}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "mes": "2025-07", "ini": "2025-06-09", "fim": "2025-07-16", "dias": 38.0, "leads": 132.0, "inv": 1800.0, "cpl": 13.64, "leads_dia": 3.47}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "mes": "2025-10", "ini": "2025-09-08", "fim": "2025-10-12", "dias": 35.0, "leads": 148.0, "inv": 1800.0, "cpl": 12.16, "leads_dia": 4.23}, {"curso": "Agile Scrum Master - Formação para um verdadeiro Scrum Master", "mes": "2026-05", "ini": "2026-03-23", "fim": "2026-04-25", "dias": 34.0, "leads": 172.0, "inv": 1890.0, "cpl": 10.99, "leads_dia": 5.06}, {"curso": "Aplicações de IA em Finanças", "mes": "2026-02", "ini": "2025-11-10", "fim": "2026-01-28", "dias": 80.0, "leads": 444.0, "inv": 6000.0, "cpl": 13.51, "leads_dia": 5.55}, {"curso": "Atualização Novo Manual OPSS ONA - 2026/2029", "mes": "2025-10", "ini": "2025-09-15", "fim": "2025-10-10", "dias": 26.0, "leads": 0, "inv": 1400.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Atualização Novo Manual OPSS ONA - 2026/2029", "mes": "2026-02", "ini": "2026-01-06", "fim": "2026-02-03", "dias": 29.0, "leads": 0, "inv": 1100.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Autoconhecimento, Liderança e Gestão de Pessoas", "mes": "2025-02", "ini": "2025-01-06", "fim": "2025-02-19", "dias": 45.0, "leads": 272.0, "inv": 1950.0, "cpl": 7.17, "leads_dia": 6.04}, {"curso": "Autoconhecimento, Liderança e Gestão de Pessoas", "mes": "2025-06", "ini": "2025-04-14", "fim": "2025-05-27", "dias": 44.0, "leads": 306.0, "inv": 1950.0, "cpl": 6.37, "leads_dia": 6.95}, {"curso": "Autoconhecimento, Liderança e Gestão de Pessoas", "mes": "2025-10", "ini": "2025-08-11", "fim": "2025-09-24", "dias": 45.0, "leads": 269.0, "inv": 1950.0, "cpl": 7.25, "leads_dia": 5.98}, {"curso": "Autoconhecimento, Liderança e Gestão de Pessoas", "mes": "2026-03", "ini": "2026-01-06", "fim": "2026-02-21", "dias": 47.0, "leads": 421.0, "inv": 2047.0, "cpl": 4.86, "leads_dia": 8.96}, {"curso": "Básico em Gestão de Projetos - 24 horas", "mes": "2025-03", "ini": "2025-01-21", "fim": "2025-03-11", "dias": 50.0, "leads": 160.0, "inv": 2340.0, "cpl": 14.62, "leads_dia": 3.2}, {"curso": "Básico em Gestão de Projetos - 24 horas", "mes": "2025-07", "ini": "2025-05-19", "fim": "2025-07-07", "dias": 50.0, "leads": 272.0, "inv": 2340.0, "cpl": 8.6, "leads_dia": 5.44}, {"curso": "Básico em Gestão de Projetos - 24 horas", "mes": "2025-11", "ini": "2025-09-15", "fim": "2025-11-02", "dias": 49.0, "leads": 254.0, "inv": 2340.0, "cpl": 9.21, "leads_dia": 5.18}, {"curso": "Como potencializar a agilidade organizacional com OKRs", "mes": "2025-02", "ini": "2025-01-06", "fim": "2025-02-12", "dias": 38.0, "leads": 131.0, "inv": 1575.0, "cpl": 12.02, "leads_dia": 3.45}, {"curso": "Como potencializar a agilidade organizacional com OKRs", "mes": "2025-05", "ini": "2025-03-24", "fim": "2025-04-28", "dias": 36.0, "leads": 124.0, "inv": 1575.0, "cpl": 12.7, "leads_dia": 3.44}, {"curso": "Como potencializar a agilidade organizacional com OKRs", "mes": "2025-08", "ini": "2025-07-01", "fim": "2025-08-04", "dias": 35.0, "leads": 147.0, "inv": 1575.0, "cpl": 10.71, "leads_dia": 4.2}, {"curso": "Como potencializar a agilidade organizacional com OKRs", "mes": "2026-05", "ini": "2026-03-30", "fim": "2026-05-04", "dias": 36.0, "leads": 185.0, "inv": 1650.0, "cpl": 8.92, "leads_dia": 5.14}, {"curso": "Customer Experience e Gestão da Qualidade", "mes": "2025-09", "ini": "2025-07-28", "fim": "2025-09-15", "dias": 50.0, "leads": 489.0, "inv": 2800.0, "cpl": 5.73, "leads_dia": 9.78}, {"curso": "Customer Experience e Gestão da Qualidade", "mes": "2026-01", "ini": "2025-12-01", "fim": "2026-01-12", "dias": 43.0, "leads": 404.0, "inv": 2100.0, "cpl": 5.2, "leads_dia": 9.4}, {"curso": "Customer Experience e Gestão da Qualidade", "mes": "2026-07", "ini": "2026-03-30", "fim": "2026-05-09", "dias": 41.0, "leads": 462.0, "inv": 2100.0, "cpl": 4.55, "leads_dia": 11.27}, {"curso": "Diretrizes para Gestão de Riscos Psicossociais - ISO 45003:2021", "mes": "2025-07", "ini": "2025-06-23", "fim": "2025-07-24", "dias": 32.0, "leads": 0, "inv": 1400.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Diretrizes para Gestão de Riscos Psicossociais - ISO 45003:2021", "mes": "2025-09", "ini": "2025-08-14", "fim": "2025-09-12", "dias": 30.0, "leads": 0, "inv": 1050.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Diretrizes para Gestão de Riscos Psicossociais - ISO 45003:2021", "mes": "2026-01", "ini": "2025-12-01", "fim": "2026-01-08", "dias": 39.0, "leads": 0, "inv": 1110.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Diretrizes para Gestão de Riscos Psicossociais - ISO 45003:2021", "mes": "2026-05", "ini": "2026-04-01", "fim": "2026-05-02", "dias": 32.0, "leads": 0, "inv": 1110.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Dominando a IA: Ferramentas e Aplicações para Negócios", "mes": "2025-05", "ini": "2025-03-12", "fim": "2025-05-08", "dias": 58.0, "leads": 226.0, "inv": 2800.0, "cpl": 12.39, "leads_dia": 3.9}, {"curso": "Dominando a IA: Ferramentas e Aplicações para Negócios", "mes": "2025-07", "ini": "2025-06-03", "fim": "2025-07-22", "dias": 50.0, "leads": 141.0, "inv": 2100.0, "cpl": 14.89, "leads_dia": 2.82}, {"curso": "Easy PMP® - Preparatório para a Certificação do PMI®", "mes": "2025-04", "ini": "2025-01-27", "fim": "2025-03-05", "dias": 38.0, "leads": 32.0, "inv": 3750.0, "cpl": 117.19, "leads_dia": 0.84}, {"curso": "Easy PMP® - Preparatório para a Certificação do PMI®", "mes": "2025-09", "ini": "2025-06-30", "fim": "2025-08-23", "dias": 55.0, "leads": 88.0, "inv": 3750.0, "cpl": 42.61, "leads_dia": 1.6}, {"curso": "Easy PMP® - Preparatório para a Certificação do PMI®", "mes": "2026-04", "ini": "2026-02-23", "fim": "2026-04-11", "dias": 48.0, "leads": 257.0, "inv": 2985.0, "cpl": 11.61, "leads_dia": 5.35}, {"curso": "Excelência em Gestão de Operações", "mes": "2026-02", "ini": "2025-12-08", "fim": "2026-01-28", "dias": 52.0, "leads": 0, "inv": 2850.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Experimentos na Prática para Melhoria de Produtos e Processos com JASP", "mes": "2026-05", "ini": "2026-03-23", "fim": "2026-05-09", "dias": 48.0, "leads": 0, "inv": 3000.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Gerenciamento da Rotina e Ferramentas da Qualidade", "mes": "2026-04", "ini": "2026-02-25", "fim": "2026-04-04", "dias": 39.0, "leads": 319.0, "inv": 2100.0, "cpl": 6.58, "leads_dia": 8.18}, {"curso": "Gestão de Mudanças Aplicada a Qualidade", "mes": "2025-02", "ini": "2024-12-02", "fim": "2025-02-05", "dias": 66.0, "leads": 362.0, "inv": 2895.0, "cpl": 8.0, "leads_dia": 5.48}, {"curso": "Gestão de Mudanças Aplicada a Qualidade", "mes": "2025-10", "ini": "2025-08-11", "fim": "2025-09-30", "dias": 51.0, "leads": 299.0, "inv": 2895.0, "cpl": 9.68, "leads_dia": 5.86}, {"curso": "Gestão de Mudanças Aplicada a Qualidade", "mes": "2026-02", "ini": "2026-01-05", "fim": "2026-02-16", "dias": 43.0, "leads": 361.0, "inv": 2895.0, "cpl": 8.02, "leads_dia": 8.4}, {"curso": "Gestão de Operações", "mes": "2025-03", "ini": "2025-01-13", "fim": "2025-03-12", "dias": 59.0, "leads": 117.0, "inv": 3900.0, "cpl": 33.33, "leads_dia": 1.98}, {"curso": "Gestão de Operações", "mes": "2025-09", "ini": "2025-07-01", "fim": "2025-08-25", "dias": 56.0, "leads": 255.0, "inv": 3900.0, "cpl": 15.29, "leads_dia": 4.55}, {"curso": "Gestão de Projetos", "mes": "2025-02", "ini": "2024-11-04", "fim": "2025-02-11", "dias": 100.0, "leads": 746.0, "inv": 9360.0, "cpl": 12.55, "leads_dia": 7.46}, {"curso": "Gestão de Projetos", "mes": "2025-09", "ini": "2025-05-19", "fim": "2025-08-10", "dias": 84.0, "leads": 750.0, "inv": 9360.0, "cpl": 12.48, "leads_dia": 8.93}, {"curso": "Gestão de Projetos", "mes": "2026-04", "ini": "2025-12-01", "fim": "2026-02-24", "dias": 86.0, "leads": 631.0, "inv": 9360.0, "cpl": 14.83, "leads_dia": 7.34}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2025-01", "ini": "2024-11-18", "fim": "2025-01-21", "dias": 65.0, "leads": 443.0, "inv": 2325.0, "cpl": 5.25, "leads_dia": 6.82}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2025-04", "ini": "2025-01-29", "fim": "2025-03-24", "dias": 55.0, "leads": 570.0, "inv": 3100.0, "cpl": 5.44, "leads_dia": 10.36}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2025-07", "ini": "2025-05-05", "fim": "2025-06-27", "dias": 54.0, "leads": 553.0, "inv": 3100.0, "cpl": 5.61, "leads_dia": 10.24}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2025-09", "ini": "2025-08-04", "fim": "2025-09-23", "dias": 51.0, "leads": 563.0, "inv": 3100.0, "cpl": 5.51, "leads_dia": 11.04}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2025-11", "ini": "2025-10-21", "fim": "2025-11-19", "dias": 30.0, "leads": 493.0, "inv": 2325.0, "cpl": 4.72, "leads_dia": 16.43}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2026-01", "ini": "2025-12-08", "fim": "2026-01-17", "dias": 41.0, "leads": 474.0, "inv": 2445.0, "cpl": 5.16, "leads_dia": 11.56}, {"curso": "Gestão por Processos, Melhoria dos Processos", "mes": "2026-04", "ini": "2026-02-23", "fim": "2026-03-24", "dias": 30.0, "leads": 534.0, "inv": 3100.0, "cpl": 5.81, "leads_dia": 17.8}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "mes": "2025-03", "ini": "2024-12-09", "fim": "2025-02-05", "dias": 59.0, "leads": 194.0, "inv": 1800.0, "cpl": 9.28, "leads_dia": 3.29}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "mes": "2025-06", "ini": "2025-04-28", "fim": "2025-05-30", "dias": 33.0, "leads": 169.0, "inv": 1800.0, "cpl": 10.65, "leads_dia": 5.12}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "mes": "2025-09", "ini": "2025-07-23", "fim": "2025-08-26", "dias": 35.0, "leads": 235.0, "inv": 1800.0, "cpl": 7.66, "leads_dia": 6.71}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "mes": "2025-11", "ini": "2025-09-15", "fim": "2025-10-24", "dias": 40.0, "leads": 169.0, "inv": 1800.0, "cpl": 10.65, "leads_dia": 4.22}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "mes": "2026-02", "ini": "2026-01-06", "fim": "2026-02-17", "dias": 43.0, "leads": 205.0, "inv": 1980.0, "cpl": 9.66, "leads_dia": 4.77}, {"curso": "Gestão por Resultados e Indicadores de Desempenho", "mes": "2026-05", "ini": "2026-03-23", "fim": "2026-05-09", "dias": 48.0, "leads": 206.0, "inv": 1980.0, "cpl": 9.61, "leads_dia": 4.29}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2025-01", "ini": "2024-11-04", "fim": "2025-01-21", "dias": 79.0, "leads": 480.0, "inv": 4875.0, "cpl": 10.16, "leads_dia": 6.08}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2025-03", "ini": "2025-01-27", "fim": "2025-03-12", "dias": 45.0, "leads": 396.0, "inv": 4875.0, "cpl": 12.31, "leads_dia": 8.8}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2025-05", "ini": "2025-03-19", "fim": "2025-05-02", "dias": 45.0, "leads": 458.0, "inv": 5250.0, "cpl": 11.46, "leads_dia": 10.18}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2025-08", "ini": "2025-05-19", "fim": "2025-07-25", "dias": 68.0, "leads": 476.0, "inv": 5250.0, "cpl": 11.03, "leads_dia": 7.0}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2025-09", "ini": "2025-08-06", "fim": "2025-09-15", "dias": 41.0, "leads": 429.0, "inv": 5250.0, "cpl": 12.24, "leads_dia": 10.46}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2025-10", "ini": "2025-09-26", "fim": "2025-10-24", "dias": 29.0, "leads": 421.0, "inv": 5250.0, "cpl": 12.47, "leads_dia": 14.52}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2026-01", "ini": "2025-11-10", "fim": "2026-01-19", "dias": 71.0, "leads": 570.0, "inv": 5250.0, "cpl": 9.21, "leads_dia": 8.03}, {"curso": "Green Belt Lean Seis Sigma", "mes": "2026-04", "ini": "2026-01-20", "fim": "2026-03-07", "dias": 47.0, "leads": 467.0, "inv": 5250.0, "cpl": 11.24, "leads_dia": 9.94}, {"curso": "IA nas Operações Industriais Farmacêuticas", "mes": "2026-05", "ini": "2026-04-23", "fim": "2026-05-20", "dias": 28.0, "leads": 401.0, "inv": 3800.0, "cpl": 9.48, "leads_dia": 14.32}, {"curso": "IA para Operações Industriais", "mes": "2025-06", "ini": "2025-04-07", "fim": "2025-05-31", "dias": 55.0, "leads": 417.0, "inv": 6750.0, "cpl": 16.19, "leads_dia": 7.58}, {"curso": "IA para Operações Industriais", "mes": "2026-02", "ini": "2025-11-03", "fim": "2026-01-24", "dias": 83.0, "leads": 527.0, "inv": 5475.0, "cpl": 10.39, "leads_dia": 6.35}, {"curso": "IA para Projetos de Melhoria e Gestão de Portfólio", "mes": "2026-05", "ini": "2026-03-24", "fim": "2026-04-29", "dias": 37.0, "leads": 267.0, "inv": 2600.0, "cpl": 9.74, "leads_dia": 7.22}, {"curso": "IQNET: ISO 45001 - Auditor Interno", "mes": "2026-05", "ini": "2026-04-06", "fim": "2026-05-02", "dias": 27.0, "leads": 186.0, "inv": 2400.0, "cpl": 12.9, "leads_dia": 6.89}, {"curso": "IQNET: ISO 9001 - Auditor Líder", "mes": "2025-05", "ini": "2025-03-31", "fim": "2025-05-12", "dias": 43.0, "leads": 425.0, "inv": 4980.0, "cpl": 11.72, "leads_dia": 9.88}, {"curso": "IQNET: ISO 9001 - Auditor Líder", "mes": "2025-11", "ini": "2025-08-18", "fim": "2025-10-24", "dias": 68.0, "leads": 752.0, "inv": 4980.0, "cpl": 6.62, "leads_dia": 11.06}, {"curso": "IQNET: ISO 9001 - Auditor Líder", "mes": "2026-03", "ini": "2026-01-12", "fim": "2026-03-14", "dias": 62.0, "leads": 644.0, "inv": 4980.0, "cpl": 7.73, "leads_dia": 10.39}, {"curso": "IQNET: ISO 9001 - Auditor Líder", "mes": "2026-05", "ini": "2026-04-01", "fim": "2026-05-02", "dias": 32.0, "leads": 375.0, "inv": 2400.0, "cpl": 6.4, "leads_dia": 11.72}, {"curso": "ISO 7101 - Auditor Interno", "mes": "2025-11", "ini": "2025-06-09", "fim": "2025-08-05", "dias": 58.0, "leads": 283.0, "inv": 3600.0, "cpl": 12.72, "leads_dia": 4.88}, {"curso": "ISO 7101 - Auditor Líder", "mes": "2025-09", "ini": "2025-08-11", "fim": "2025-08-25", "dias": 15.0, "leads": 33.0, "inv": 6640.0, "cpl": 201.21, "leads_dia": 2.2}, {"curso": "ISO/IEC 27701 – Interpretação dos requisitos da nova versão independente", "mes": "2025-11", "ini": "2025-09-29", "fim": "2025-11-07", "dias": 40.0, "leads": 0, "inv": 2085.0, "cpl": null, "leads_dia": 0.0}, {"curso": "ISO/IEC 27701 – Interpretação dos requisitos da nova versão independente", "mes": "2026-04", "ini": "2026-03-19", "fim": "2026-04-21", "dias": 34.0, "leads": 0, "inv": 2085.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Indústria 4.0: Conceito, Método e Aplicação Prática", "mes": "2025-04", "ini": "2025-01-06", "fim": "2025-02-12", "dias": 38.0, "leads": 164.0, "inv": 2850.0, "cpl": 17.38, "leads_dia": 4.32}, {"curso": "Indústria 4.0: Conceito, Método e Aplicação Prática", "mes": "2025-07", "ini": "2025-05-21", "fim": "2025-07-07", "dias": 48.0, "leads": 216.0, "inv": 2850.0, "cpl": 13.19, "leads_dia": 4.5}, {"curso": "Inteligência Artificial aplicada ao RH", "mes": "2026-03", "ini": "2026-01-21", "fim": "2026-03-08", "dias": 47.0, "leads": 316.0, "inv": 2600.0, "cpl": 8.23, "leads_dia": 6.72}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2025-01", "ini": "2024-11-18", "fim": "2025-01-21", "dias": 65.0, "leads": 284.0, "inv": 2100.0, "cpl": 7.39, "leads_dia": 4.37}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2025-04", "ini": "2025-02-26", "fim": "2025-04-16", "dias": 50.0, "leads": 376.0, "inv": 2800.0, "cpl": 7.45, "leads_dia": 7.52}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2025-07", "ini": "2025-05-20", "fim": "2025-07-08", "dias": 50.0, "leads": 364.0, "inv": 2800.0, "cpl": 7.69, "leads_dia": 7.28}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2025-08", "ini": "2025-07-01", "fim": "2025-08-05", "dias": 36.0, "leads": 368.0, "inv": 2800.0, "cpl": 7.61, "leads_dia": 10.22}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2025-10", "ini": "2025-08-18", "fim": "2025-09-30", "dias": 44.0, "leads": 376.0, "inv": 2800.0, "cpl": 7.45, "leads_dia": 8.55}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2025-11", "ini": "2025-10-21", "fim": "2025-11-18", "dias": 29.0, "leads": 270.0, "inv": 2100.0, "cpl": 7.78, "leads_dia": 9.31}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2026-01", "ini": "2025-12-08", "fim": "2026-01-17", "dias": 41.0, "leads": 249.0, "inv": 2100.0, "cpl": 8.43, "leads_dia": 6.07}, {"curso": "Inteligência Artificial na Gestão de Projetos", "mes": "2026-03", "ini": "2026-02-23", "fim": "2026-03-17", "dias": 23.0, "leads": 210.0, "inv": 2100.0, "cpl": 10.0, "leads_dia": 9.13}, {"curso": "Inteligência Emocional: Como usar a razão para equilibrar a emoção", "mes": "2025-04", "ini": "2025-02-17", "fim": "2025-04-02", "dias": 45.0, "leads": 271.0, "inv": 1725.0, "cpl": 6.37, "leads_dia": 6.02}, {"curso": "Inteligência Emocional: Como usar a razão para equilibrar a emoção", "mes": "2025-08", "ini": "2025-07-01", "fim": "2025-08-12", "dias": 43.0, "leads": 351.0, "inv": 1725.0, "cpl": 4.91, "leads_dia": 8.16}, {"curso": "Inteligência Emocional: Como usar a razão para equilibrar a emoção", "mes": "2025-12", "ini": "2025-10-08", "fim": "2025-11-21", "dias": 45.0, "leads": 275.0, "inv": 1725.0, "cpl": 6.27, "leads_dia": 6.11}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2025-05", "ini": "2025-03-31", "fim": "2025-05-05", "dias": 36.0, "leads": 141.0, "inv": 1500.0, "cpl": 10.64, "leads_dia": 3.92}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2025-06", "ini": "2025-05-19", "fim": "2025-06-22", "dias": 35.0, "leads": 103.0, "inv": 1500.0, "cpl": 14.56, "leads_dia": 2.94}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2025-09", "ini": "2025-07-24", "fim": "2025-08-28", "dias": 36.0, "leads": 119.0, "inv": 1500.0, "cpl": 12.61, "leads_dia": 3.31}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2025-11", "ini": "2025-10-06", "fim": "2025-11-06", "dias": 32.0, "leads": 177.0, "inv": 1500.0, "cpl": 8.47, "leads_dia": 5.53}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2026-01", "ini": "2025-12-01", "fim": "2026-01-10", "dias": 41.0, "leads": 177.0, "inv": 1590.0, "cpl": 8.98, "leads_dia": 4.32}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2026-03", "ini": "2026-02-23", "fim": "2026-03-12", "dias": 18.0, "leads": 80.0, "inv": 1590.0, "cpl": 19.88, "leads_dia": 4.44}, {"curso": "Interpretação dos Requisitos ISO 9001:2015", "mes": "2026-05", "ini": "2026-03-31", "fim": "2026-05-02", "dias": 33.0, "leads": 184.0, "inv": 1590.0, "cpl": 8.64, "leads_dia": 5.58}, {"curso": "Interpretação dos requisitos – ISO 7101", "mes": "2025-06", "ini": "2025-04-28", "fim": "2025-06-11", "dias": 45.0, "leads": 0, "inv": 3600.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Interpretação dos requisitos – ISO/IEC 42001", "mes": "2026-05", "ini": "2026-04-07", "fim": "2026-05-18", "dias": 42.0, "leads": 0, "inv": 3600.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Jornada IA Aplicada: Liderança, Dados e Estratégia", "mes": null, "ini": "2025-09-18", "fim": "2025-10-18", "dias": 31.0, "leads": 0, "inv": 4000.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Jornada IA Aplicada: Liderança, Dados e Estratégia", "mes": null, "ini": "2025-10-19", "fim": "2025-11-19", "dias": 32.0, "leads": 0, "inv": 3500.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Lean: Ferramentas para Excelência Operacional", "mes": "2025-03", "ini": "2025-02-12", "fim": "2025-03-18", "dias": 35.0, "leads": 0, "inv": 1348.5, "cpl": null, "leads_dia": 0.0}, {"curso": "Lean: Ferramentas para Excelência Operacional", "mes": "2025-06", "ini": "2025-05-15", "fim": "2025-06-18", "dias": 35.0, "leads": 0, "inv": 1348.5, "cpl": null, "leads_dia": 0.0}, {"curso": "Lean: Ferramentas para Excelência Operacional", "mes": "2025-09", "ini": "2025-08-11", "fim": "2025-09-15", "dias": 36.0, "leads": 0, "inv": 1348.5, "cpl": null, "leads_dia": 0.0}, {"curso": "Lean: Ferramentas para Excelência Operacional", "mes": "2025-12", "ini": "2025-10-15", "fim": "2025-11-21", "dias": 38.0, "leads": 0, "inv": 1348.5, "cpl": null, "leads_dia": 0.0}, {"curso": "Liderança Assertiva: Um Estilo que Constrói Relações Maduras com Foco em Resultados", "mes": "2025-03", "ini": "2024-12-04", "fim": "2025-01-22", "dias": 50.0, "leads": 106.0, "inv": 1725.0, "cpl": 16.27, "leads_dia": 2.12}, {"curso": "Liderança Assertiva: Um Estilo que Constrói Relações Maduras com Foco em Resultados", "mes": "2025-06", "ini": "2025-03-17", "fim": "2025-05-05", "dias": 50.0, "leads": 38.0, "inv": 1725.0, "cpl": 45.39, "leads_dia": 0.76}, {"curso": "Liderança Assertiva: Um Estilo que Constrói Relações Maduras com Foco em Resultados", "mes": "2026-04", "ini": "2026-02-19", "fim": "2026-03-28", "dias": 38.0, "leads": 348.0, "inv": 1800.0, "cpl": 5.17, "leads_dia": 9.16}, {"curso": "Liderança e Gestão de Pessoas para Alta Performance", "mes": "2025-09", "ini": "2025-06-23", "fim": "2025-09-09", "dias": 79.0, "leads": 0, "inv": 5248.5, "cpl": null, "leads_dia": 0.0}, {"curso": "Liderança e Gestão de Pessoas para Alta Performance (Prorrogada)", "mes": "2025-05", "ini": "2025-01-20", "fim": "2025-04-08", "dias": 79.0, "leads": 0, "inv": 5248.5, "cpl": null, "leads_dia": 0.0}, {"curso": "Logística e Supply Chain com Ênfase em Ferramentas Analíticas e Novas Tecnologias", "mes": "2025-04", "ini": "2025-02-17", "fim": "2025-04-16", "dias": 59.0, "leads": 482.0, "inv": 3300.0, "cpl": 6.85, "leads_dia": 8.17}, {"curso": "Logística e Supply Chain com Ênfase em Ferramentas Analíticas e Novas Tecnologias", "mes": "2025-09", "ini": "2025-07-21", "fim": "2025-09-16", "dias": 58.0, "leads": 529.0, "inv": 3300.0, "cpl": 6.24, "leads_dia": 9.12}, {"curso": "Logística e Supply Chain com Ênfase em Ferramentas Analíticas e Novas Tecnologias", "mes": "2026-02", "ini": "2025-12-08", "fim": "2026-02-13", "dias": 68.0, "leads": 719.0, "inv": 3300.0, "cpl": 4.59, "leads_dia": 10.57}, {"curso": "MBA em Engenharia da Qualidade", "mes": "2025-03", "ini": "2024-10-21", "fim": "2025-03-15", "dias": 146.0, "leads": 3557.0, "inv": 100000.0, "cpl": 28.11, "leads_dia": 24.36}, {"curso": "MBA em Engenharia da Qualidade", "mes": "2025-08", "ini": "2025-05-12", "fim": "2025-08-05", "dias": 86.0, "leads": 1390.0, "inv": 40000.0, "cpl": 28.78, "leads_dia": 16.16}, {"curso": "MBA em Engenharia da Qualidade", "mes": "2026-04", "ini": "2025-10-27", "fim": "2026-03-27", "dias": 152.0, "leads": 2104.0, "inv": 40000.0, "cpl": 19.01, "leads_dia": 13.84}, {"curso": "MBA em Estratégia e Inovação com Aplicação de IA", "mes": "2025-09", "ini": "2024-11-18", "fim": "2025-03-07", "dias": 110.0, "leads": 309.0, "inv": 0, "cpl": null, "leads_dia": 2.81}, {"curso": "MBA em Gestão de Negócios", "mes": "2025-03", "ini": "2024-10-07", "fim": "2025-03-01", "dias": 146.0, "leads": 1365.0, "inv": 100000.0, "cpl": 73.26, "leads_dia": 9.35}, {"curso": "MBA em Gestão Ágil, Inovação e Liderança", "mes": "2025-03", "ini": "2024-10-14", "fim": "2025-03-08", "dias": 146.0, "leads": 3990.0, "inv": 100000.0, "cpl": 25.06, "leads_dia": 27.33}, {"curso": "MBA em Gestão Ágil, Inovação e Liderança", "mes": "2025-08", "ini": "2025-05-19", "fim": "2025-08-19", "dias": 93.0, "leads": 1799.0, "inv": 70000.0, "cpl": 38.91, "leads_dia": 19.34}, {"curso": "MBA em Gestão Ágil, Inovação e Liderança", "mes": "2026-04", "ini": "2025-10-13", "fim": "2026-03-27", "dias": 166.0, "leads": 2797.0, "inv": 70000.0, "cpl": 25.03, "leads_dia": 16.85}, {"curso": "MBA em IA Aplicada à Gestão Estratégica de Projetos", "mes": "2026-04", "ini": "2025-10-15", "fim": "2026-03-27", "dias": 164.0, "leads": 2946.0, "inv": 70000.0, "cpl": 23.76, "leads_dia": 17.96}, {"curso": "MBA em Logística e Supply Chain", "mes": "2026-03", "ini": "2025-06-23", "fim": "2025-07-22", "dias": 30.0, "leads": 0, "inv": 2000.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Storytelling e Técnicas de Oratória", "mes": "2025-02", "ini": "2025-01-06", "fim": "2025-02-14", "dias": 40.0, "leads": 239.0, "inv": 2100.0, "cpl": 8.79, "leads_dia": 5.97}, {"curso": "Storytelling e Técnicas de Oratória", "mes": "2025-05", "ini": "2025-03-25", "fim": "2025-05-08", "dias": 45.0, "leads": 277.0, "inv": 2100.0, "cpl": 7.58, "leads_dia": 6.16}, {"curso": "Storytelling e Técnicas de Oratória", "mes": "2025-08", "ini": "2025-06-30", "fim": "2025-08-13", "dias": 45.0, "leads": 313.0, "inv": 2100.0, "cpl": 6.71, "leads_dia": 6.96}, {"curso": "Storytelling e Técnicas de Oratória", "mes": "2025-11", "ini": "2025-09-17", "fim": "2025-11-01", "dias": 46.0, "leads": 368.0, "inv": 2100.0, "cpl": 5.71, "leads_dia": 8.0}, {"curso": "Storytelling e Técnicas de Oratória", "mes": "2026-02", "ini": "2026-01-05", "fim": "2026-02-15", "dias": 42.0, "leads": 388.0, "inv": 2175.0, "cpl": 5.61, "leads_dia": 9.24}, {"curso": "Storytelling e Técnicas de Oratória", "mes": "2026-05", "ini": "2026-04-01", "fim": "2026-05-16", "dias": 46.0, "leads": 417.0, "inv": 2175.0, "cpl": 5.22, "leads_dia": 9.07}, {"curso": "Tecnologias para os controles da ISO 27001", "mes": "2025-04", "ini": "2024-12-02", "fim": "2025-01-28", "dias": 58.0, "leads": 20.0, "inv": 1860.0, "cpl": 93.0, "leads_dia": 0.34}, {"curso": "Tecnologias para os controles da ISO 27001", "mes": "2025-08", "ini": "2025-06-23", "fim": "2025-07-31", "dias": 39.0, "leads": 8.0, "inv": 1860.0, "cpl": 232.5, "leads_dia": 0.21}, {"curso": "Tecnologias para os controles da ISO 27001", "mes": "2026-05", "ini": "2026-04-13", "fim": "2026-05-16", "dias": 34.0, "leads": 3.0, "inv": 1860.0, "cpl": 620.0, "leads_dia": 0.09}, {"curso": "Upgrade para Black Belt em Lean Seis Sigma", "mes": "2025-05", "ini": "2025-02-10", "fim": "2025-04-25", "dias": 75.0, "leads": 0, "inv": 5250.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Upgrade para Black Belt em Lean Seis Sigma", "mes": "2025-09", "ini": "2025-06-09", "fim": "2025-08-22", "dias": 75.0, "leads": 0, "inv": 5250.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Upgrade para Black Belt em Lean Seis Sigma", "mes": "2026-04", "ini": "2026-01-12", "fim": "2026-03-26", "dias": 74.0, "leads": 0, "inv": 5625.0, "cpl": null, "leads_dia": 0.0}, {"curso": "Yellow Belt Lean Seis Sigma", "mes": "2025-02", "ini": "2025-01-06", "fim": "2025-01-31", "dias": 26.0, "leads": 93.0, "inv": 1850.0, "cpl": 19.89, "leads_dia": 3.58}, {"curso": "Yellow Belt Lean Seis Sigma", "mes": "2025-05", "ini": "2025-03-27", "fim": "2025-04-30", "dias": 35.0, "leads": 121.0, "inv": 1650.0, "cpl": 13.64, "leads_dia": 3.46}, {"curso": "Yellow Belt Lean Seis Sigma", "mes": "2025-08", "ini": "2025-07-07", "fim": "2025-08-11", "dias": 36.0, "leads": 210.0, "inv": 1650.0, "cpl": 7.86, "leads_dia": 5.83}, {"curso": "Yellow Belt Lean Seis Sigma", "mes": "2025-11", "ini": "2025-09-15", "fim": "2025-10-24", "dias": 40.0, "leads": 100.0, "inv": 1650.0, "cpl": 16.5, "leads_dia": 2.5}, {"curso": "Yellow Belt Lean Seis Sigma", "mes": "2026-02", "ini": "2025-12-08", "fim": "2026-01-23", "dias": 47.0, "leads": 88.0, "inv": 1650.0, "cpl": 18.75, "leads_dia": 1.87}, {"curso": "Yellow Belt Lean Seis Sigma", "mes": "2026-04", "ini": "2026-03-03", "fim": "2026-03-29", "dias": 27.0, "leads": 89.0, "inv": 1650.0, "cpl": 18.54, "leads_dia": 3.3}]};
+const BRL=v=>'R$ '+(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
+const N=v=>(v||0).toLocaleString('pt-BR');
+const NAVY='#060653',AZUL='#4848B5',AZUL2='#6a6ad4',CINZA='#b9b9d6',CIANO='#3aa9b8';
+const MESES_PT=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const labelsAll=DATA.months.map(m=>{const p=m.split('-');return MESES_PT[+p[1]-1]+'/'+p[0].slice(2);});
 
-const AZUL='#003a70', AZUL2='#0060b0', VERDE='#1a9d5a', VERM='#c73a3a', CINZA='#cbd5e1';
-const fmt = n => Number(n||0).toLocaleString('pt-BR');
-const fmtR = n => 'R$ ' + Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
-const fmtDate = iso => iso ? iso.split('-').reverse().join('/') : '';
+function theme(c){
+ const s=(c||'').toLowerCase();
+ if(s.includes('mba')) return 'MBA';
+ if(/iso|iqnet|\bona\b|lgpd|27001|9001|45001|14001|7101|42001|22301|37001|16949|27701|auditor|acredita|requisitos|compliance|dpo/.test(s)) return 'ISO/Qualidade';
+ if(/lean|seis sigma|belt|\btpm\b|fmea|jasp|processo|melhoria|operaç|supply|log[ií]stica|ind[uú]stria 4|manufactur/.test(s)) return 'Lean/Operações';
+ if(/agile|scrum|okr|kanban|[áa]gil/.test(s)) return 'Agile';
+ if(/intelig[êe]ncia artificial|\bia\b|\bai\b|dominando a ia|aplicaç[õo]es de ia/.test(s)) return 'IA';
+ if(/lideran|pessoas|emocional|autoconhecimento|storytelling|orat[óo]ria|customer|feminina|mentoria|assertiva/.test(s)) return 'Liderança/Soft';
+ return 'Projetos/Outros';
+}
+function midx(m){return DATA.months.indexOf(m);}
 
-const COBERTURA_LEADS_INICIO = '2026-03-29';
+const state={tema:'',curso:'',ini:0,fim:DATA.months.length-1};
+let charts={};
 
-(function setDefaultDates(){
-  const hoje = new Date();
-  const toISO = d => d.toISOString().slice(0,10);
-  document.getElementById('fIni').value = COBERTURA_LEADS_INICIO;
-  document.getElementById('fFim').value = toISO(hoje);
-})();
+const temas=[...new Set(DATA.hist.map(h=>theme(h.curso)))].sort();
+document.getElementById('f-tema').innerHTML='<option value="">Todos os temas</option>'+temas.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
+function fillCursos(){
+ const list=DATA.hist.filter(h=>(!state.tema||theme(h.curso)===state.tema)).sort((a,b)=>a.curso.localeCompare(b.curso,'pt'));
+ document.getElementById('f-curso').innerHTML='<option value="">Todos os cursos</option>'+list.map(h=>'<option value="'+h.curso.replace(/"/g,'&quot;')+'">'+(h.curso.length>55?h.curso.slice(0,55)+'…':h.curso)+'</option>').join('');
+}
+fillCursos();
+const selI=document.getElementById('f-ini'),selF=document.getElementById('f-fim');
+selI.innerHTML=labelsAll.map((l,i)=>'<option value="'+i+'">'+l+'</option>').join('');
+selF.innerHTML=labelsAll.map((l,i)=>'<option value="'+i+'">'+l+'</option>').join('');
+selI.value=0;selF.value=DATA.months.length-1;
 
-let turmasData = [];
-let charts = {};
-
-function destruirGraficos(){
-  Object.values(charts).forEach(c=>c && c.destroy());
-  charts = {};
+function coursesSel(){
+ return DATA.hist.filter(h=> (state.curso? h.curso===state.curso : (!state.tema||theme(h.curso)===state.tema)) );
+}
+function inPeriod(i){return i>=state.ini && i<=state.fim;}
+function campSel(){
+ return DATA.camp.filter(c=>{
+  if(state.curso && c.curso!==state.curso) return false;
+  if(!state.curso && state.tema && theme(c.curso)!==state.tema) return false;
+  const idx=midx(c.mes);
+  const fullRange=(state.ini===0 && state.fim===DATA.months.length-1);
+  if(idx<0) return fullRange;
+  return inPeriod(idx);
+ });
 }
 
-async function carregar(){
-  const ini = document.getElementById('fIni').value;
-  const fim = document.getElementById('fFim').value;
-  const erroBox = document.getElementById('erro');
-  const corpo = document.getElementById('corpoTurmas');
-  corpo.innerHTML = '<tr><td colspan="8" class="loading">Carregando…</td></tr>';
-  erroBox.innerHTML = '';
+function render(){
+ const cs=coursesSel();
+ const camps=campSel();
+ const series=[],lbls=[];
+ for(let i=state.ini;i<=state.fim;i++){lbls.push(labelsAll[i]);series.push(cs.reduce((a,h)=>a+(h.vals[i]||0),0));}
+ const totLeads=series.reduce((a,b)=>a+b,0);
+ let l25=0,l26=0;
+ for(let i=state.ini;i<=state.fim;i++){const y=DATA.months[i].slice(0,4);const v=cs.reduce((a,h)=>a+(h.vals[i]||0),0);if(y==='2025')l25+=v;else l26+=v;}
+ const inv=camps.reduce((a,c)=>a+(c.inv||0),0);
+ const cplv=camps.filter(c=>c.cpl&&c.leads>0).map(c=>c.cpl).sort((a,b)=>a-b);
+ const cplMed=cplv.length?cplv[Math.floor(cplv.length/2)]:0;
+ const turmas=camps.length, zero=camps.filter(c=>(c.leads||0)===0).length;
 
-  const [{data: turmas, error: e1}, {data: placar, error: e2}] = await Promise.all([
-    sb.rpc('historico_turmas', {p_inicio: ini, p_fim: fim}),
-    sb.rpc('placar', {p_inicio: ini, p_fim: fim})
-  ]);
+ const daily=[];
+ for(let i=state.ini;i<=state.fim;i++){const v=cs.reduce((a,h)=>a+(h.vals[i]||0),0);const yy=+DATA.months[i].slice(0,4),mm=+DATA.months[i].slice(5,7);daily.push(v/new Date(yy,mm,0).getDate());}
+ const dsort=[...daily].sort((a,b)=>a-b);
+ const medDay=dsort.length?(dsort.length%2?dsort[(dsort.length-1)/2]:(dsort[dsort.length/2-1]+dsort[dsort.length/2])/2):0;
+ const kpis=[
+  {v:N(totLeads),l:'Leads no período',s:(l25+l26>0)?('2025: '+N(l25)+' · 2026: '+N(l26)):'',c:''},
+  {v:N(Math.round(medDay)),l:'Mediana diária',s:'leads/dia em mês típico',c:''},
+  {v:N(turmas),l:'Turmas no período',s:zero+' sem captação',c:zero>0?'down':''},
+  {v:BRL(inv),l:'Investimento (mkt)',s:'no período',c:''},
+  {v:cplMed?'R$ '+cplMed.toFixed(0):'—',l:'CPL mediano/turma',s:'custo por lead',c:''},
+  {v:turmas?N(Math.round(totLeads/Math.max(1,turmas))):'—',l:'Leads médios/turma',s:'',c:''},
+ ];
+ document.getElementById('kpis').innerHTML=kpis.map(k=>'<div class="kpi"><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div><div class="s '+k.c+'">'+k.s+'</div></div>').join('');
 
-  if(e1 || e2){
-    erroBox.innerHTML = `<div class="erro">Erro ao carregar: ${(e1||e2).message}</div>`;
-    corpo.innerHTML = '';
-    return;
-  }
+ const af=[];if(state.tema)af.push(state.tema);if(state.curso)af.push('curso selecionado');
+ document.getElementById('activeflt').textContent=af.length?('Filtro: '+af.join(' · ')):'Visão geral';
+ document.getElementById('tit-mensal').textContent = state.curso? ('Evolução mensal — '+(state.curso.length>50?state.curso.slice(0,50)+'…':state.curso)) : (state.tema? ('Evolução mensal — '+state.tema):'Evolução mensal de leads');
 
-  turmasData = turmas;
-  document.getElementById('atualizado').textContent =
-    `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+ mkChart('c-mensal','line',{labels:lbls,datasets:[{label:'Leads',data:series,borderColor:NAVY,backgroundColor:'rgba(72,72,181,.10)',tension:.3,fill:true,borderWidth:3,pointRadius:lbls.length>14?2:3,pointBackgroundColor:AZUL}]},
+  {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'leads/mês'}}}});
 
-  renderKpis(turmas);
-  renderGraficos(placar.filter(r => Number(r.investimento) > 0));
-  renderTabela();
+ const base=DATA.hist.filter(h=>(!state.tema||theme(h.curso)===state.tema));
+ const ranked=base.map(h=>{let s=0;for(let i=state.ini;i<=state.fim;i++)s+=h.vals[i]||0;return {curso:h.curso,leads:s};})
+   .filter(x=>x.leads>0).sort((a,b)=>b.leads-a.leads).slice(0,12);
+ mkChart('c-topcursos','bar',{labels:ranked.map(t=>t.curso.length>32?t.curso.slice(0,32)+'…':t.curso),
+   datasets:[{label:'Leads',data:ranked.map(t=>t.leads),backgroundColor:ranked.map(t=>state.curso&&t.curso===state.curso?AZUL:NAVY)}]},
+  {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true},y:{ticks:{font:{size:10}}}}});
+
+ renderPareto();
+ renderAltaQueda();
+ renderPerene();
+
+ const pts=camps.filter(c=>c.inv>0&&c.leads>0&&c.cpl).map(c=>({x:c.inv,y:c.leads,r:Math.max(4,Math.min(26,Math.sqrt(c.cpl)*2)),curso:c.curso,cpl:c.cpl}));
+ mkChart('c-disp','bubble',{datasets:[{label:'Turmas',data:pts,backgroundColor:'rgba(72,72,181,.4)',borderColor:NAVY}]},
+  {plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>{const d=p.raw;return [d.curso.slice(0,40),'Invest: '+BRL(d.x)+' · Leads: '+N(d.y)+' · CPL: R$ '+d.cpl.toFixed(2)];}}}},
+   scales:{x:{type:'logarithmic',title:{display:true,text:'investimento (R$, escala log)'}},y:{beginAtZero:true,title:{display:true,text:'leads na janela'}}}});
+
+ const valid=camps.filter(c=>c.cpl&&c.leads>0);
+ const best=[...valid].sort((a,b)=>a.cpl-b.cpl).slice(0,12);
+ const worst=[...valid].sort((a,b)=>b.cpl-a.cpl).slice(0,12);
+ const tbl=(rws,cls)=> rws.length? '<table><thead><tr><th>Curso</th><th>Mês</th><th>Leads</th><th>CPL</th></tr></thead><tbody>'+
+   rws.map(c=>'<tr><td>'+(c.curso.length>30?c.curso.slice(0,30)+'…':c.curso)+'</td><td>'+(c.mes||'')+'</td><td>'+N(c.leads)+'</td><td class="'+cls+'">R$ '+c.cpl.toFixed(2)+'</td></tr>').join('')+'</tbody></table>' : '<div class="empty">Sem turmas no filtro.</div>';
+ document.getElementById('t-best').innerHTML=tbl(best,'good');
+ document.getElementById('t-worst').innerHTML=tbl(worst,'bad');
+
+ renderCamp();
 }
 
-function renderKpis(turmas){
-  const comDado = turmas.filter(t => t.data_fim >= COBERTURA_LEADS_INICIO);
-  const investTotal = turmas.reduce((s,t)=>s+Number(t.investimento||0),0);
-  const investComDado = comDado.reduce((s,t)=>s+Number(t.investimento||0),0);
-  const leadsTotal = comDado.reduce((s,t)=>s+Number(t.leads||0),0);
-  const cplMedio = leadsTotal ? investComDado/leadsTotal : null;
-  document.getElementById('tagTurmas').textContent = `${turmas.length} turmas`;
-  document.getElementById('cards').innerHTML = `
-    <div class="kpi"><div class="lbl">Investimento total</div><div class="val">${fmtR(investTotal)}</div>
-      <div class="delta">${turmas.length} turmas no período</div></div>
-    <div class="kpi"><div class="lbl">Leads (turmas com dado de lead)</div><div class="val">${fmt(leadsTotal)}</div>
-      <div class="delta">${comDado.length} de ${turmas.length} turmas têm cobertura*</div></div>
-    <div class="kpi"><div class="lbl">CPL médio</div><div class="val">${cplMedio?('R$ '+cplMedio.toFixed(2)):'—'}</div>
-      <div class="delta">só turmas com dado de lead</div></div>
-    <div class="kpi"><div class="lbl">Cursos com mídia</div><div class="val">${new Set(turmas.map(t=>t.curso)).size}</div>
-      <div class="delta">distintos no período</div></div>`;
+function renderPerene(){
+ const camps=campSel();
+ const map={};
+ camps.forEach(c=>{const k=c.curso;(map[k]=map[k]||{curso:k,turmas:0,inv:0,leads:0,cpls:[]});map[k].turmas++;map[k].inv+=c.inv||0;map[k].leads+=c.leads||0;if(c.cpl&&c.leads>0)map[k].cpls.push(c.cpl);});
+ const hsel={};DATA.hist.forEach(h=>hsel[h.curso]=h.vals);
+ const span=state.fim-state.ini+1;
+ let arr=Object.values(map).map(o=>{
+   const v=hsel[o.curso]||[];let ma=0;for(let i=state.ini;i<=state.fim;i++)if(v[i]&&v[i]>0)ma++;
+   const cm=o.cpls.slice().sort((a,b)=>a-b);const cpl=cm.length?cm[Math.floor(cm.length/2)]:0;
+   const idx=Math.round((Math.min(o.turmas,8)/8*0.5 + (span?ma/span:0)*0.5)*100);
+   return Object.assign(o,{ma:ma,cpl:cpl,idx:idx});
+ }).filter(o=>o.turmas>=2 && o.inv>0);
+ arr.sort((a,b)=> b.idx-a.idx || b.turmas-a.turmas || b.inv-a.inv);
+ const pts=arr.map(o=>({x:o.turmas,y:o.inv,r:Math.max(5,Math.min(28,Math.sqrt(o.leads)/3)),curso:o.curso,leads:o.leads}));
+ mkChart('c-perene','bubble',{datasets:[{label:'Cursos',data:pts,backgroundColor:'rgba(46,158,91,.38)',borderColor:'#2e9e5b'}]},
+  {plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>{const d=p.raw;return [d.curso.slice(0,40),'Turmas: '+d.x+' · Invest: '+BRL(d.y)+' · Leads: '+N(d.leads)];}}}},
+   scales:{x:{beginAtZero:true,title:{display:true,text:'nº de turmas no período'}},y:{type:'logarithmic',title:{display:true,text:'investimento (R$, escala log)'}}}});
+ const top=arr.slice(0,15);
+ document.getElementById('t-perene').innerHTML= top.length? '<table><thead><tr><th>Curso</th><th>Índice</th><th>Turmas</th><th>Meses</th><th>Investim.</th><th>Leads</th><th>CPL</th></tr></thead><tbody>'+
+   top.map(o=>'<tr><td>'+(o.curso.length>34?o.curso.slice(0,34)+'…':o.curso)+'</td><td class="good">'+o.idx+'</td><td>'+o.turmas+'</td><td>'+o.ma+'</td><td>'+BRL(o.inv)+'</td><td>'+N(o.leads)+'</td><td>'+(o.cpl?'R$ '+o.cpl.toFixed(2):'—')+'</td></tr>').join('')+'</tbody></table>'
+   : '<div class="empty">Sem cursos perenes neste filtro.</div>';
+}
+function renderPareto(){
+ const cs=coursesSel();
+ const arr=cs.map(h=>{let s=0;for(let i=state.ini;i<=state.fim;i++)s+=h.vals[i]||0;return{curso:h.curso,leads:s};}).filter(x=>x.leads>0).sort((a,b)=>b.leads-a.leads);
+ const total=arr.reduce((a,b)=>a+b.leads,0)||1;
+ const top=arr.slice(0,15);
+ let cum=0;const cumpct=top.map(x=>{cum+=x.leads;return +(cum/total*100).toFixed(1);});
+ mkChart('c-pareto','bar',{labels:top.map(t=>t.curso.length>24?t.curso.slice(0,24)+'…':t.curso),
+   datasets:[
+    {type:'bar',label:'Leads',data:top.map(t=>t.leads),backgroundColor:NAVY,yAxisID:'y',order:2},
+    {type:'line',label:'% acumulado',data:cumpct,borderColor:AZUL,backgroundColor:AZUL,yAxisID:'y2',tension:.2,borderWidth:2,pointRadius:3,order:1}
+   ]},
+  {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}}},scales:{
+    x:{ticks:{font:{size:9},maxRotation:60,minRotation:45}},
+    y:{beginAtZero:true,position:'left',title:{display:true,text:'leads'}},
+    y2:{beginAtZero:true,max:100,position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'% acumulado'},ticks:{callback:v=>v+'%'}}
+  }});
+ let c2=0,n80=0;for(const x of arr){c2+=x.leads;n80++;if(c2/total>=0.8)break;}
+ const top5=arr.slice(0,5).reduce((a,b)=>a+b.leads,0)/total*100;
+ document.getElementById('pareto-nota').innerHTML='<b>'+n80+'</b> de '+arr.length+' cursos concentram <b>80%</b> dos leads. Top 5 cursos = <b>'+top5.toFixed(0)+'%</b> do total.';
+}
+function renderAltaQueda(){
+ const base=DATA.hist.filter(h=> (state.curso? h.curso===state.curso : (!state.tema||theme(h.curso)===state.tema)) );
+ const arr=base.map(h=>{const a=h.vals.slice(0,6).reduce((x,y)=>x+(y||0),0);const b=h.vals.slice(12,18).reduce((x,y)=>x+(y||0),0);return{curso:h.curso,d:b-a};}).filter(x=>Math.abs(x.d)>0);
+ const up=[...arr].filter(x=>x.d>0).sort((a,b)=>b.d-a.d).slice(0,8);
+ const down=[...arr].filter(x=>x.d<0).sort((a,b)=>a.d-b.d).slice(0,8);
+ const comb=[...up,...down.reverse()];
+ mkChart('c-altaqueda','bar',{labels:comb.map(t=>t.curso.length>30?t.curso.slice(0,30)+'…':t.curso),
+   datasets:[{label:'Δ leads',data:comb.map(t=>t.d),backgroundColor:comb.map(t=>t.d>=0?'#2e9e5b':'#d64545')}]},
+  {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>(p.raw>=0?'+':'')+N(p.raw)+' leads (jan–jun 26 vs 25)'}}},scales:{x:{title:{display:true,text:'variação de leads'}},y:{ticks:{font:{size:9}}}}});
+}
+function mkChart(id,type,data,opts){
+ if(charts[id])charts[id].destroy();
+ charts[id]=new Chart(document.getElementById(id),{type:type,data:data,options:Object.assign({responsive:true,maintainAspectRatio:false},opts)});
 }
 
-function renderGraficos(rows){
-  destruirGraficos();
-  const comCpl = rows.filter(r => r.cpl !== null && r.cpl !== undefined && r.leads > 0);
-  const melhores = [...comCpl].sort((a,b)=>a.cpl-b.cpl).slice(0,10);
-  const piores = [...comCpl].sort((a,b)=>b.cpl-a.cpl).slice(0,10);
-
-  const barOpts = {
-    responsive:true, maintainAspectRatio:false,
-    indexAxis:'y',
-    plugins:{legend:{display:false}},
-    scales:{x:{title:{display:true,text:'CPL (R$)'}}, y:{ticks:{font:{size:10}}}}
-  };
-
-  charts.melhores = new Chart(document.getElementById('cMelhores'), {
-    type:'bar',
-    data:{labels: melhores.map(r=>r.curso), datasets:[{data: melhores.map(r=>r.cpl), backgroundColor: VERDE}]},
-    options: barOpts
-  });
-  charts.piores = new Chart(document.getElementById('cPiores'), {
-    type:'bar',
-    data:{labels: piores.map(r=>r.curso), datasets:[{data: piores.map(r=>r.cpl), backgroundColor: VERM}]},
-    options: barOpts
-  });
+let sortKey='leads',sortDir=-1;
+function renderCamp(){
+ const q=document.getElementById('busca').value.toLowerCase();
+ let rows=campSel().filter(c=>c.curso.toLowerCase().includes(q));
+ rows.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];if(typeof x==='string'){x=x||'';y=y||'';return sortDir*x.localeCompare(y);}return sortDir*((x||0)-(y||0));});
+ const cols=[['curso','Curso'],['mes','Mês'],['dias','Dias'],['leads','Leads'],['leads_dia','Leads/dia'],['inv','Investim.'],['cpl','CPL']];
+ if(!rows.length){document.getElementById('t-camp').innerHTML='<div class="empty">Sem turmas para este filtro.</div>';return;}
+ let h='<table><thead><tr>'+cols.map(c=>'<th data-k="'+c[0]+'">'+c[1]+'</th>').join('')+'</tr></thead><tbody>';
+ h+=rows.map(c=>'<tr><td>'+(c.curso.length>40?c.curso.slice(0,40)+'…':c.curso)+'</td><td>'+(c.mes||'')+'</td><td>'+(c.dias||'')+'</td><td>'+N(c.leads)+'</td><td>'+(c.leads_dia?c.leads_dia.toFixed(1):'')+'</td><td>'+BRL(c.inv)+'</td><td>'+(c.cpl?'R$ '+c.cpl.toFixed(2):'—')+'</td></tr>').join('');
+ h+='</tbody></table>';
+ const el=document.getElementById('t-camp');el.innerHTML=h;
+ el.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}renderCamp();});
 }
 
-function renderTabela(){
-  const termo = document.getElementById('busca').value.toLowerCase();
-  const corpo = document.getElementById('corpoTurmas');
-  const rows = turmasData.filter(t => t.curso.toLowerCase().includes(termo));
-  if(!rows.length){
-    corpo.innerHTML = '<tr><td colspan="8" class="loading">Nenhuma turma encontrada.</td></tr>';
-    return;
-  }
-  corpo.innerHTML = rows.map(t=>{
-    const semCobertura = t.data_fim < COBERTURA_LEADS_INICIO;
-    const cpl = t.cpl!=null ? Number(t.cpl) : null;
-    const cplCls = cpl==null ? '' : (cpl <= 30 ? 'cpl-bom' : (cpl >= 100 ? 'cpl-alto' : ''));
-    const leadsCel = semCobertura ? '<span class="z" title="turma fora do período com dado de lead no Supabase (a partir de 29/03/2026)">sem dado</span>' : fmt(t.leads);
-    const cplCel = semCobertura ? '<span class="z">—</span>' : (cpl!=null ? 'R$ '+cpl.toFixed(2) : '<span class="z">—</span>');
-    return `<tr>
-      <td class="curso">${t.curso}</td>
-      <td>${t.tipo}</td>
-      <td>${t.codigo || '<span class="z">—</span>'}</td>
-      <td>${fmtDate(t.data_inicio)}</td>
-      <td>${fmtDate(t.data_fim)}</td>
-      <td>${fmtR(t.investimento)}</td>
-      <td>${leadsCel}</td>
-      <td class="${semCobertura?'':cplCls}">${cplCel}</td>
-    </tr>`;
-  }).join('');
-}
+document.getElementById('f-tema').onchange=e=>{state.tema=e.target.value;state.curso='';fillCursos();render();};
+document.getElementById('f-curso').onchange=e=>{state.curso=e.target.value;render();};
+selI.onchange=e=>{state.ini=+e.target.value;if(state.ini>state.fim){state.fim=state.ini;selF.value=state.fim;}render();};
+selF.onchange=e=>{state.fim=+e.target.value;if(state.fim<state.ini){state.ini=state.fim;selI.value=state.ini;}render();};
+document.getElementById('busca').oninput=renderCamp;
+document.getElementById('limpar').onclick=()=>{state.tema='';state.curso='';state.ini=0;state.fim=DATA.months.length-1;document.getElementById('f-tema').value='';selI.value=0;selF.value=DATA.months.length-1;document.getElementById('busca').value='';fillCursos();render();};
 
-carregar();
+render();
 </script>
 </body>
 </html>
