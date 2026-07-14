@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Histórico &amp; Investimento · Vanzolini</title>
+<style>
+  :root{
+    --azul:#003a70; --azul2:#0060b0; --claro:#eef3f8; --linha:#e2e8f0;
+    --txt:#1f2b3a; --sub:#64748b; --verde:#1a9d5a; --verde-bg:#e7f6ee;
+    --amar:#b5820a; --amar-bg:#fdf5e3; --verm:#c73a3a; --verm-bg:#fbe9e9;
+    --zebra:#f7fafd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
+  .wrap{max-width:1320px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;flex-wrap:wrap;gap:12px;background:var(--claro);
+    border:1px solid #dfe9f5;border-radius:14px;padding:14px 20px}
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{height:34px;width:auto;display:block}
+  .brand .divisor{width:1px;align-self:stretch;background:#cfdcec}
+  h1{font-size:16px;color:var(--azul);font-weight:700}
+  .brand small{color:var(--sub);font-size:11px;display:block}
+  .voltar{color:var(--azul2);text-decoration:none;font-size:12.5px;font-weight:600;
+    border:1px solid var(--linha);background:#fff;border-radius:20px;padding:8px 15px}
+  .voltar:hover{background:var(--claro)}
+
+  .barra{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;
+    justify-content:space-between;margin-bottom:14px}
+  .filtros{background:#fff;border:1px solid var(--linha);border-radius:12px;
+    padding:12px 14px;display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+  .campo label{display:block;font-size:10px;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--sub);margin-bottom:4px}
+  .campo input,.campo select{border:1px solid var(--linha);border-radius:8px;
+    padding:7px 9px;font-size:13px;color:var(--txt);background:#fff}
+  .btn{background:var(--azul);color:#fff;border:none;border-radius:8px;
+    padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--azul2)}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .kpi{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px 16px}
+  .kpi .lbl{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-size:22px;font-weight:700;color:var(--azul);margin-top:4px}
+  .kpi .delta{font-size:12px;margin-top:2px;font-weight:600;color:var(--sub)}
+
+  .sec{margin-bottom:16px}
+  .sec h2{font-size:13px;color:var(--azul);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .tag{background:#fff;border:1px solid var(--linha);border-radius:20px;
+    padding:3px 10px;font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .card{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:16px}
+  .chartbox{position:relative;height:340px}
+  .chartbox.tall{height:420px}
+
+  .tabela{background:#fff;border:1px solid var(--linha);border-radius:12px;
+    overflow:auto;max-height:600px}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  th,td{padding:7px 9px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  th{background:var(--azul);color:#fff;font-size:10px;text-transform:uppercase;
+    letter-spacing:.3px;font-weight:600;position:sticky;top:0;z-index:2}
+  td.curso,th.curso{text-align:left;white-space:normal;min-width:240px;
+    max-width:320px;position:sticky;left:0;background:#fff}
+  th.curso{background:var(--azul);z-index:3}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  tbody tr:nth-child(even) td.curso{background:var(--zebra)}
+  tbody tr:hover{background:#eef4fb}
+  tbody tr:hover td.curso{background:#eef4fb}
+  .z{color:#cbd5e1}
+  .cpl-bom{color:var(--verde);font-weight:700}
+  .cpl-alto{color:var(--verm);font-weight:700}
+  input.busca{border:1px solid var(--linha);border-radius:8px;padding:7px 10px;
+    font-size:13px;width:260px;margin-bottom:10px}
+  .loading{padding:40px;text-align:center;color:var(--sub)}
+  .erro{padding:14px;background:var(--verm-bg);color:var(--verm);border-radius:10px;margin-bottom:14px}
+  .rodape{margin-top:12px;color:var(--sub);font-size:11px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div class="divisor"></div>
+      <div><h1>Histórico &amp; Investimento</h1>
+        <small>turmas, mídia e CPL · leitura em tempo real do Supabase</small></div>
+    </div>
+    <a class="voltar" href="index.html">← Voltar ao placar</a>
+  </header>
+
+  <div class="barra">
+    <div class="filtros">
+      <div class="campo"><label>Período — de</label><input type="date" id="fIni"></div>
+      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
+      <button class="btn" onclick="carregar()">Aplicar</button>
+    </div>
+    <div class="tag" id="atualizado"></div>
+  </div>
+
+  <div id="erro"></div>
+  <div class="cards" id="cards"></div>
+
+  <div class="grid2 sec">
+    <div class="card">
+      <h2>Melhores CPL <span class="tag">mais barato por lead</span></h2>
+      <div class="chartbox"><canvas id="cMelhores"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Piores CPL <span class="tag">mais caro por lead</span></h2>
+      <div class="chartbox"><canvas id="cPiores"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Turmas no período <span class="tag" id="tagTurmas"></span></h2>
+    <input class="busca" id="busca" placeholder="Buscar curso…" oninput="renderTabela()">
+    <div class="tabela">
+      <table>
+        <thead><tr>
+          <th class="curso">Curso</th><th>Tipo</th><th>Turma</th>
+          <th>Início</th><th>Fim</th><th>Investimento</th><th>Leads</th><th>CPL</th>
+        </tr></thead>
+        <tbody id="corpoTurmas"><tr><td colspan="8" class="loading">Carregando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="rodape">
+    <div>Investimento por turma vem do histórico compilado em <b>Historico_Leads_Vanzolini.xlsx</b> (turmas até mai/2026); leads e CPL são recalculados ao vivo contra o Supabase, não os números congelados da planilha.</div>
+    <div>* O Supabase só tem dado de lead a partir de 29/03/2026 (é todo o histórico que a planilha de origem manteve). Turmas anteriores a essa data mostram investimento real mas leads "sem dado" — não significa que a campanha não performou, só que não há como medir aqui.</div>
+    <div style="margin-top:4px">Fonte de atualização mensal do investimento ainda em avaliação (Monday × planilha de mídia semanal).</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const SUPABASE_URL = "https://ltasijrhkotyyrxnavab.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const AZUL='#003a70', AZUL2='#0060b0', VERDE='#1a9d5a', VERM='#c73a3a', CINZA='#cbd5e1';
+const fmt = n => Number(n||0).toLocaleString('pt-BR');
+const fmtR = n => 'R$ ' + Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
+const fmtDate = iso => iso ? iso.split('-').reverse().join('/') : '';
+
+const COBERTURA_LEADS_INICIO = '2026-03-29';
+
+(function setDefaultDates(){
+  const hoje = new Date();
+  const toISO = d => d.toISOString().slice(0,10);
+  document.getElementById('fIni').value = COBERTURA_LEADS_INICIO;
+  document.getElementById('fFim').value = toISO(hoje);
+})();
+
+let turmasData = [];
+let charts = {};
+
+function destruirGraficos(){
+  Object.values(charts).forEach(c=>c && c.destroy());
+  charts = {};
+}
+
+async function carregar(){
+  const ini = document.getElementById('fIni').value;
+  const fim = document.getElementById('fFim').value;
+  const erroBox = document.getElementById('erro');
+  const corpo = document.getElementById('corpoTurmas');
+  corpo.innerHTML = '<tr><td colspan="8" class="loading">Carregando…</td></tr>';
+  erroBox.innerHTML = '';
+
+  const [{data: turmas, error: e1}, {data: placar, error: e2}] = await Promise.all([
+    sb.rpc('historico_turmas', {p_inicio: ini, p_fim: fim}),
+    sb.rpc('placar', {p_inicio: ini, p_fim: fim})
+  ]);
+
+  if(e1 || e2){
+    erroBox.innerHTML = `<div class="erro">Erro ao carregar: ${(e1||e2).message}</div>`;
+    corpo.innerHTML = '';
+    return;
+  }
+
+  turmasData = turmas;
+  document.getElementById('atualizado').textContent =
+    `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+
+  renderKpis(turmas);
+  renderGraficos(placar.filter(r => Number(r.investimento) > 0));
+  renderTabela();
+}
+
+function renderKpis(turmas){
+  const comDado = turmas.filter(t => t.data_fim >= COBERTURA_LEADS_INICIO);
+  const investTotal = turmas.reduce((s,t)=>s+Number(t.investimento||0),0);
+  const investComDado = comDado.reduce((s,t)=>s+Number(t.investimento||0),0);
+  const leadsTotal = comDado.reduce((s,t)=>s+Number(t.leads||0),0);
+  const cplMedio = leadsTotal ? investComDado/leadsTotal : null;
+  document.getElementById('tagTurmas').textContent = `${turmas.length} turmas`;
+  document.getElementById('cards').innerHTML = `
+    <div class="kpi"><div class="lbl">Investimento total</div><div class="val">${fmtR(investTotal)}</div>
+      <div class="delta">${turmas.length} turmas no período</div></div>
+    <div class="kpi"><div class="lbl">Leads (turmas com dado de lead)</div><div class="val">${fmt(leadsTotal)}</div>
+      <div class="delta">${comDado.length} de ${turmas.length} turmas têm cobertura*</div></div>
+    <div class="kpi"><div class="lbl">CPL médio</div><div class="val">${cplMedio?('R$ '+cplMedio.toFixed(2)):'—'}</div>
+      <div class="delta">só turmas com dado de lead</div></div>
+    <div class="kpi"><div class="lbl">Cursos com mídia</div><div class="val">${new Set(turmas.map(t=>t.curso)).size}</div>
+      <div class="delta">distintos no período</div></div>`;
+}
+
+function renderGraficos(rows){
+  destruirGraficos();
+  const comCpl = rows.filter(r => r.cpl !== null && r.cpl !== undefined && r.leads > 0);
+  const melhores = [...comCpl].sort((a,b)=>a.cpl-b.cpl).slice(0,10);
+  const piores = [...comCpl].sort((a,b)=>b.cpl-a.cpl).slice(0,10);
+
+  const barOpts = {
+    responsive:true, maintainAspectRatio:false,
+    indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{x:{title:{display:true,text:'CPL (R$)'}}, y:{ticks:{font:{size:10}}}}
+  };
+
+  charts.melhores = new Chart(document.getElementById('cMelhores'), {
+    type:'bar',
+    data:{labels: melhores.map(r=>r.curso), datasets:[{data: melhores.map(r=>r.cpl), backgroundColor: VERDE}]},
+    options: barOpts
+  });
+  charts.piores = new Chart(document.getElementById('cPiores'), {
+    type:'bar',
+    data:{labels: piores.map(r=>r.curso), datasets:[{data: piores.map(r=>r.cpl), backgroundColor: VERM}]},
+    options: barOpts
+  });
+}
+
+function renderTabela(){
+  const termo = document.getElementById('busca').value.toLowerCase();
+  const corpo = document.getElementById('corpoTurmas');
+  const rows = turmasData.filter(t => t.curso.toLowerCase().includes(termo));
+  if(!rows.length){
+    corpo.innerHTML = '<tr><td colspan="8" class="loading">Nenhuma turma encontrada.</td></tr>';
+    return;
+  }
+  corpo.innerHTML = rows.map(t=>{
+    const semCobertura = t.data_fim < COBERTURA_LEADS_INICIO;
+    const cpl = t.cpl!=null ? Number(t.cpl) : null;
+    const cplCls = cpl==null ? '' : (cpl <= 30 ? 'cpl-bom' : (cpl >= 100 ? 'cpl-alto' : ''));
+    const leadsCel = semCobertura ? '<span class="z" title="turma fora do período com dado de lead no Supabase (a partir de 29/03/2026)">sem dado</span>' : fmt(t.leads);
+    const cplCel = semCobertura ? '<span class="z">—</span>' : (cpl!=null ? 'R$ '+cpl.toFixed(2) : '<span class="z">—</span>');
+    return `<tr>
+      <td class="curso">${t.curso}</td>
+      <td>${t.tipo}</td>
+      <td>${t.codigo || '<span class="z">—</span>'}</td>
+      <td>${fmtDate(t.data_inicio)}</td>
+      <td>${fmtDate(t.data_fim)}</td>
+      <td>${fmtR(t.investimento)}</td>
+      <td>${leadsCel}</td>
+      <td class="${semCobertura?'':cplCls}">${cplCel}</td>
+    </tr>`;
+  }).join('');
+}
+
+carregar();
+</script>
+</body>
+</html>

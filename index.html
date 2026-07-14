@@ -109,7 +109,10 @@
       <div><h1>Placar de Leads</h1>
         <small>leitura em tempo real do Supabase</small></div>
     </div>
-    <div class="tag" id="tagTopo">conectando…</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a class="toggle" href="historico.html" style="text-decoration:none">📈 Histórico &amp; investimento</a>
+      <div class="tag" id="tagTopo">conectando…</div>
+    </div>
   </header>
 
   <div class="barra">
@@ -150,7 +153,7 @@
       <span class="badge b-verm">Abaixo</span> ·
       <span class="badge" style="background:var(--claro);color:var(--sub)">— sem histórico ainda</span>.
       Linhas com barra azul e selo <b>ATIVA</b> (clicável, abre a campanha no Monday) têm campanha em andamento no período escolhido.</div>
-    <div style="margin-top:4px">Dados ao vivo do Supabase (base <code>communitas</code>). Edição de conversões, turma e investimento ainda não estão nesta versão — leitura apenas.</div>
+    <div style="margin-top:4px">Dados ao vivo do Supabase (base <code>communitas</code>), leitura apenas. Investimento/CPL cobre turmas com mídia registrada até mai/2026 — veja o histórico completo em <a href="historico.html" style="color:var(--azul2)">Histórico &amp; investimento</a>.</div>
   </div>
 </div>
 
@@ -164,6 +167,7 @@ const MONDAY_BOARD = "935301050";
 const tipoOrder = {MBA:0, Curso:1, Institucional:2};
 const rotulos = {MBA:'MBAs', Curso:'Cursos', Institucional:'Campanha de captação'};
 const fmt = n => Number(n||0).toLocaleString('pt-BR');
+const fmtR = n => 'R$ ' + Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
 const fmtDate = iso => iso ? iso.split('-').reverse().slice(0,2).join('/') : '';
 
 (function setDefaultDates(){
@@ -227,6 +231,13 @@ function renderizar(data){
   let tipoAtual='';
   const soma={meta_ads:0,linkedin:0,form_prog:0,form_pagina:0,popup:0,whatsapp:0,outros:0,leads:0};
   let ativos=0, leadsAtivos=0, semLeadAtiva=0;
+  let investTotal=0, leadsComInvest=0;
+  data.forEach(r=>{
+    if(Number(r.investimento) > 0){
+      investTotal += Number(r.investimento);
+      leadsComInvest += Number(r.leads)||0;
+    }
+  });
 
   rows.forEach(r=>{
     if(r.tipo!==tipoAtual){
@@ -284,8 +295,8 @@ function renderizar(data){
       <div class="delta muted">no período</div></div>
     <div class="kpi"><div class="lbl">Canal líder</div><div class="val">Meta</div>
       <div class="delta muted">${soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos ativos`:'—'}</div></div>
-    <div class="kpi"><div class="lbl">Investimento / CPL</div><div class="val" style="font-size:15px;color:var(--sub)">não carregado</div>
-      <div class="delta muted">v2.0</div></div>`;
+    <div class="kpi"><div class="lbl">Investimento / CPL médio</div><div class="val" style="font-size:20px">${investTotal?fmtR(investTotal):'<span class="z">sem dado</span>'}</div>
+      <div class="delta muted">${leadsComInvest?`CPL R$ ${(investTotal/leadsComInvest).toFixed(2)} · ${fmt(leadsComInvest)} leads`:'sem turma com investimento no período'}</div></div>`;
 
   const alertaBox = document.getElementById('alerta');
   alertaBox.style.display = 'flex';
