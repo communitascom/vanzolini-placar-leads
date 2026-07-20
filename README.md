@@ -44,22 +44,32 @@ Recalculada em 20/07/2026 na mesma régua de pessoas. Antes vinha de cópia
 manual do `Historico_Leads_Vanzolini.xlsx` e precisava de refresh mensal na
 mão. Agora sai do próprio banco.
 
-Base do cálculo: mediana de pessoas distintas por dia, contando só os dias
-com pelo menos 1 lead, na janela de 01/07/2025 a 30/06/2026. Julho/2026 fica
-de fora de propósito, para não usar o mês anômalo como baseline. Cursos com
-menos de 20 dias de dado na janela ficam com `null` (a tela mostra "sem
-histórico"), em vez de exibir uma mediana de base fina que seria ruído.
+**Base do cálculo: dias dentro das janelas de campanha**, tiradas da tabela
+`turmas` (`data_inicio` a `data_fim`), até 30/06/2026. Julho/2026 fica de fora
+de propósito, para não usar o mês anômalo como baseline. Dias de campanha sem
+lead entram como zero: campanha parada é zero real e deve puxar a mediana.
+
+O período de campanha é essencial e não é detalhe. A primeira tentativa usou
+"dias com pelo menos 1 lead" e deu errado: fora da campanha ainda pinga lead
+residual de página antiga e orgânico, e esses dias afundam a mediana, fazendo
+todo curso parecer "Acima". A base de turmas reproduz os valores originais da
+planilha dentro de 1 a 2 pontos; a base de "dias com lead" errava até 4x
+(Gerenciamento da Rotina dava 2,0 onde o correto é 9,0).
+
+Cursos sem turma cadastrada, com menos de 30 dias de campanha, ou com mediana
+zero ficam com `null` e a tela mostra "sem histórico", em vez de exibir um
+número de base fina que seria ruído.
 
 Achados do recálculo:
 
 - Vários cursos tinham `mediana_dia = 0,00`, não nulo, e por isso apareciam
-  como "sem histórico" sem nunca terem tido meta. O ONA é o caso extremo:
-  constava 0,00 e tem mediana real de 47 pessoas/dia.
-- Os valores antigos **não se reproduzem a partir do banco** para vários
-  cursos, em ambas as direções (IA Farmacêuticas constava 14,3 e é 6,5; MBA
-  em Gestão de Negócios constava 9,3 e dava 25,5). Vinham de base própria da
-  planilha, que não temos como auditar.
-- Valores antigos preservados na tabela `_backup_mediana`.
+  como "sem histórico" sem nunca terem tido meta de verdade.
+- **23 dos 65 cursos ativos ficaram sem meta por falta de turma cadastrada**,
+  e entre eles estão os de maior volume: ONA (898 leads em julho), MBA em
+  Liderança IA e Execução Estratégica (886), ISO 31000 (555), IQNET ISO 14001
+  (435). As turmas foram importadas da planilha até mai/2026 e os cursos mais
+  novos nunca entraram. Cadastrar essas turmas é o que fecha a lacuna.
+- Valores originais da planilha preservados em `_backup_mediana`.
 
 Para refazer o cálculo no futuro, a query está em
 `sql/recalcula_mediana.sql`.
