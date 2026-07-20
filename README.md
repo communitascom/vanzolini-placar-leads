@@ -28,9 +28,7 @@ Consequências a ter em mente:
 
 - **Semana não soma mês.** Contagem de pessoas distintas não é aditiva. Quem
   converteu em duas semanas conta 1 em cada semana e 1 no mês.
-- **`cursos.mediana_dia` (coluna "Esperado"/"Situação") ainda está na régua
-  antiga**, calculada por evento. Precisa ser recalculada por pessoa, senão
-  os cursos aparecem melhores do que estão.
+- **Semana não soma mês** (repetido de propósito, é o engano mais provável).
 - **`historico.html` também está na régua antiga** (dados estáticos embutidos),
   então diverge do `index.html` até ser regerado.
 - **`admin.html` mostra linhas cruas de propósito**, por ser o painel de
@@ -39,6 +37,32 @@ Consequências a ter em mente:
 A causa da duplicação em julho **ainda não foi encontrada**. A dedupe na
 leitura corrige o número exibido, não a origem: o banco segue recebendo
 linhas repetidas. Nenhuma linha foi apagada, o dado bruto está preservado.
+
+## Mediana esperada por curso (`cursos.mediana_dia`)
+
+Recalculada em 20/07/2026 na mesma régua de pessoas. Antes vinha de cópia
+manual do `Historico_Leads_Vanzolini.xlsx` e precisava de refresh mensal na
+mão. Agora sai do próprio banco.
+
+Base do cálculo: mediana de pessoas distintas por dia, contando só os dias
+com pelo menos 1 lead, na janela de 01/07/2025 a 30/06/2026. Julho/2026 fica
+de fora de propósito, para não usar o mês anômalo como baseline. Cursos com
+menos de 20 dias de dado na janela ficam com `null` (a tela mostra "sem
+histórico"), em vez de exibir uma mediana de base fina que seria ruído.
+
+Achados do recálculo:
+
+- Vários cursos tinham `mediana_dia = 0,00`, não nulo, e por isso apareciam
+  como "sem histórico" sem nunca terem tido meta. O ONA é o caso extremo:
+  constava 0,00 e tem mediana real de 47 pessoas/dia.
+- Os valores antigos **não se reproduzem a partir do banco** para vários
+  cursos, em ambas as direções (IA Farmacêuticas constava 14,3 e é 6,5; MBA
+  em Gestão de Negócios constava 9,3 e dava 25,5). Vinham de base própria da
+  planilha, que não temos como auditar.
+- Valores antigos preservados na tabela `_backup_mediana`.
+
+Para refazer o cálculo no futuro, a query está em
+`sql/recalcula_mediana.sql`.
 
 ## Ponto de restauração
 
