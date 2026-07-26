@@ -132,7 +132,7 @@ tbody tr:hover{background:#eeeefb;}
 
 <div class="sec">
 <h2><span class="tag">Vendas</span> Pipeline por turma</h2>
-<div class="hint">Base para dimensionar o pipeline antes de cada turma. Clique no cabeçalho para ordenar.</div>
+<div class="hint">Base para dimensionar o pipeline antes de cada turma. Clique no cabeçalho para ordenar. "Mediana curso" e "vs mediana" comparam o CPL desta turma contra a mediana das OUTRAS turmas do mesmo curso (histórico completo, não só o período filtrado) — verde é mais barato que o normal do curso, vermelho é mais caro.</div>
 <input type="text" class="tsearch" id="busca" placeholder="Buscar curso na tabela...">
 <div class="card"><div class="scrollt" id="t-camp"></div></div>
 </div>
@@ -309,15 +309,39 @@ function mkChart(id,type,data,opts){
  charts[id]=new Chart(document.getElementById(id),{type:type,data:data,options:Object.assign({responsive:true,maintainAspectRatio:false},opts)});
 }
 
+function mediana(vals){
+ const v=vals.slice().sort((a,b)=>a-b);
+ if(!v.length) return null;
+ return v.length%2 ? v[(v.length-1)/2] : (v[v.length/2-1]+v[v.length/2])/2;
+}
+function medianaOutrasTurmas(turma){
+ const vals=DATA.camp.filter(c=>c.curso===turma.curso && c!==turma && c.cpl && c.leads>0).map(c=>c.cpl);
+ return mediana(vals);
+}
+
 let sortKey='leads',sortDir=-1;
 function renderCamp(){
  const q=document.getElementById('busca').value.toLowerCase();
  let rows=campSel().filter(c=>c.curso.toLowerCase().includes(q));
  rows.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];if(typeof x==='string'){x=x||'';y=y||'';return sortDir*x.localeCompare(y);}return sortDir*((x||0)-(y||0));});
- const cols=[['curso','Curso'],['mes','Mês'],['dias','Dias'],['leads','Leads'],['leads_dia','Leads/dia'],['inv','Investim.'],['cpl','CPL']];
+ const cols=[['curso','Curso'],['mes','Mês'],['dias','Dias'],['leads','Leads'],['leads_dia','Leads/dia'],['inv','Investim.'],['cpl','CPL turma'],['med_outras','Mediana curso'],['delta_cpl','vs mediana']];
  if(!rows.length){document.getElementById('t-camp').innerHTML='<div class="empty">Sem turmas para este filtro.</div>';return;}
+ rows=rows.map(c=>{
+   const medOutras=medianaOutrasTurmas(c);
+   const delta=(c.cpl&&medOutras)?((c.cpl-medOutras)/medOutras*100):null;
+   return Object.assign({},c,{med_outras:medOutras,delta_cpl:delta});
+ });
+ if(sortKey==='med_outras'||sortKey==='delta_cpl'){
+   rows.sort((a,b)=>sortDir*((a[sortKey]??-Infinity)-(b[sortKey]??-Infinity)));
+ }
  let h='<table><thead><tr>'+cols.map(c=>'<th data-k="'+c[0]+'">'+c[1]+'</th>').join('')+'</tr></thead><tbody>';
- h+=rows.map(c=>'<tr><td>'+(c.curso.length>40?c.curso.slice(0,40)+'…':c.curso)+'</td><td>'+(c.mes||'')+'</td><td>'+(c.dias||'')+'</td><td>'+N(c.leads)+'</td><td>'+(c.leads_dia?c.leads_dia.toFixed(1):'')+'</td><td>'+BRL(c.inv)+'</td><td>'+(c.cpl?'R$ '+c.cpl.toFixed(2):'—')+'</td></tr>').join('');
+ h+=rows.map(c=>{
+   const medTxt=c.med_outras!=null?'R$ '+c.med_outras.toFixed(2):'<span class="z">— sem outras turmas</span>';
+   const deltaTxt=c.delta_cpl!=null
+     ? '<span class="'+(c.delta_cpl<=0?'good':'bad')+'">'+(c.delta_cpl>=0?'+':'')+c.delta_cpl.toFixed(0)+'%</span>'
+     : '<span class="z">—</span>';
+   return '<tr><td>'+(c.curso.length>40?c.curso.slice(0,40)+'…':c.curso)+'</td><td>'+(c.mes||'')+'</td><td>'+(c.dias||'')+'</td><td>'+N(c.leads)+'</td><td>'+(c.leads_dia?c.leads_dia.toFixed(1):'')+'</td><td>'+BRL(c.inv)+'</td><td>'+(c.cpl?'R$ '+c.cpl.toFixed(2):'—')+'</td><td>'+medTxt+'</td><td>'+deltaTxt+'</td></tr>';
+ }).join('');
  h+='</tbody></table>';
  const el=document.getElementById('t-camp');el.innerHTML=h;
  el.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}renderCamp();});
