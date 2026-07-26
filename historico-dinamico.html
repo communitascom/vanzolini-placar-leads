@@ -60,7 +60,24 @@ tbody tr:hover{background:#eeeefb;}
 .tsearch{padding:7px 11px;border:1px solid var(--borda);border-radius:9px;font-size:12px;margin-bottom:10px;width:260px;font-family:inherit;}
 .empty{padding:40px;text-align:center;color:var(--mut);font-size:13px;}
 .foot{font-size:11px;color:var(--mut);margin-top:30px;text-align:center;}
+.printhead{display:none;}
 @media(max-width:880px){.grid2{grid-template-columns:1fr;}.wrap{padding:16px;}.filterbar{position:static;}}
+@media print{
+ body{background:#fff;}
+ header,.filterbar,#imprimir,#limpar,.tsearch,.voltar{display:none!important;}
+ .printhead{display:block;margin-bottom:18px;}
+ .printhead h2{font-size:18px;color:var(--navy);margin-bottom:2px;}
+ .printhead div{font-size:11.5px;color:var(--mut);}
+ .wrap{padding:0;max-width:100%;}
+ .sec{margin-top:16px;page-break-inside:avoid;}
+ .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;}
+ .chartbox.tall{height:320px;}
+ .chartbox{height:220px;}
+ .scrollt{max-height:none;overflow:visible;}
+ table{font-size:10px;}
+ th{position:static;}
+ .kpis{page-break-inside:avoid;}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
@@ -85,7 +102,13 @@ tbody tr:hover{background:#eeeefb;}
  <div class="fgrp"><label>Mês de</label><select id="f-ini"></select></div>
  <div class="fgrp"><label>Mês até</label><select id="f-fim"></select></div>
  <button id="limpar">Limpar filtros</button>
+ <button id="imprimir" style="padding:8px 16px;border:1px solid var(--verde);background:#fff;color:var(--verde);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;">🖨️ Imprimir / Salvar PDF</button>
  <span class="activeflt" id="activeflt"></span>
+</div>
+
+<div class="printhead" id="printhead">
+ <h2 id="ph-titulo"></h2>
+ <div id="ph-sub"></div>
 </div>
 
 <div class="kpis" id="kpis"></div>
@@ -353,6 +376,16 @@ selI.onchange=e=>{state.ini=+e.target.value;if(state.ini>state.fim){state.fim=st
 selF.onchange=e=>{state.fim=+e.target.value;if(state.fim<state.ini){state.ini=state.fim;selI.value=state.ini;}render();};
 document.getElementById('busca').oninput=renderCamp;
 document.getElementById('limpar').onclick=()=>{state.tema='';state.curso='';state.ini=0;state.fim=DATA.months.length-1;document.getElementById('f-tema').value='';selI.value=0;selF.value=DATA.months.length-1;document.getElementById('busca').value='';fillCursos();render();};
+
+document.getElementById('imprimir').onclick=()=>{
+ const periodo = (state.ini===0 && state.fim===DATA.months.length-1)
+   ? 'Histórico completo ('+labelsAll[0]+' a '+labelsAll[labelsAll.length-1]+')'
+   : (labelsAll[state.ini]===labelsAll[state.fim] ? labelsAll[state.ini] : labelsAll[state.ini]+' a '+labelsAll[state.fim]);
+ const escopo = state.curso ? state.curso : (state.tema ? 'Tema: '+state.tema : 'Todos os cursos');
+ document.getElementById('ph-titulo').textContent = 'Fechamento de Leads · '+periodo;
+ document.getElementById('ph-sub').textContent = escopo+' · gerado em '+new Date().toLocaleString('pt-BR')+' · Fundação Vanzolini';
+ window.print();
+};
 
 async function carregarDados(){
  document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">…</div><div class="l">carregando leitura ao vivo do Supabase…</div></div>';
