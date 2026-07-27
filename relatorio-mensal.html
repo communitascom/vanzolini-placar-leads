@@ -10,40 +10,40 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:var(--txt);line-height:1.45;font-size:12px;}
 h1,h2,h3,.v{font-family:'Inter Tight','Work Sans',sans-serif;}
-.pag{width:210mm;min-height:297mm;margin:0 auto;padding:12mm 13mm 9mm;background:#fff;}
+.pag{width:210mm;min-height:297mm;margin:0 auto;padding:11mm 13mm 7mm;background:#fff;position:relative;}
+.pag + .pag{page-break-before:always;}
 header{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:11px;margin-bottom:16px;}
 .logo{height:42px}
 h1{font-size:17px;color:var(--navy);line-height:1.15}
 header .sub{font-size:11px;color:var(--mut);margin-top:2px}
-header .per{text-align:right;font-size:11px;color:var(--mut)}
+header .per{text-align:right;font-size:11px;color:var(--mut);white-space:nowrap}
 header .per b{display:block;font-size:15px;color:var(--navy);font-family:'Inter Tight'}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px;}
-.kpi{border:1px solid var(--borda);border-radius:9px;padding:10px 11px;border-left:3px solid var(--azul);}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.kpi{border:1px solid var(--borda);border-radius:9px;padding:8px 10px;border-left:3px solid var(--azul);}
 .kpi .v{font-size:19px;font-weight:700;color:var(--navy);}
 .kpi .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
 .kpi .d{font-size:10.5px;font-weight:600;margin-top:3px}
 .up{color:var(--verde)} .down{color:var(--verm)} .flat{color:var(--mut)}
-h2{font-size:12px;color:var(--navy);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
+h2{font-size:12px;color:var(--navy);margin:9px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
 h2 span{font-size:10px;color:var(--mut);font-weight:400;font-family:'Work Sans'}
 table{width:100%;border-collapse:collapse;font-size:10.5px;}
-th,td{padding:3.5px 7px;text-align:right;border-bottom:1px solid #f0f0f7;}
+th,td{padding:2.4px 7px;text-align:right;border-bottom:1px solid #f0f0f7;}
 th:first-child,td:first-child{text-align:left}
 th{background:var(--navy);color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
 tbody tr:nth-child(even){background:var(--off)}
 .tot td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f8!important}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
-.chart{height:98px;position:relative}
-.chart.alta{height:118px}
-.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:8px 12px;font-size:10px;color:var(--mut);margin-top:10px}
+.chart{height:80px;position:relative}
+.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:7px 11px;font-size:9.5px;color:var(--mut);margin-top:8px}
 .nota b{color:var(--txt)}
-.rodape{margin-top:16px;padding-top:9px;border-top:1px solid var(--borda);font-size:9px;color:var(--mut);display:flex;justify-content:space-between}
+.rodape{margin-top:8px;padding-top:6px;border-top:1px solid var(--borda);font-size:9px;color:var(--mut);display:flex;justify-content:space-between}
 .z{color:#c3c3d4}
+.carregando{padding:60px;text-align:center;color:var(--mut)}
 @page{size:A4;margin:0}
 @media print{
   .pag{margin:0;box-shadow:none;min-height:0}
-  /* nada e cortado no meio: se nao couber, o bloco inteiro desce de pagina */
-  table{page-break-inside:auto}
-  tr{page-break-inside:avoid;page-break-after:auto}
+  .pag + .pag{page-break-before:always}
+  tr{page-break-inside:avoid}
   thead{display:table-header-group}
   .chart,.g2,.nota,.kpis{page-break-inside:avoid}
   h2{page-break-after:avoid}
@@ -52,44 +52,7 @@ tbody tr:nth-child(even){background:var(--off)}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
 <body>
-<div class="pag">
-  <header>
-    <div style="display:flex;align-items:center;gap:13px">
-      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
-      <div>
-        <h1>Relatório Mensal de Captação</h1>
-        <div class="sub">Leads, investimento e desempenho de mídia por curso</div>
-      </div>
-    </div>
-    <div class="per"><b id="periodo"></b><span id="geradoem"></span></div>
-  </header>
-
-  <div class="kpis" id="kpis"></div>
-
-  <h2 id="tit-tabela">Desempenho por curso <span id="sub-cursos"></span></h2>
-  <div id="t-cursos"></div>
-
-  <h2>Captação diária <span id="sub-diario"></span></h2>
-  <div class="chart" id="box-diario"><canvas id="c-diario"></canvas></div>
-
-  <div class="g2">
-    <div>
-      <h2>Origem dos leads <span>por canal de entrada</span></h2>
-      <div class="chart" id="box-canal"><canvas id="c-canal"></canvas></div>
-    </div>
-    <div>
-      <h2>Investimento por plataforma <span>mídia paga</span></h2>
-      <div id="t-plat"></div>
-    </div>
-  </div>
-
-  <div class="nota" id="nota"></div>
-
-  <div class="rodape">
-    <span>Fundação Vanzolini · Relatório de captação</span>
-    <span id="rod-fonte"></span>
-  </div>
-</div>
+<div id="root"><div class="carregando">Carregando…</div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -100,112 +63,138 @@ const N=v=>Number(v||0).toLocaleString('pt-BR');
 const BRL=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
 const BRL2=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-const NAVY='#060653',AZUL='#4848B5',CINZA='#c9c9ee';
+const NAVY='#060653',AZUL='#4848B5';
 const PAL=['#060653','#4848B5','#6a6ad4','#8f8fe0','#b3b3ea','#3aa9b8','#c9c9ee'];
 
-function delta(a,b){
+function delta(a,b,inverso){
   if(!b) return {txt:'sem base anterior',cls:'flat'};
   const p=100*(a-b)/b;
-  return {txt:(p>=0?'+':'')+p.toFixed(1)+'% vs mês anterior', cls: p>2?'up' : p<-2?'down':'flat'};
+  const bom = inverso ? p<=-2 : p>=2;
+  const ruim = inverso ? p>=2 : p<=-2;
+  return {txt:(p>=0?'+':'')+p.toFixed(1)+'% vs mês anterior', cls: bom?'up' : ruim?'down':'flat'};
+}
+
+function secao(data, tipo, soAtivos, mes, idx){
+  const r=data.resumo, [ano,m]=mes.split('-');
+  const rotulo = tipo==='MBA' ? 'MBAs' : tipo==='Curso' ? 'Cursos' : null;
+  const palavra = tipo==='MBA' ? 'MBAs' : tipo==='Curso' ? 'cursos' : 'cursos e MBAs';
+  const cpl=r.leads?r.investimento/r.leads:0;
+  const cplAnt=r.leads_ant?r.investimento_ant/r.leads_ant:0;
+  const ctr=r.impressoes?100*r.cliques/r.impressoes:0;
+  const dL=delta(r.leads,r.leads_ant), dI=delta(r.investimento,r.investimento_ant);
+  const dC=delta(cpl,cplAnt,true);
+  const cs=data.cursos||[];
+  const somaInv=cs.reduce((a,c)=>a+Number(c.investimento),0);
+  const somaLd=cs.reduce((a,c)=>a+Number(c.leads),0);
+  const pl=data.plataformas||[];
+  const tp=pl.reduce((a,p)=>({inv:a.inv+Number(p.investimento),imp:a.imp+Number(p.impressoes),cli:a.cli+Number(p.cliques)}),{inv:0,imp:0,cli:0});
+
+  const el=document.createElement('div');
+  el.className='pag';
+  el.innerHTML=`
+  <header>
+    <div style="display:flex;align-items:center;gap:13px">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div>
+        <h1>Relatório Mensal de Captação${rotulo?' · '+rotulo:''}</h1>
+        <div class="sub">${(tipo==='MBA'?'Programas de MBA':tipo==='Curso'?'Cursos de curta duração':'Visão geral')}${soAtivos?' com campanha de mídia ativa no mês':''}: leads, investimento e desempenho</div>
+      </div>
+    </div>
+    <div class="per"><b>${MES[+m-1].replace(/^./,c=>c.toUpperCase())} de ${ano}</b>emitido em ${new Date().toLocaleDateString('pt-BR')}</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">${N(r.leads)}</div><div class="l">Leads captados</div><div class="d ${dL.cls}">${dL.txt}</div></div>
+    <div class="kpi"><div class="v">${BRL(r.investimento)}</div><div class="l">Investimento em mídia</div><div class="d ${dI.cls}">${dI.txt}</div></div>
+    <div class="kpi"><div class="v">${BRL2(cpl)}</div><div class="l">Custo por lead</div><div class="d ${dC.cls}">${dC.txt}</div></div>
+    <div class="kpi"><div class="v">${ctr.toFixed(2)}%</div><div class="l">CTR médio</div><div class="d flat">${N(r.cliques)} cliques em ${N(r.impressoes)}</div></div>
+  </div>
+
+  <h2>Desempenho por ${tipo==='MBA'?'MBA':'curso'} <span>${soAtivos?`os ${cs.length} com campanha ativa no mês`:(cs.length>=30?`os ${cs.length} com mais leads, de ${r.cursos} no total`:`todos os ${cs.length} com captação no mês`)}</span></h2>
+  <table><thead><tr><th>${tipo==='MBA'?'MBA':'Curso'}</th><th>Leads</th><th>% do mês</th><th>Investimento</th><th>Custo por lead</th><th>CTR</th></tr></thead><tbody>
+  ${cs.map(c=>{const inv=Number(c.investimento),lds=Number(c.leads),imp=Number(c.impressoes),cli=Number(c.cliques);
+    return `<tr><td>${c.curso}</td><td><b>${N(lds)}</b></td><td>${(100*lds/r.leads).toFixed(1)}%</td>
+      <td>${inv>0?BRL(inv):'<span class="z">sem mídia</span>'}</td>
+      <td>${inv>0?BRL2(inv/lds):'<span class="z">não se aplica</span>'}</td>
+      <td>${imp>0?(100*cli/imp).toFixed(2)+'%':'<span class="z">sem mídia</span>'}</td></tr>`}).join('')}
+  <tr class="tot"><td>Total das linhas acima</td><td>${N(somaLd)}</td><td>${(100*somaLd/r.leads).toFixed(1)}%</td><td>${BRL(somaInv)}</td><td>${somaLd?BRL2(somaInv/somaLd):''}</td><td></td></tr>
+  </tbody></table>
+
+  <h2>Captação diária <span id="sub-diario-${idx}"></span></h2>
+  <div class="chart"><canvas id="c-diario-${idx}"></canvas></div>
+
+  <div class="g2">
+    <div>
+      <h2>Origem dos leads <span>por canal de entrada</span></h2>
+      <div class="chart"><canvas id="c-canal-${idx}"></canvas></div>
+    </div>
+    <div>
+      <h2>Investimento por plataforma <span>mídia paga</span></h2>
+      <table><thead><tr><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>CTR</th></tr></thead><tbody>
+      ${pl.map(p=>{const c=Number(p.impressoes)?100*Number(p.cliques)/Number(p.impressoes):0;
+        return `<tr><td><b>${p.plataforma}</b></td><td>${BRL(p.investimento)}</td><td>${N(p.impressoes)}</td><td>${c.toFixed(2)}%</td></tr>`}).join('')}
+      <tr class="tot"><td>Total</td><td>${BRL(tp.inv)}</td><td>${N(tp.imp)}</td><td>${tp.imp?(100*tp.cli/tp.imp).toFixed(2):'0,00'}%</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="nota"><b>Como ler este relatório.</b> Um lead é contado uma vez por ${tipo==='MBA'?'MBA':'curso'}, e uma nova conversão da mesma pessoa só conta de novo depois de 90 dias, o que evita inflar o número com reenvios automáticos.
+  ${rotulo?`Este recorte cobre apenas ${palavra}, então os totais não incluem as demais frentes de captação. `:''}
+  ${soAtivos?`Entram aqui somente ${palavra} que tiveram investimento de mídia no mês, que é o critério de campanha ativa. Leads de ${palavra} sem campanha no período ficam fora deste recorte.`
+            :`O custo por lead considera apenas mídia paga atribuída ${tipo==='MBA'?'ao MBA':'ao curso'}, então ${palavra} sem campanha ativa no mês aparecem sem investimento.`}</div>
+
+  <div class="rodape">
+    <span>Fundação Vanzolini · Relatório de captação</span>
+    <span>Fonte: RD Station e plataformas de mídia · dados consolidados pela Communitas</span>
+  </div>`;
+  return el;
+}
+
+function desenhar(data, mes, idx){
+  const [ano,m]=mes.split('-');
+  const dia=data.diario||[];
+  const totalDias=new Date(+ano,+m,0).getDate();
+  const labels=[],serie=[];
+  for(let d=1;d<=totalDias;d++){
+    const iso=`${ano}-${m}-${String(d).padStart(2,'0')}`;
+    const a=dia.find(x=>x.dia===iso);
+    labels.push(String(d)); serie.push(a?Number(a.leads):0);
+  }
+  const media=serie.reduce((a,b)=>a+b,0)/totalDias;
+  document.getElementById('sub-diario-'+idx).textContent=`média de ${media.toFixed(0)} leads por dia`;
+  new Chart(document.getElementById('c-diario-'+idx),{type:'bar',
+    data:{labels,datasets:[{label:'Leads',data:serie,backgroundColor:AZUL,borderRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:8}}},x:{ticks:{font:{size:7},autoSkip:false},grid:{display:false}}}}});
+
+  const can=(data.canais||[]).filter(c=>Number(c.leads)>0);
+  new Chart(document.getElementById('c-canal-'+idx),{type:'doughnut',
+    data:{labels:can.map(c=>c.canal),datasets:[{data:can.map(c=>Number(c.leads)),backgroundColor:PAL,borderWidth:1,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,cutout:'52%',
+      plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:9,padding:5,
+        generateLabels(ch){const d=ch.data,t=d.datasets[0].data.reduce((a,b)=>a+b,0);
+          return d.labels.map((l,i)=>({text:`${l} · ${(100*d.datasets[0].data[i]/t).toFixed(0)}%`,
+            fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'#fff',lineWidth:1,index:i}));}}}}}});
 }
 
 async function montar(){
   const par=new URLSearchParams(location.search);
   const mes=par.get('mes')||new Date().toISOString().slice(0,7);
-  const tipo=par.get('tipo')||null;
   const soAtivos=par.get('ativos')==='1';
-  const {data,error}=await sb.rpc('relatorio_mensal',{p_mes:mes+'-01',p_tipo:tipo,p_so_ativos:soAtivos});
-  if(error){document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">Erro</div><div class="l">'+error.message+'</div></div>';return;}
-  const r=data.resumo, [ano,m]=mes.split('-');
-  const rotulo = tipo==='MBA' ? 'MBAs' : tipo==='Curso' ? 'Cursos' : null;
-  if(rotulo){
-    document.querySelector('header h1').textContent='Relatório Mensal de Captação · '+rotulo;
-    document.querySelector('header .sub').textContent=
-      (tipo==='MBA' ? 'Programas de MBA' : 'Cursos de curta duração')
-      + (soAtivos ? ' com campanha de mídia ativa no mês' : '')
-      + ': leads, investimento e desempenho';
-    document.getElementById('tit-tabela').firstChild.textContent=
-      tipo==='MBA' ? 'Desempenho por MBA ' : 'Desempenho por curso ';
+  const tipos=(par.get('tipos')||par.get('tipo')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if(!tipos.length) tipos.push(null);
+
+  const root=document.getElementById('root');
+  const pacotes=[];
+  for(const t of tipos){
+    const {data,error}=await sb.rpc('relatorio_mensal',{p_mes:mes+'-01',p_tipo:t,p_so_ativos:soAtivos});
+    if(error){root.innerHTML='<div class="carregando">Erro ao carregar: '+error.message+'</div>';return;}
+    pacotes.push({data,tipo:t});
   }
-  document.getElementById('periodo').textContent=MES[+m-1].replace(/^./,c=>c.toUpperCase())+' de '+ano;
-  document.getElementById('geradoem').textContent='emitido em '+new Date().toLocaleDateString('pt-BR');
-
-  const cpl=r.leads?r.investimento/r.leads:0;
-  const cplAnt=r.leads_ant?r.investimento_ant/r.leads_ant:0;
-  const ctr=r.impressoes?100*r.cliques/r.impressoes:0;
-  const dL=delta(r.leads,r.leads_ant), dI=delta(r.investimento,r.investimento_ant);
-  const dC=cplAnt?(()=>{const p=100*(cpl-cplAnt)/cplAnt;return{txt:(p>=0?'+':'')+p.toFixed(1)+'% vs mês anterior',cls:p<=-2?'up':p>=2?'down':'flat'};})():{txt:'sem base anterior',cls:'flat'};
-
-  document.getElementById('kpis').innerHTML=`
-    <div class="kpi"><div class="v">${N(r.leads)}</div><div class="l">Leads captados</div><div class="d ${dL.cls}">${dL.txt}</div></div>
-    <div class="kpi"><div class="v">${BRL(r.investimento)}</div><div class="l">Investimento em mídia</div><div class="d ${dI.cls}">${dI.txt}</div></div>
-    <div class="kpi"><div class="v">${BRL2(cpl)}</div><div class="l">Custo por lead</div><div class="d ${dC.cls}">${dC.txt}</div></div>
-    <div class="kpi"><div class="v">${ctr.toFixed(2)}%</div><div class="l">CTR médio</div><div class="d flat">${N(r.cliques)} cliques em ${N(r.impressoes)}</div></div>`;
-
-  // captacao diaria
-  const dia=data.diario||[];
-  const totalDias=new Date(+ano,+m,0).getDate();
-  const serie=[]; const labels=[];
-  for(let d=1;d<=totalDias;d++){
-    const iso=`${ano}-${m}-${String(d).padStart(2,'0')}`;
-    const achou=dia.find(x=>x.dia===iso);
-    labels.push(String(d)); serie.push(achou?Number(achou.leads):0);
-  }
-  const media=serie.reduce((a,b)=>a+b,0)/totalDias;
-  document.getElementById('sub-diario').textContent=`média de ${media.toFixed(0)} leads por dia`;
-  new Chart(document.getElementById('c-diario'),{type:'bar',
-    data:{labels,datasets:[{label:'Leads',data:serie,backgroundColor:AZUL,borderRadius:2}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,
-      plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true,ticks:{font:{size:8}}},x:{ticks:{font:{size:7},autoSkip:false},grid:{display:false}}}}});
-
-  // canais
-  const can=(data.canais||[]).filter(c=>Number(c.leads)>0);
-  new Chart(document.getElementById('c-canal'),{type:'doughnut',
-    data:{labels:can.map(c=>c.canal),datasets:[{data:can.map(c=>Number(c.leads)),backgroundColor:PAL,borderWidth:1,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,cutout:'52%',
-      plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:9,padding:6,
-        generateLabels(ch){const d=ch.data,t=d.datasets[0].data.reduce((a,b)=>a+b,0);
-          return d.labels.map((l,i)=>({text:`${l} · ${(100*d.datasets[0].data[i]/t).toFixed(0)}%`,
-            fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'#fff',lineWidth:1,index:i}));}}}}}});
-
-  // plataformas
-  const pl=data.plataformas||[];
-  const tp=pl.reduce((a,p)=>({inv:a.inv+Number(p.investimento),imp:a.imp+Number(p.impressoes),cli:a.cli+Number(p.cliques)}),{inv:0,imp:0,cli:0});
-  document.getElementById('t-plat').innerHTML=`<table><thead><tr><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>CTR</th></tr></thead><tbody>`+
-    pl.map(p=>{const c=Number(p.impressoes)?100*Number(p.cliques)/Number(p.impressoes):0;
-      return `<tr><td><b>${p.plataforma}</b></td><td>${BRL(p.investimento)}</td><td>${N(p.impressoes)}</td><td>${c.toFixed(2)}%</td></tr>`}).join('')+
-    `<tr class="tot"><td>Total</td><td>${BRL(tp.inv)}</td><td>${N(tp.imp)}</td><td>${tp.imp?(100*tp.cli/tp.imp).toFixed(2):'0,00'}%</td></tr></tbody></table>`;
-
-  // cursos
-  const cs=data.cursos||[];
-  const somaInv=cs.reduce((a,c)=>a+Number(c.investimento),0);
-  const somaLd=cs.reduce((a,c)=>a+Number(c.leads),0);
-  document.getElementById('sub-cursos').textContent =
-    soAtivos ? `os ${cs.length} com campanha ativa no mês`
-             : (cs.length>=30 ? `os ${cs.length} com mais leads, de ${r.cursos} no total`
-                              : `todos os ${cs.length} com captação no mês`);
-  document.getElementById('t-cursos').innerHTML=`<table><thead><tr><th>${tipo==='MBA'?'MBA':'Curso'}</th><th>Leads</th><th>% do mês</th><th>Investimento</th><th>Custo por lead</th><th>CTR</th></tr></thead><tbody>`+
-    cs.map(c=>{const inv=Number(c.investimento),lds=Number(c.leads),imp=Number(c.impressoes),cli=Number(c.cliques);
-      return `<tr><td>${c.curso}</td>
-        <td><b>${N(lds)}</b></td><td>${(100*lds/r.leads).toFixed(1)}%</td>
-        <td>${inv>0?BRL(inv):'<span class="z">sem mídia</span>'}</td>
-        <td>${inv>0?BRL2(inv/lds):'<span class="z">não se aplica</span>'}</td>
-        <td>${imp>0?(100*cli/imp).toFixed(2)+'%':'<span class="z">sem mídia</span>'}</td></tr>`}).join('')+
-    `<tr class="tot"><td>Total das linhas acima</td><td>${N(somaLd)}</td><td>${(100*somaLd/r.leads).toFixed(1)}%</td><td>${BRL(somaInv)}</td><td>${somaLd?BRL2(somaInv/somaLd):''}</td><td></td></tr>`+
-    `</tbody></table>`;
-
-  const palavra = tipo==='MBA' ? 'MBAs' : 'cursos';
-  document.getElementById('nota').innerHTML=
-    `<b>Como ler este relatório.</b> Um lead é contado uma vez por ${tipo==='MBA'?'MBA':'curso'}, e uma nova conversão da mesma pessoa `+
-    `só conta de novo depois de 90 dias, o que evita inflar o número com reenvios automáticos. `+
-    (rotulo ? `Este recorte cobre apenas ${palavra}, então os totais não incluem as demais frentes de captação. ` : '')+
-    (soAtivos
-      ? `Entram aqui somente ${palavra} que tiveram investimento de mídia no mês, que é o critério de campanha ativa. Leads de ${palavra} sem campanha no período ficam fora deste recorte.`
-      : `O custo por lead considera apenas mídia paga atribuída ${tipo==='MBA'?'ao MBA':'ao curso'}, então ${palavra} sem campanha ativa no mês aparecem sem investimento.`);
-  document.getElementById('rod-fonte').textContent='Fonte: RD Station e plataformas de mídia · dados consolidados pela Communitas';
-  document.title='Vanzolini_Relatorio_Leads_'+mes+(tipo?'_'+tipo:'');
-  window.__pronto=true;
+  root.innerHTML='';
+  pacotes.forEach((p,i)=>root.appendChild(secao(p.data,p.tipo,soAtivos,mes,i)));
+  pacotes.forEach((p,i)=>desenhar(p.data,mes,i));
+  document.title='Vanzolini_Relatorio_Leads_'+mes+(tipos.filter(Boolean).length?'_'+tipos.filter(Boolean).join('-'):'');
 }
 montar();
 </script>
