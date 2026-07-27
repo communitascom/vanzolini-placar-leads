@@ -10,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:var(--txt);line-height:1.45;font-size:12px;}
 h1,h2,h3,.v{font-family:'Inter Tight','Work Sans',sans-serif;}
-.pag{width:210mm;min-height:297mm;margin:0 auto;padding:14mm 14mm 12mm;background:#fff;}
+.pag{width:210mm;min-height:297mm;margin:0 auto;padding:12mm 13mm 9mm;background:#fff;}
 header{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:11px;margin-bottom:16px;}
 .logo{height:42px}
 h1{font-size:17px;color:var(--navy);line-height:1.15}
@@ -23,23 +23,31 @@ header .per b{display:block;font-size:15px;color:var(--navy);font-family:'Inter 
 .kpi .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
 .kpi .d{font-size:10.5px;font-weight:600;margin-top:3px}
 .up{color:var(--verde)} .down{color:var(--verm)} .flat{color:var(--mut)}
-h2{font-size:12px;color:var(--navy);margin:15px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
+h2{font-size:12px;color:var(--navy);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
 h2 span{font-size:10px;color:var(--mut);font-weight:400;font-family:'Work Sans'}
 table{width:100%;border-collapse:collapse;font-size:10.5px;}
-th,td{padding:5px 7px;text-align:right;border-bottom:1px solid #f0f0f7;}
+th,td{padding:3.5px 7px;text-align:right;border-bottom:1px solid #f0f0f7;}
 th:first-child,td:first-child{text-align:left}
 th{background:var(--navy);color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
 tbody tr:nth-child(even){background:var(--off)}
 .tot td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f8!important}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
-.chart{height:132px;position:relative}
-.chart.alta{height:150px}
-.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--mut);margin-top:12px}
+.chart{height:98px;position:relative}
+.chart.alta{height:118px}
+.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:8px 12px;font-size:10px;color:var(--mut);margin-top:10px}
 .nota b{color:var(--txt)}
 .rodape{margin-top:16px;padding-top:9px;border-top:1px solid var(--borda);font-size:9px;color:var(--mut);display:flex;justify-content:space-between}
 .z{color:#c3c3d4}
 @page{size:A4;margin:0}
-@media print{.pag{margin:0;box-shadow:none}}
+@media print{
+  .pag{margin:0;box-shadow:none;min-height:0}
+  /* nada e cortado no meio: se nao couber, o bloco inteiro desce de pagina */
+  table{page-break-inside:auto}
+  tr{page-break-inside:avoid;page-break-after:auto}
+  thead{display:table-header-group}
+  .chart,.g2,.nota,.kpis{page-break-inside:avoid}
+  h2{page-break-after:avoid}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
@@ -58,6 +66,9 @@ tbody tr:nth-child(even){background:var(--off)}
 
   <div class="kpis" id="kpis"></div>
 
+  <h2 id="tit-tabela">Desempenho por curso <span id="sub-cursos"></span></h2>
+  <div id="t-cursos"></div>
+
   <h2>Captação diária <span id="sub-diario"></span></h2>
   <div class="chart" id="box-diario"><canvas id="c-diario"></canvas></div>
 
@@ -71,9 +82,6 @@ tbody tr:nth-child(even){background:var(--off)}
       <div id="t-plat"></div>
     </div>
   </div>
-
-  <h2>Desempenho por curso <span>os 15 cursos com mais leads no mês</span></h2>
-  <div id="t-cursos"></div>
 
   <div class="nota" id="nota"></div>
 
@@ -104,9 +112,21 @@ function delta(a,b){
 async function montar(){
   const par=new URLSearchParams(location.search);
   const mes=par.get('mes')||new Date().toISOString().slice(0,7);
-  const {data,error}=await sb.rpc('relatorio_mensal',{p_mes:mes+'-01'});
+  const tipo=par.get('tipo')||null;
+  const soAtivos=par.get('ativos')==='1';
+  const {data,error}=await sb.rpc('relatorio_mensal',{p_mes:mes+'-01',p_tipo:tipo,p_so_ativos:soAtivos});
   if(error){document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">Erro</div><div class="l">'+error.message+'</div></div>';return;}
   const r=data.resumo, [ano,m]=mes.split('-');
+  const rotulo = tipo==='MBA' ? 'MBAs' : tipo==='Curso' ? 'Cursos' : null;
+  if(rotulo){
+    document.querySelector('header h1').textContent='Relatório Mensal de Captação · '+rotulo;
+    document.querySelector('header .sub').textContent=
+      (tipo==='MBA' ? 'Programas de MBA' : 'Cursos de curta duração')
+      + (soAtivos ? ' com campanha de mídia ativa no mês' : '')
+      + ': leads, investimento e desempenho';
+    document.getElementById('tit-tabela').firstChild.textContent=
+      tipo==='MBA' ? 'Desempenho por MBA ' : 'Desempenho por curso ';
+  }
   document.getElementById('periodo').textContent=MES[+m-1].replace(/^./,c=>c.toUpperCase())+' de '+ano;
   document.getElementById('geradoem').textContent='emitido em '+new Date().toLocaleDateString('pt-BR');
 
@@ -159,21 +179,32 @@ async function montar(){
 
   // cursos
   const cs=data.cursos||[];
-  document.getElementById('t-cursos').innerHTML=`<table><thead><tr><th>Curso</th><th>Tipo</th><th>Leads</th><th>% do mês</th><th>Investimento</th><th>Custo por lead</th></tr></thead><tbody>`+
-    cs.map(c=>{const inv=Number(c.investimento),lds=Number(c.leads);
-      return `<tr><td>${c.curso}</td><td style="text-align:left;color:var(--mut)">${c.tipo||''}</td>
+  const somaInv=cs.reduce((a,c)=>a+Number(c.investimento),0);
+  const somaLd=cs.reduce((a,c)=>a+Number(c.leads),0);
+  document.getElementById('sub-cursos').textContent =
+    soAtivos ? `os ${cs.length} com campanha ativa no mês`
+             : (cs.length>=30 ? `os ${cs.length} com mais leads, de ${r.cursos} no total`
+                              : `todos os ${cs.length} com captação no mês`);
+  document.getElementById('t-cursos').innerHTML=`<table><thead><tr><th>${tipo==='MBA'?'MBA':'Curso'}</th><th>Leads</th><th>% do mês</th><th>Investimento</th><th>Custo por lead</th><th>CTR</th></tr></thead><tbody>`+
+    cs.map(c=>{const inv=Number(c.investimento),lds=Number(c.leads),imp=Number(c.impressoes),cli=Number(c.cliques);
+      return `<tr><td>${c.curso}</td>
         <td><b>${N(lds)}</b></td><td>${(100*lds/r.leads).toFixed(1)}%</td>
         <td>${inv>0?BRL(inv):'<span class="z">sem mídia</span>'}</td>
-        <td>${inv>0?BRL2(inv/lds):'<span class="z">não se aplica</span>'}</td></tr>`}).join('')+
+        <td>${inv>0?BRL2(inv/lds):'<span class="z">não se aplica</span>'}</td>
+        <td>${imp>0?(100*cli/imp).toFixed(2)+'%':'<span class="z">sem mídia</span>'}</td></tr>`}).join('')+
+    `<tr class="tot"><td>Total das linhas acima</td><td>${N(somaLd)}</td><td>${(100*somaLd/r.leads).toFixed(1)}%</td><td>${BRL(somaInv)}</td><td>${somaLd?BRL2(somaInv/somaLd):''}</td><td></td></tr>`+
     `</tbody></table>`;
 
-  const somaTop=cs.reduce((a,c)=>a+Number(c.leads),0);
+  const palavra = tipo==='MBA' ? 'MBAs' : 'cursos';
   document.getElementById('nota').innerHTML=
-    `<b>Como ler este relatório.</b> Um lead é contado uma vez por curso, e uma nova conversão da mesma pessoa no mesmo curso só conta de novo depois de 90 dias, o que evita inflar o número com reenvios automáticos. `+
-    `Os ${cs.length} cursos listados concentram ${(100*somaTop/r.leads).toFixed(1)}% dos ${N(r.leads)} leads do mês, distribuídos entre ${r.cursos} cursos no total. `+
-    `O custo por lead considera apenas mídia paga atribuída ao curso, então cursos sem campanha ativa aparecem sem investimento.`;
+    `<b>Como ler este relatório.</b> Um lead é contado uma vez por ${tipo==='MBA'?'MBA':'curso'}, e uma nova conversão da mesma pessoa `+
+    `só conta de novo depois de 90 dias, o que evita inflar o número com reenvios automáticos. `+
+    (rotulo ? `Este recorte cobre apenas ${palavra}, então os totais não incluem as demais frentes de captação. ` : '')+
+    (soAtivos
+      ? `Entram aqui somente ${palavra} que tiveram investimento de mídia no mês, que é o critério de campanha ativa. Leads de ${palavra} sem campanha no período ficam fora deste recorte.`
+      : `O custo por lead considera apenas mídia paga atribuída ${tipo==='MBA'?'ao MBA':'ao curso'}, então ${palavra} sem campanha ativa no mês aparecem sem investimento.`);
   document.getElementById('rod-fonte').textContent='Fonte: RD Station e plataformas de mídia · dados consolidados pela Communitas';
-  document.title='Vanzolini_Relatorio_Leads_'+mes;
+  document.title='Vanzolini_Relatorio_Leads_'+mes+(tipo?'_'+tipo:'');
   window.__pronto=true;
 }
 montar();
