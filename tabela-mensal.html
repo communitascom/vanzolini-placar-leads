@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Tabela Mensal de Leads · Fundação Vanzolini</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#060653;--azul:#4848B5;--off:#F7F7FC;--txt:#1a1a2e;--mut:#6f6f8a;--borda:#e4e4f1;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Work Sans',-apple-system,Segoe UI,sans-serif;background:#fff;color:var(--txt);font-size:12px;line-height:1.4;}
+.pag{width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm 8mm;}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:10px;margin-bottom:14px;}
+.logo{height:40px}
+h1{font-family:'Inter Tight';font-size:16px;color:var(--navy);line-height:1.15}
+.sub{font-size:10.5px;color:var(--mut);margin-top:2px}
+.per{text-align:right;font-size:10.5px;color:var(--mut);white-space:nowrap}
+.per b{display:block;font-size:14px;color:var(--navy);font-family:'Inter Tight'}
+table{width:100%;border-collapse:collapse;font-size:10px;}
+th,td{padding:2.6px 6px;text-align:right;border-bottom:1px solid #f0f0f7;}
+th:first-child,td:first-child{text-align:left}
+th{background:var(--navy);color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+tbody tr:nth-child(even){background:var(--off)}
+td.n{font-variant-numeric:tabular-nums}
+td.tot{font-weight:700;color:var(--navy)}
+.z{color:#c9c9d8}
+tr.total td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f8!important;font-size:10.5px}
+.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:8px 11px;font-size:9.5px;color:var(--mut);margin-top:10px}
+.nota b{color:var(--txt)}
+.rodape{margin-top:10px;padding-top:6px;border-top:1px solid var(--borda);font-size:9px;color:var(--mut);display:flex;justify-content:space-between}
+@page{size:A4;margin:0}
+@media print{.pag{margin:0}tr{page-break-inside:avoid}thead{display:table-header-group}}
+</style>
+</head>
+<body>
+<div class="pag" id="root"><div style="padding:60px;text-align:center;color:#888">Carregando…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const sb=supabase.createClient("https://ltasijrhkotyyrxnavab.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c");
+const N=v=>Number(v||0).toLocaleString('pt-BR');
+const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const cel=v=>Number(v)?N(v):'<span class="z">0</span>';
+
+async function montar(){
+  const par=new URLSearchParams(location.search);
+  const mes=par.get('mes')||new Date().toISOString().slice(0,7);
+  const tipo=par.get('tipo')||'Curso';
+  const {data,error}=await sb.rpc('tabela_cursos_canal',{p_mes:mes+'-01',p_tipo:tipo});
+  if(error){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+error.message+'</p>';return;}
+  const [ano,m]=mes.split('-');
+  const t=data.reduce((a,c)=>({meta:a.meta+ +c.meta,li:a.li+ +c.linkedin,fo:a.fo+ +c.form,ou:a.ou+ +c.outros,to:a.to+ +c.total}),{meta:0,li:0,fo:0,ou:0,to:0});
+  const comLead=data.filter(c=>Number(c.total)>0).length;
+
+  document.getElementById('root').innerHTML=`
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div><h1>Leads por ${tipo==='MBA'?'MBA':'curso'} e canal de entrada</h1>
+      <div class="sub">${tipo==='MBA'?'Programas de MBA':'Cursos de curta duração'} do catálogo, com captação no mês</div></div>
+    </div>
+    <div class="per"><b>${MES[+m-1].replace(/^./,c=>c.toUpperCase())} de ${ano}</b>emitido em ${new Date().toLocaleDateString('pt-BR')}</div>
+  </header>
+  <table>
+    <thead><tr><th>${tipo==='MBA'?'MBA':'Curso'}</th><th>Meta</th><th>LinkedIn</th><th>Form</th><th>Outros</th><th>Total</th></tr></thead>
+    <tbody>
+    ${data.map(c=>`<tr>
+      <td>${c.curso}</td>
+      <td class="n">${cel(c.meta)}</td>
+      <td class="n">${cel(c.linkedin)}</td>
+      <td class="n">${cel(c.form)}</td>
+      <td class="n">${cel(c.outros)}</td>
+      <td class="n tot">${cel(c.total)}</td></tr>`).join('')}
+    <tr class="total"><td>Total</td><td>${N(t.meta)}</td><td>${N(t.li)}</td><td>${N(t.fo)}</td><td>${N(t.ou)}</td><td>${N(t.to)}</td></tr>
+    </tbody>
+  </table>
+  <div class="nota"><b>Como ler.</b> Um lead é contado uma vez por curso, e uma nova conversão da mesma pessoa só conta de novo depois de 90 dias.
+  A coluna Form reúne formulário de página e formulário programático. A coluna Outros reúne popup, WhatsApp e demais origens, para que a soma das colunas feche com o total.
+  Estão listados os ${data.length} ${tipo==='MBA'?'MBAs':'cursos'} do catálogo, dos quais ${comLead} tiveram captação no mês.</div>
+  <div class="rodape"><span>Fundação Vanzolini · Captação de leads</span><span>Fonte: RD Station · dados consolidados pela Communitas</span></div>`;
+  document.title='Vanzolini_Leads_por_canal_'+mes;
+  window.__ok=true;
+}
+montar();
+</script>
+</body>
+</html>
