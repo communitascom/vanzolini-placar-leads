@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório Mensal de Captação · Fundação Vanzolini</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#060653;--azul:#4848B5;--off:#F7F7FC;--txt:#1a1a2e;--mut:#6f6f8a;--verde:#2e9e5b;--verm:#d64545;--borda:#e4e4f1;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:var(--txt);line-height:1.45;font-size:12px;}
+h1,h2,h3,.v{font-family:'Inter Tight','Work Sans',sans-serif;}
+.pag{width:210mm;min-height:297mm;margin:0 auto;padding:14mm 14mm 12mm;background:#fff;}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:11px;margin-bottom:16px;}
+.logo{height:42px}
+h1{font-size:17px;color:var(--navy);line-height:1.15}
+header .sub{font-size:11px;color:var(--mut);margin-top:2px}
+header .per{text-align:right;font-size:11px;color:var(--mut)}
+header .per b{display:block;font-size:15px;color:var(--navy);font-family:'Inter Tight'}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px;}
+.kpi{border:1px solid var(--borda);border-radius:9px;padding:10px 11px;border-left:3px solid var(--azul);}
+.kpi .v{font-size:19px;font-weight:700;color:var(--navy);}
+.kpi .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.kpi .d{font-size:10.5px;font-weight:600;margin-top:3px}
+.up{color:var(--verde)} .down{color:var(--verm)} .flat{color:var(--mut)}
+h2{font-size:12px;color:var(--navy);margin:15px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
+h2 span{font-size:10px;color:var(--mut);font-weight:400;font-family:'Work Sans'}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+th,td{padding:5px 7px;text-align:right;border-bottom:1px solid #f0f0f7;}
+th:first-child,td:first-child{text-align:left}
+th{background:var(--navy);color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+tbody tr:nth-child(even){background:var(--off)}
+.tot td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f8!important}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.chart{height:132px;position:relative}
+.chart.alta{height:150px}
+.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--mut);margin-top:12px}
+.nota b{color:var(--txt)}
+.rodape{margin-top:16px;padding-top:9px;border-top:1px solid var(--borda);font-size:9px;color:var(--mut);display:flex;justify-content:space-between}
+.z{color:#c3c3d4}
+@page{size:A4;margin:0}
+@media print{.pag{margin:0;box-shadow:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+<div class="pag">
+  <header>
+    <div style="display:flex;align-items:center;gap:13px">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div>
+        <h1>Relatório Mensal de Captação</h1>
+        <div class="sub">Leads, investimento e desempenho de mídia por curso</div>
+      </div>
+    </div>
+    <div class="per"><b id="periodo"></b><span id="geradoem"></span></div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Captação diária <span id="sub-diario"></span></h2>
+  <div class="chart" id="box-diario"><canvas id="c-diario"></canvas></div>
+
+  <div class="g2">
+    <div>
+      <h2>Origem dos leads <span>por canal de entrada</span></h2>
+      <div class="chart" id="box-canal"><canvas id="c-canal"></canvas></div>
+    </div>
+    <div>
+      <h2>Investimento por plataforma <span>mídia paga</span></h2>
+      <div id="t-plat"></div>
+    </div>
+  </div>
+
+  <h2>Desempenho por curso <span>os 15 cursos com mais leads no mês</span></h2>
+  <div id="t-cursos"></div>
+
+  <div class="nota" id="nota"></div>
+
+  <div class="rodape">
+    <span>Fundação Vanzolini · Relatório de captação</span>
+    <span id="rod-fonte"></span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL="https://ltasijrhkotyyrxnavab.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const N=v=>Number(v||0).toLocaleString('pt-BR');
+const BRL=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
+const BRL2=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const NAVY='#060653',AZUL='#4848B5',CINZA='#c9c9ee';
+const PAL=['#060653','#4848B5','#6a6ad4','#8f8fe0','#b3b3ea','#3aa9b8','#c9c9ee'];
+
+function delta(a,b){
+  if(!b) return {txt:'sem base anterior',cls:'flat'};
+  const p=100*(a-b)/b;
+  return {txt:(p>=0?'+':'')+p.toFixed(1)+'% vs mês anterior', cls: p>2?'up' : p<-2?'down':'flat'};
+}
+
+async function montar(){
+  const par=new URLSearchParams(location.search);
+  const mes=par.get('mes')||new Date().toISOString().slice(0,7);
+  const {data,error}=await sb.rpc('relatorio_mensal',{p_mes:mes+'-01'});
+  if(error){document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">Erro</div><div class="l">'+error.message+'</div></div>';return;}
+  const r=data.resumo, [ano,m]=mes.split('-');
+  document.getElementById('periodo').textContent=MES[+m-1].replace(/^./,c=>c.toUpperCase())+' de '+ano;
+  document.getElementById('geradoem').textContent='emitido em '+new Date().toLocaleDateString('pt-BR');
+
+  const cpl=r.leads?r.investimento/r.leads:0;
+  const cplAnt=r.leads_ant?r.investimento_ant/r.leads_ant:0;
+  const ctr=r.impressoes?100*r.cliques/r.impressoes:0;
+  const dL=delta(r.leads,r.leads_ant), dI=delta(r.investimento,r.investimento_ant);
+  const dC=cplAnt?(()=>{const p=100*(cpl-cplAnt)/cplAnt;return{txt:(p>=0?'+':'')+p.toFixed(1)+'% vs mês anterior',cls:p<=-2?'up':p>=2?'down':'flat'};})():{txt:'sem base anterior',cls:'flat'};
+
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi"><div class="v">${N(r.leads)}</div><div class="l">Leads captados</div><div class="d ${dL.cls}">${dL.txt}</div></div>
+    <div class="kpi"><div class="v">${BRL(r.investimento)}</div><div class="l">Investimento em mídia</div><div class="d ${dI.cls}">${dI.txt}</div></div>
+    <div class="kpi"><div class="v">${BRL2(cpl)}</div><div class="l">Custo por lead</div><div class="d ${dC.cls}">${dC.txt}</div></div>
+    <div class="kpi"><div class="v">${ctr.toFixed(2)}%</div><div class="l">CTR médio</div><div class="d flat">${N(r.cliques)} cliques em ${N(r.impressoes)}</div></div>`;
+
+  // captacao diaria
+  const dia=data.diario||[];
+  const totalDias=new Date(+ano,+m,0).getDate();
+  const serie=[]; const labels=[];
+  for(let d=1;d<=totalDias;d++){
+    const iso=`${ano}-${m}-${String(d).padStart(2,'0')}`;
+    const achou=dia.find(x=>x.dia===iso);
+    labels.push(String(d)); serie.push(achou?Number(achou.leads):0);
+  }
+  const media=serie.reduce((a,b)=>a+b,0)/totalDias;
+  document.getElementById('sub-diario').textContent=`média de ${media.toFixed(0)} leads por dia`;
+  new Chart(document.getElementById('c-diario'),{type:'bar',
+    data:{labels,datasets:[{label:'Leads',data:serie,backgroundColor:AZUL,borderRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:8}}},x:{ticks:{font:{size:7},autoSkip:false},grid:{display:false}}}}});
+
+  // canais
+  const can=(data.canais||[]).filter(c=>Number(c.leads)>0);
+  new Chart(document.getElementById('c-canal'),{type:'doughnut',
+    data:{labels:can.map(c=>c.canal),datasets:[{data:can.map(c=>Number(c.leads)),backgroundColor:PAL,borderWidth:1,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,cutout:'52%',
+      plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:9,padding:6,
+        generateLabels(ch){const d=ch.data,t=d.datasets[0].data.reduce((a,b)=>a+b,0);
+          return d.labels.map((l,i)=>({text:`${l} · ${(100*d.datasets[0].data[i]/t).toFixed(0)}%`,
+            fillStyle:d.datasets[0].backgroundColor[i],strokeStyle:'#fff',lineWidth:1,index:i}));}}}}}});
+
+  // plataformas
+  const pl=data.plataformas||[];
+  const tp=pl.reduce((a,p)=>({inv:a.inv+Number(p.investimento),imp:a.imp+Number(p.impressoes),cli:a.cli+Number(p.cliques)}),{inv:0,imp:0,cli:0});
+  document.getElementById('t-plat').innerHTML=`<table><thead><tr><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>CTR</th></tr></thead><tbody>`+
+    pl.map(p=>{const c=Number(p.impressoes)?100*Number(p.cliques)/Number(p.impressoes):0;
+      return `<tr><td><b>${p.plataforma}</b></td><td>${BRL(p.investimento)}</td><td>${N(p.impressoes)}</td><td>${c.toFixed(2)}%</td></tr>`}).join('')+
+    `<tr class="tot"><td>Total</td><td>${BRL(tp.inv)}</td><td>${N(tp.imp)}</td><td>${tp.imp?(100*tp.cli/tp.imp).toFixed(2):'0,00'}%</td></tr></tbody></table>`;
+
+  // cursos
+  const cs=data.cursos||[];
+  document.getElementById('t-cursos').innerHTML=`<table><thead><tr><th>Curso</th><th>Tipo</th><th>Leads</th><th>% do mês</th><th>Investimento</th><th>Custo por lead</th></tr></thead><tbody>`+
+    cs.map(c=>{const inv=Number(c.investimento),lds=Number(c.leads);
+      return `<tr><td>${c.curso}</td><td style="text-align:left;color:var(--mut)">${c.tipo||''}</td>
+        <td><b>${N(lds)}</b></td><td>${(100*lds/r.leads).toFixed(1)}%</td>
+        <td>${inv>0?BRL(inv):'<span class="z">sem mídia</span>'}</td>
+        <td>${inv>0?BRL2(inv/lds):'<span class="z">não se aplica</span>'}</td></tr>`}).join('')+
+    `</tbody></table>`;
+
+  const somaTop=cs.reduce((a,c)=>a+Number(c.leads),0);
+  document.getElementById('nota').innerHTML=
+    `<b>Como ler este relatório.</b> Um lead é contado uma vez por curso, e uma nova conversão da mesma pessoa no mesmo curso só conta de novo depois de 90 dias, o que evita inflar o número com reenvios automáticos. `+
+    `Os ${cs.length} cursos listados concentram ${(100*somaTop/r.leads).toFixed(1)}% dos ${N(r.leads)} leads do mês, distribuídos entre ${r.cursos} cursos no total. `+
+    `O custo por lead considera apenas mídia paga atribuída ao curso, então cursos sem campanha ativa aparecem sem investimento.`;
+  document.getElementById('rod-fonte').textContent='Fonte: RD Station e plataformas de mídia · dados consolidados pela Communitas';
+  document.title='Vanzolini_Relatorio_Leads_'+mes;
+  window.__pronto=true;
+}
+montar();
+</script>
+</body>
+</html>
