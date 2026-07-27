@@ -61,17 +61,7 @@ tr.curso td .qtd{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px
 <body>
 <div class="wrap">
 
-<div id="telaLogin" style="display:none">
-  <div class="login">
-    <h2>Conversões por curso</h2>
-    <p>Área restrita da equipe. Informe seu e-mail para receber o link de acesso.</p>
-    <div class="fld"><input id="loginEmail" type="email" placeholder="seu@email.com"></div>
-    <button class="btn" onclick="enviarLink()" style="width:100%">Enviar link de acesso</button>
-    <div id="loginMsg"></div>
-  </div>
-</div>
-
-<div id="telaApp" style="display:none">
+<div id="telaApp">
   <header>
     <div class="brand">
       <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
@@ -80,16 +70,14 @@ tr.curso td .qtd{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px
         <small>o que entra na contagem de cada curso</small></div>
     </div>
     <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
-      <span class="tag" id="usuarioLogado"></span>
       <a class="btn ghost" href="index.html" style="text-decoration:none">← Placar</a>
-      <button class="btn ghost" onclick="sair()">Sair</button>
     </div>
   </header>
 
   <div class="card" id="cardOrfas" style="display:none">
     <h2><span>⚠️ Conversões entrando sem curso</span><span class="tag" id="tagOrfas"></span></h2>
-    <div class="hint">Estão chegando leads com estes identificadores, mas nenhum curso foi associado, então eles não contam em lugar nenhum. Vincule para que passem a contar, inclusive os que já entraram.</div>
-    <div class="scroll" style="max-height:none"><table>
+    <div class="hint">Estão chegando leads com estes identificadores sem curso associado, então não contam em lugar nenhum. Vincule os que forem de um curso específico e os leads passam a contar, inclusive os que já entraram.<br><b>Nem toda linha aqui é um erro:</b> conversões genéricas como download de programa, início de chat e negociação criada no CRM não pertencem a um curso e devem continuar sem vínculo.</div>
+    <div class="scroll" style="max-height:34vh"><table>
       <thead><tr><th>Conversão</th><th class="num">Leads parados</th><th class="num">Pessoas</th><th class="num">Último</th><th></th></tr></thead>
       <tbody id="corpoOrfas"></tbody>
     </table></div>
@@ -155,23 +143,7 @@ const N=v=>Number(v||0).toLocaleString('pt-BR');
 const dt=s=>s?s.split('-').reverse().join('/'):'';
 let LINHAS=[], ORFAS=[], CURSOS=[];
 
-async function enviarLink(){
-  const email=document.getElementById('loginEmail').value.trim();
-  const msg=document.getElementById('loginMsg');
-  if(!email){msg.innerHTML='<div class="msg err">Digite um e-mail.</div>';return;}
-  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href}});
-  msg.innerHTML=error?`<div class="msg err">Erro: ${error.message}</div>`
-    :`<div class="msg ok">Link enviado para ${email}. Confira seu e-mail.</div>`;
-}
-async function sair(){ await sb.auth.signOut(); location.reload(); }
-function fechar(id){ document.getElementById(id).classList.remove('on'); }
-
 async function iniciar(){
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session){document.getElementById('telaLogin').style.display='block';document.getElementById('telaApp').style.display='none';return;}
-  document.getElementById('telaLogin').style.display='none';
-  document.getElementById('telaApp').style.display='block';
-  document.getElementById('usuarioLogado').textContent=session.user.email;
   await carregar();
 }
 
@@ -285,11 +257,11 @@ async function salvarCurso(){
   const msg=document.getElementById('msgCurso'), btn=document.getElementById('btnSalvarCurso');
   if(!nome){msg.innerHTML='<div class="msg err">Informe o nome do curso.</div>';return;}
   btn.disabled=true; btn.textContent='Cadastrando…';
-  const {data,error}=await sb.from('cursos').insert({nome,tipo,ativo:true}).select('id').single();
+  const {data,error}=await sb.rpc('cria_curso',{p_nome:nome,p_tipo:tipo});
   if(error){btn.disabled=false;btn.textContent='Cadastrar';msg.innerHTML=`<div class="msg err">Erro: ${error.message}</div>`;return;}
   let extra='';
   if(conv){
-    const r=await sb.rpc('vincula_conversao',{p_conversao:conv,p_curso_id:data.id});
+    const r=await sb.rpc('vincula_conversao',{p_conversao:conv,p_curso_id:data});
     extra = r.error ? ` Curso criado, mas a conversão falhou: ${r.error.message}`
                     : ` Conversão vinculada${Number(r.data)>0?', com '+N(r.data)+' lead(s) recuperados':''}.`;
   }
@@ -299,7 +271,6 @@ async function salvarCurso(){
   setTimeout(()=>fechar('ovCurso'),1800);
 }
 
-sb.auth.onAuthStateChange(()=>iniciar());
 iniciar();
 </script>
 </body>
