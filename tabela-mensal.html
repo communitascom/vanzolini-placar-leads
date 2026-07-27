@@ -44,7 +44,8 @@ async function montar(){
   const par=new URLSearchParams(location.search);
   const mes=par.get('mes')||new Date().toISOString().slice(0,7);
   const tipo=par.get('tipo')||'Curso';
-  const {data,error}=await sb.rpc('tabela_cursos_canal',{p_mes:mes+'-01',p_tipo:tipo});
+  const soLista=par.get('lista')==='1';
+  const {data,error}=await sb.rpc('tabela_cursos_canal',{p_mes:mes+'-01',p_tipo:tipo,p_so_lista:soLista});
   if(error){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+error.message+'</p>';return;}
   const [ano,m]=mes.split('-');
   const t=data.reduce((a,c)=>({meta:a.meta+ +c.meta,li:a.li+ +c.linkedin,fo:a.fo+ +c.form,ou:a.ou+ +c.outros,to:a.to+ +c.total}),{meta:0,li:0,fo:0,ou:0,to:0});
@@ -55,7 +56,7 @@ async function montar(){
     <div style="display:flex;align-items:center;gap:12px">
       <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
       <div><h1>Leads por ${tipo==='MBA'?'MBA':'curso'} e canal de entrada</h1>
-      <div class="sub">${tipo==='MBA'?'Programas de MBA':'Cursos de curta duração'} do catálogo, com captação no mês</div></div>
+      <div class="sub">${tipo==='MBA'?'Programas de MBA':'Cursos de curta duração'}${soLista?' da lista de controle da captação':' do catálogo'}, com captação no mês</div></div>
     </div>
     <div class="per"><b>${MES[+m-1].replace(/^./,c=>c.toUpperCase())} de ${ano}</b>emitido em ${new Date().toLocaleDateString('pt-BR')}</div>
   </header>
@@ -74,7 +75,7 @@ async function montar(){
   </table>
   <div class="nota"><b>Como ler.</b> Um lead é contado uma vez por curso, e uma nova conversão da mesma pessoa só conta de novo depois de 90 dias.
   A coluna Form reúne formulário de página e formulário programático. A coluna Outros reúne popup, WhatsApp e demais origens, para que a soma das colunas feche com o total.
-  Estão listados os ${data.length} ${tipo==='MBA'?'MBAs':'cursos'} do catálogo, dos quais ${comLead} tiveram captação no mês.</div>
+  Estão listados os ${data.length} ${tipo==='MBA'?'MBAs':'cursos'} ${soLista?'da lista de controle da captação':'do catálogo'}, dos quais ${comLead} tiveram captação no mês.</div>
   <div class="rodape"><span>Fundação Vanzolini · Captação de leads</span><span>Fonte: RD Station · dados consolidados pela Communitas</span></div>`;
   document.title='Vanzolini_Leads_por_canal_'+mes;
   window.__ok=true;
