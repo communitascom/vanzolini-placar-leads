@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campanhas em andamento · Fundação Vanzolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#060653;--azul:#4848B5;--azul2:#6a6ad4;--off:#F3F3FB;--txt:#1a1a2e;--mut:#7a7a93;--verde:#2e9e5b;--verde-bg:#e7f6ee;--amar:#b5820a;--amar-bg:#fdf5e3;--verm:#d64545;--verm-bg:#fbe9e9;--borda:#e4e4f1;--card:#ffffff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--off);color:var(--txt);line-height:1.45;}
+h1,h2,h3,.v{font-family:'Inter Tight','Work Sans',sans-serif;}
+header{display:flex;align-items:center;justify-content:space-between;margin:0 auto 22px;max-width:1300px;flex-wrap:wrap;gap:12px;background:#eef3f8;border:1px solid #dfe9f5;border-radius:14px;padding:14px 32px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{height:51px;width:auto;display:block}
+.brand .divisor{width:1px;align-self:stretch;background:#cfdcec}
+header h1{font-size:16px;font-weight:700;color:#003a70;line-height:1.2;}
+.brand small{color:var(--mut);font-size:11px;display:block;margin-top:2px}
+.voltar{display:inline-block;font-size:12px;color:#0060b0;opacity:.9;text-decoration:none;border:1px solid #dfe9f5;border-radius:20px;padding:6px 14px;background:#fff}
+.voltar:hover{opacity:1;background:#eef3f8;}
+.pill{font-weight:600;color:#0060b0;font-size:12px;background:#eaf3fc;border:1px solid #bcd9f5;border-radius:20px;padding:2px 10px;margin-left:6px;}
+.wrap{max-width:1300px;margin:0 auto;padding:0 32px 60px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;}
+.kpi{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;}
+.kpi:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--azul);}
+.kpi .v{font-size:24px;font-weight:700;color:var(--navy);}
+.kpi .l{font-size:11.5px;color:var(--mut);margin-top:2px;}
+.kpi .s{font-size:11px;margin-top:6px;font-weight:600;color:var(--mut);}
+.sec{margin-top:28px;}
+.sec h2{font-size:14px;color:var(--navy);margin-bottom:3px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.sec h2 .tag{font-size:9.5px;background:var(--azul);color:#fff;padding:3px 9px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
+.sec .hint{font-size:12px;color:var(--mut);margin-bottom:12px;}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(6,6,83,.03);}
+.chartbox{position:relative;height:340px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:8px 9px;text-align:right;border-bottom:1px solid var(--borda);white-space:nowrap;}
+th:first-child,td:first-child{text-align:left;white-space:normal;min-width:210px;}
+th{background:var(--navy);color:#fff;font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;}
+tbody tr:hover{background:#eeeefb;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600}
+.b-verde{background:var(--verde-bg);color:var(--verde)} .b-amar{background:var(--amar-bg);color:var(--amar)} .b-verm{background:var(--verm-bg);color:var(--verm)}
+.z{color:#cbd5e1}
+.barra{position:relative;height:16px;background:#eef0f8;border-radius:8px;overflow:hidden;min-width:110px;display:inline-block;vertical-align:middle}
+.barra span{position:absolute;left:0;top:0;bottom:0;border-radius:8px}
+.barra .t{background:#c9c9ee}
+.barra .g{background:var(--azul)}
+.leg{font-size:10px;color:var(--mut);margin-top:3px;display:block;text-align:right}
+.fgrp select{padding:8px 12px;border:1px solid var(--borda);border-radius:9px;font-size:13px;font-family:inherit;background:#fff;color:var(--txt);min-width:320px;cursor:pointer;}
+.note{background:#eeeefb;border:1px solid #c9c9ee;border-radius:11px;padding:12px 16px;font-size:12.5px;color:var(--navy);margin-top:14px;}
+.foot{font-size:11px;color:var(--mut);margin-top:30px;text-align:center;}
+.loading{padding:40px;text-align:center;color:var(--mut);font-size:13px;}
+.alerta{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--borda);border-left:4px solid var(--amar);border-radius:11px;padding:11px 15px;margin-bottom:8px;font-size:12.5px;}
+.alerta.alta{border-left-color:var(--verm);background:#fffafa}
+.alerta.media{border-left-color:var(--amar);background:#fffdf7}
+.alerta b{color:var(--navy)}
+.alerta .ico{font-size:15px;line-height:1.2}
+.alerta .txt{color:var(--mut)}
+.avisodef{background:#fff7ed;border:1px solid #fcd9a8;border-left:4px solid #e08a1e;border-radius:10px;padding:10px 14px;margin:14px 0;font-size:12.5px;color:#8a5410}
+.printhead{display:none;}
+#imprimir{padding:8px 16px;border:1px solid var(--verde);background:#fff;color:var(--verde);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+@media(max-width:880px){.wrap{padding:16px;}}
+@media print{
+ body{background:#fff;}
+ header,#imprimir,.fgrp,.voltar{display:none!important;}
+ .printhead{display:block;margin-bottom:18px;}
+ .printhead h2{font-size:18px;color:var(--navy);margin-bottom:2px;}
+ .printhead div{font-size:11.5px;color:var(--mut);}
+ .wrap{padding:0;max-width:100%;}
+ .sec{margin-top:16px;page-break-inside:avoid;}
+ .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;}
+ .chartbox{height:260px;}
+ table{font-size:10px;}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+    <div class="divisor"></div>
+    <div><h1>Campanhas em andamento <span class="pill">ao vivo</span></h1>
+      <small>ritmo de captação, projeção de fechamento e ritmo de verba</small></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button id="imprimir">🖨️ Imprimir / Salvar PDF</button>
+    <a class="voltar" href="historico-dinamico.html">Histórico dinâmico</a>
+    <a class="voltar" href="index.html">← Voltar ao placar</a>
+  </div>
+</header>
+<div class="wrap">
+
+<div class="printhead" id="printhead"><h2 id="ph-titulo"></h2><div id="ph-sub"></div></div>
+
+<div class="kpis" id="kpis"><div class="kpi"><div class="v">…</div><div class="l">carregando</div></div></div>
+
+<div class="sec" id="sec-alertas" style="display:none">
+<h2><span class="tag">Alertas</span> O que pede atenção</h2>
+<div class="hint">A captação é comparada com a mediana do <b>mesmo dia da semana</b> no histórico do curso, porque zero lead num domingo é normal e zero numa terça não é. Só aparece aqui o que está fora do padrão.</div>
+<div id="alertas"></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Ritmo</span> Campanhas no ar</h2>
+<div class="hint">A projeção usa a curva histórica de 140 turmas: quanto do total de leads já costuma estar captado quando X% do tempo passou. Só aparece a partir de 15% do tempo decorrido, antes disso o número é instável demais para servir.</div>
+<div class="card"><div id="t-camp"><div class="loading">Carregando…</div></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Ritmo</span> Curva de captação</h2>
+<div class="hint" id="hint-curva">Leads acumulados até hoje contra o caminho esperado, e a projeção até o fim da campanha.</div>
+<div class="fgrp" style="margin-bottom:12px"><select id="f-camp"></select></div>
+<div class="card"><div class="chartbox"><canvas id="c-curva"></canvas></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Verba</span> Tempo decorrido x verba investida</h2>
+<div class="hint">Barra clara = percentual do tempo que já passou. Barra escura = percentual da verba já gasta. Quando a verba fica muito atrás do tempo, sobra dinheiro para queimar em poucos dias no fim.</div>
+<div class="card"><div class="chartbox"><canvas id="c-verba"></canvas></div></div>
+</div>
+
+<div class="sec">
+<h2><span class="tag">Mídia</span> CTR por plataforma</h2>
+<div class="hint">CTR sempre calculado como cliques divididos por impressões. Cada plataforma tem régua própria: LinkedIn opera numa faixa naturalmente muito abaixo de Meta e Google, então comparar entre plataformas não faz sentido, só contra o histórico da mesma.</div>
+<div class="card"><div id="t-ctr"><div class="loading">Carregando…</div></div></div>
+</div>
+
+<div class="foot" id="rodape"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://ltasijrhkotyyrxnavab.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const MONDAY_BOARD = "935301050";
+
+const N = v => Number(v||0).toLocaleString('pt-BR');
+const BRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
+const BRL2 = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const PCT = v => (v===null||v===undefined) ? '<span class="z">—</span>' : Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+const NAVY='#060653', AZUL='#4848B5', CINZA='#c9c9ee', VERDE='#2e9e5b';
+let CAMP=[], RITMO=[], CURVA=[], MIDIA=[], ALERTAS=[], MIDIA_ATE=null, charts={};
+
+function mkChart(id,type,data,opts){
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type,data,options:Object.assign({responsive:true,maintainAspectRatio:false},opts)});
+}
+
+function selo(v){
+  if(v===null||v===undefined) return '<span class="z">sem base</span>';
+  const n=Number(v);
+  const cls = n>=10?'b-verde' : n<=-15?'b-verm' : 'b-amar';
+  return `<span class="badge ${cls}">${n>=0?'+':''}${n}%</span>`;
+}
+
+function render(){
+  const totLeads = CAMP.reduce((a,c)=>a+Number(c.leads||0),0);
+  const totVerba = CAMP.reduce((a,c)=>a+Number(c.verba||0),0);
+  const totGasto = CAMP.reduce((a,c)=>a+Number(c.gasto||0),0);
+  const totProj  = CAMP.reduce((a,c)=>a+Number(c.proj_leads||0),0);
+  const cplMedio = totLeads ? totGasto/totLeads : 0;
+  const pctGasto = totVerba ? 100*totGasto/totVerba : 0;
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="v">${CAMP.length}</div><div class="l">Campanhas no ar</div><div class="s">${CAMP.filter(c=>c.proj_leads).length} com projeção</div></div>
+    <div class="kpi"><div class="v">${N(totLeads)}</div><div class="l">Leads captados</div><div class="s">projeção de ${N(totProj)} no fechamento</div></div>
+    <div class="kpi"><div class="v">${BRL(totGasto)}</div><div class="l">Verba investida</div><div class="s">${pctGasto.toFixed(1)}% de ${BRL(totVerba)}</div></div>
+    <div class="kpi"><div class="v">${BRL(totVerba-totGasto)}</div><div class="l">Verba a investir</div><div class="s">saldo das campanhas no ar</div></div>
+    <div class="kpi"><div class="v">${BRL2(cplMedio)}</div><div class="l">CPL médio</div><div class="s">custo por lead no período</div></div>`;
+
+  // alertas
+  const sec = document.getElementById('sec-alertas');
+  const cx = document.getElementById('alertas');
+  let aviso = '';
+  if(MIDIA_ATE){
+    const diasAtras = Math.round((new Date().setHours(0,0,0,0) - new Date(MIDIA_ATE+'T00:00:00').getTime())/86400000);
+    if(diasAtras > 1) aviso = `<div class="avisodef">⚠️ Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ou seja, ${diasAtras} dias atrás. Parte do atraso de verba apontado abaixo pode ser só a carga pendente, não subinvestimento real. Os leads estão ao vivo.</div>`;
+  }
+  if(ALERTAS.length || aviso){
+    sec.style.display='block';
+    cx.innerHTML = aviso + (ALERTAS.length ? ALERTAS.map(a=>`
+      <div class="alerta ${a.severidade}">
+        <span class="ico">${a.tipo_alerta==='verba'?'💰':'📉'}</span>
+        <div><b>${a.curso}</b><br><span class="txt">${a.detalhe}</span></div>
+      </div>`).join('') : '<div class="alerta" style="border-left-color:var(--verde);background:var(--verde-bg)"><span class="ico">✓</span><div><b>Nenhuma campanha fora do padrão</b><br><span class="txt">captação e ritmo de verba dentro do esperado</span></div></div>');
+  }
+
+  // tabela principal
+  let h = `<table><thead><tr>
+    <th>Curso</th><th>Período</th><th>Tempo</th><th>Leads</th><th>Projeção</th>
+    <th>Faixa</th><th>Histórico</th><th>vs hist.</th>
+    <th>Verba</th><th>Gasto</th><th>Investir/dia</th><th>CTR</th><th>CPL</th>
+  </tr></thead><tbody>`;
+  CAMP.forEach(c=>{
+    const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
+    const barra = `<div class="barra"><span class="t" style="width:${Math.min(100,pctT)}%"></span><span class="g" style="width:${Math.min(100,pctG)}%;opacity:.85"></span></div>`;
+    const nome = c.monday_item_id
+      ? `<a href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${c.monday_item_id}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600;text-decoration:none">${c.curso}</a>`
+      : `<b>${c.curso}</b>`;
+    h += `<tr>
+      <td>${nome}</td>
+      <td style="font-size:11px;color:var(--mut)">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)}<br>${c.dias_restantes} dias restantes</td>
+      <td>${PCT(c.pct_tempo)}<br><span class="leg">${c.dias_decorridos}/${c.dias_total} dias</span></td>
+      <td><b>${N(c.leads)}</b></td>
+      <td>${c.proj_leads?'<b>'+N(c.proj_leads)+'</b>':'<span class="z">cedo</span>'}</td>
+      <td style="font-size:11px;color:var(--mut)">${c.proj_min?N(c.proj_min)+' a '+N(c.proj_max):'—'}</td>
+      <td>${c.mediana_historica?N(c.mediana_historica)+'<span class="leg">'+c.turmas_base+' turma(s)</span>':'<span class="z">—</span>'}</td>
+      <td>${selo(c.vs_historico)}</td>
+      <td>${c.verba?BRL(c.verba):'<span class="z">—</span>'}</td>
+      <td>${BRL(c.gasto)}<br>${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
+      <td>${c.investir_por_dia?BRL2(c.investir_por_dia):'<span class="z">—</span>'}</td>
+      <td>${c.ctr?Number(c.ctr).toFixed(2)+'%':'<span class="z">—</span>'}</td>
+      <td>${c.cpl?BRL2(c.cpl):'<span class="z">—</span>'}</td>
+    </tr>`;
+  });
+  h += '</tbody></table>';
+  document.getElementById('t-camp').innerHTML = h;
+
+  // grafico de verba: tempo x gasto
+  const ord = [...CAMP].sort((a,b)=>Number(b.verba||0)-Number(a.verba||0));
+  mkChart('c-verba','bar',{
+    labels: ord.map(c=>c.curso.length>34?c.curso.slice(0,34)+'…':c.curso),
+    datasets:[
+      {label:'% do tempo decorrido', data:ord.map(c=>Number(c.pct_tempo||0)), backgroundColor:CINZA},
+      {label:'% da verba gasta', data:ord.map(c=>Number(c.pct_gasto||0)), backgroundColor:AZUL}
+    ]},
+    {indexAxis:'y', plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}}},
+     scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}});
+
+  // CTR por plataforma
+  const porPlat = {};
+  MIDIA.forEach(m=>{
+    const p = m.plataforma;
+    porPlat[p] = porPlat[p] || {impr:0, cliq:0, inv:0, cursos:new Set()};
+    porPlat[p].impr += Number(m.impressoes||0);
+    porPlat[p].cliq += Number(m.cliques||0);
+    porPlat[p].inv  += Number(m.investimento||0);
+    if(m.curso) porPlat[p].cursos.add(m.curso);
+  });
+  let hc = `<table><thead><tr><th>Plataforma</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Investimento</th><th>Cursos</th></tr></thead><tbody>`;
+  Object.keys(porPlat).sort((a,b)=>porPlat[b].inv-porPlat[a].inv).forEach(p=>{
+    const d = porPlat[p];
+    const ctr = d.impr ? 100*d.cliq/d.impr : 0;
+    hc += `<tr><td><b>${p}</b></td><td>${N(d.impr)}</td><td>${N(d.cliq)}</td>
+      <td><b>${ctr.toFixed(2)}%</b></td><td>${d.cliq?BRL2(d.inv/d.cliq):'—'}</td>
+      <td>${BRL(d.inv)}</td><td>${d.cursos.size}</td></tr>`;
+  });
+  hc += '</tbody></table>';
+  document.getElementById('t-ctr').innerHTML = hc;
+
+  // seletor da curva
+  const sel = document.getElementById('f-camp');
+  sel.innerHTML = CAMP.map(c=>`<option value="${c.curso.replace(/"/g,'&quot;')}">${c.curso}</option>`).join('');
+  sel.onchange = ()=>desenhaCurva(sel.value);
+  if(CAMP.length) desenhaCurva(CAMP[0].curso);
+}
+
+function desenhaCurva(curso){
+  const c = CAMP.find(x=>x.curso===curso);
+  const serie = RITMO.filter(r=>r.curso===curso);
+  if(!c || !serie.length) return;
+
+  const labels = serie.map(r=>r.dia.slice(8,10)+'/'+r.dia.slice(5,7));
+  const real = serie.map(r=>Number(r.leads_acum));
+  const esperado = serie.map(r=>r.esperado_acum===null?null:Number(r.esperado_acum));
+
+  // projecao para frente: da curva historica, dos bins ainda nao alcancados
+  const pctAtual = Number(c.pct_tempo);
+  const futuros = CURVA.filter(x=>Number(x.pct_tempo) > pctAtual);
+  const labelsFut = futuros.map(x=>'+'+x.pct_tempo+'% tempo');
+  const projFut = futuros.map(x=> c.proj_leads ? Math.round(c.proj_leads*Number(x.pct_leads_mediana)/100) : null);
+  const projMin = futuros.map(x=> c.proj_min ? Math.round(c.proj_min*Number(x.pct_leads_mediana)/100) : null);
+  const projMax = futuros.map(x=> c.proj_max ? Math.round(c.proj_max*Number(x.pct_leads_mediana)/100) : null);
+  const nR = real.length;
+  const vazio = new Array(nR-1).fill(null);
+
+  document.getElementById('hint-curva').innerHTML =
+    `<b>${c.curso}</b>: ${N(c.leads)} leads em ${c.dias_decorridos} de ${c.dias_total} dias (${PCT(c.pct_tempo)} do tempo). ` +
+    (c.proj_leads
+      ? `Projeção de <b>${N(c.proj_leads)}</b> no fechamento, faixa provável de ${N(c.proj_min)} a ${N(c.proj_max)}. `
+      : 'Ainda cedo para projetar. ') +
+    `A linha esperada é ancorada no ponto de hoje, então ela sempre encosta no real agora: o que informa é o caminho antes e a projeção depois.`;
+
+  mkChart('c-curva','line',{
+    labels: labels.concat(labelsFut),
+    datasets:[
+      {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(72,72,181,.10)', fill:true, tension:.25, borderWidth:3, pointRadius:0},
+      {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.25, borderWidth:2, pointRadius:0},
+      {label:'Projeção', data:vazio.concat([real[nR-1]]).concat(projFut), borderColor:VERDE, borderDash:[3,3], tension:.25, borderWidth:2, pointRadius:0},
+      {label:'Faixa otimista', data:vazio.concat([real[nR-1]]).concat(projMax), borderColor:'rgba(46,158,91,.35)', tension:.25, borderWidth:1, pointRadius:0},
+      {label:'Faixa conservadora', data:vazio.concat([real[nR-1]]).concat(projMin), borderColor:'rgba(46,158,91,.35)', tension:.25, borderWidth:1, pointRadius:0}
+    ]},
+    {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14}}},
+     scales:{y:{beginAtZero:true,title:{display:true,text:'leads acumulados'}},
+             x:{ticks:{font:{size:9},maxRotation:60,minRotation:0,autoSkip:true,maxTicksLimit:20}}}});
+}
+
+document.getElementById('imprimir').onclick = ()=>{
+  document.getElementById('ph-titulo').textContent = 'Campanhas em andamento · Fundação Vanzolini';
+  document.getElementById('ph-sub').textContent = 'gerado em ' + new Date().toLocaleString('pt-BR');
+  window.print();
+};
+
+async function carregar(){
+  const hoje = new Date().toISOString().slice(0,10);
+  const ini = new Date(Date.now()-90*86400000).toISOString().slice(0,10);
+  const [a,b,c,d,e,f] = await Promise.all([
+    sb.rpc('campanhas_andamento'),
+    sb.rpc('ritmo_diario'),
+    sb.rpc('curva_ritmo'),
+    sb.rpc('midia_por_curso',{p_inicio:ini,p_fim:hoje}),
+    sb.rpc('alertas_captacao'),
+    sb.rpc('midia_atualizada_ate')
+  ]);
+  const erro = a.error||b.error||c.error||d.error||e.error;
+  if(erro){
+    document.getElementById('kpis').innerHTML =
+      `<div class="kpi"><div class="v" style="font-size:15px;color:#d64545">Erro ao carregar</div><div class="l">${erro.message}</div></div>`;
+    return;
+  }
+  CAMP=a.data; RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
+  MIDIA_ATE = f.data || null;
+  document.getElementById('rodape').innerHTML =
+    `Leitura do Supabase · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''} · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  render();
+}
+carregar();
+</script>
+</body>
+</html>
