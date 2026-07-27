@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversões por curso · Fundação Vanzolini</title>
+<style>
+:root{--azul:#003a70;--azul2:#0060b0;--claro:#eef3f8;--linha:#e2e8f0;--txt:#1f2b3a;--sub:#64748b;
+--verde:#1a9d5a;--verde-bg:#e7f6ee;--amar:#b5820a;--amar-bg:#fdf5e3;--verm:#c73a3a;--verm-bg:#fbe9e9;--zebra:#f7fafd;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
+.wrap{max-width:1180px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px;
+  background:var(--claro);border:1px solid #dfe9f5;border-radius:14px;padding:14px 20px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{height:44px}
+.brand .divisor{width:1px;align-self:stretch;background:#cfdcec}
+h1{font-size:16px;color:var(--azul);font-weight:700}
+.brand small{color:var(--sub);font-size:11px;display:block}
+.btn{background:var(--azul);color:#fff;border:none;border-radius:8px;padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--azul2)}
+.btn.ghost{background:#fff;color:var(--azul);border:1px solid var(--linha)}
+.btn.mini{padding:3px 9px;font-size:11.5px;border-radius:7px}
+.btn.perigo{background:#fff;color:var(--verm);border:1px solid #f0c9c9}
+.btn.perigo:hover{background:var(--verm-bg)}
+.card{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:13.5px;color:var(--azul);margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card .hint{font-size:11.5px;color:var(--sub);margin-bottom:11px}
+input,select{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;background:#fff;color:var(--txt);width:100%}
+input:focus,select:focus{outline:none;border-color:var(--azul2)}
+.busca{max-width:330px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid #f0f4f9;vertical-align:top}
+th{background:var(--azul);color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.curso td{background:var(--claro);font-weight:700;color:var(--azul);border-top:1px solid #dbe6f2}
+tr.curso td .qtd{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px}
+.conv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#334155;word-break:break-all}
+.sem{color:#94a3b8;font-style:italic}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600}
+.b-verde{background:var(--verde-bg);color:var(--verde)} .b-amar{background:var(--amar-bg);color:var(--amar)}
+.b-verm{background:var(--verm-bg);color:var(--verm)} .b-cinza{background:#eef2f7;color:var(--sub)}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.on{display:flex}
+.modal{background:#fff;border-radius:14px;padding:20px 22px;width:100%;max-width:520px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal h3{font-size:15px;color:var(--azul);margin-bottom:4px}
+.modal .exp{font-size:11.5px;color:var(--sub);margin-bottom:14px}
+.fld{margin-bottom:11px}
+.fld label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);margin-bottom:4px;font-weight:600}
+.foot{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+.msg{padding:9px 12px;border-radius:8px;font-size:12px;margin-top:10px}
+.msg.ok{background:var(--verde-bg);color:#175c3a} .msg.err{background:var(--verm-bg);color:#8a2020}
+.login{max-width:400px;margin:70px auto;background:#fff;border:1px solid var(--linha);border-radius:14px;padding:26px}
+.login h2{font-size:16px;color:var(--azul);margin-bottom:6px}
+.login p{font-size:12.5px;color:var(--sub);margin-bottom:14px}
+.tag{background:#fff;border:1px solid var(--linha);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--sub)}
+.carregando{padding:30px;text-align:center;color:var(--sub)}
+.scroll{max-height:62vh;overflow:auto;border:1px solid var(--linha);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="telaLogin" style="display:none">
+  <div class="login">
+    <h2>Conversões por curso</h2>
+    <p>Área restrita da equipe. Informe seu e-mail para receber o link de acesso.</p>
+    <div class="fld"><input id="loginEmail" type="email" placeholder="seu@email.com"></div>
+    <button class="btn" onclick="enviarLink()" style="width:100%">Enviar link de acesso</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<div id="telaApp" style="display:none">
+  <header>
+    <div class="brand">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div class="divisor"></div>
+      <div><h1>Conversões por curso</h1>
+        <small>o que entra na contagem de cada curso</small></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+      <span class="tag" id="usuarioLogado"></span>
+      <a class="btn ghost" href="index.html" style="text-decoration:none">← Placar</a>
+      <button class="btn ghost" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="card" id="cardOrfas" style="display:none">
+    <h2><span>⚠️ Conversões entrando sem curso</span><span class="tag" id="tagOrfas"></span></h2>
+    <div class="hint">Estão chegando leads com estes identificadores, mas nenhum curso foi associado, então eles não contam em lugar nenhum. Vincule para que passem a contar, inclusive os que já entraram.</div>
+    <div class="scroll" style="max-height:none"><table>
+      <thead><tr><th>Conversão</th><th class="num">Leads parados</th><th class="num">Pessoas</th><th class="num">Último</th><th></th></tr></thead>
+      <tbody id="corpoOrfas"></tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>
+      <span>Cursos e suas conversões</span>
+      <span style="display:flex;gap:9px;align-items:center">
+        <input class="busca" id="busca" type="text" placeholder="Buscar curso ou conversão…" oninput="render()">
+        <button class="btn" onclick="abrirNovoCurso()">+ Novo curso</button>
+      </span>
+    </h2>
+    <div class="hint" id="resumo"></div>
+    <div class="scroll"><table>
+      <thead><tr><th style="width:46%">Curso e conversões</th><th class="num">Leads já trazidos</th><th class="num">Último lead</th><th style="width:150px"></th></tr></thead>
+      <tbody id="corpo"><tr><td colspan="4" class="carregando">Carregando…</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+<div class="overlay" id="ovConv">
+  <div class="modal">
+    <h3 id="tituloConv">Vincular conversão</h3>
+    <div class="exp" id="expConv"></div>
+    <div class="fld"><label>Identificador da conversão no RD</label>
+      <input id="cConversao" type="text" placeholder="MBA-LIDERANCA-ESTRATEGICA-RD">
+      <div style="font-size:11px;color:var(--sub);margin-top:5px">Cole exatamente como aparece no RD. O sufixo numérico e o texto entre colchetes são ignorados automaticamente, então uma variação como <code>-2</code> ou <code>[NOVOS-CAMPOS]</code> já fica coberta.</div>
+    </div>
+    <div class="fld"><label>Curso que vai receber os leads</label><select id="cCurso"></select></div>
+    <div id="msgConv"></div>
+    <div class="foot">
+      <button class="btn ghost" onclick="fechar('ovConv')">Cancelar</button>
+      <button class="btn" id="btnSalvarConv" onclick="salvarConv()">Vincular</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovCurso">
+  <div class="modal">
+    <h3>Novo curso</h3>
+    <div class="exp">Cadastre o curso e, logo em seguida, vincule as conversões que trazem os leads dele.</div>
+    <div class="fld"><label>Nome do curso</label><input id="nCurso" type="text" placeholder="Nome como aparece no site e no Monday"></div>
+    <div class="fld"><label>Tipo</label>
+      <select id="nTipo"><option value="Curso">Curso</option><option value="MBA">MBA</option><option value="Institucional">Institucional</option></select>
+    </div>
+    <div class="fld"><label>Primeira conversão (opcional)</label><input id="nConversao" type="text" placeholder="deixe em branco para vincular depois"></div>
+    <div id="msgCurso"></div>
+    <div class="foot">
+      <button class="btn ghost" onclick="fechar('ovCurso')">Cancelar</button>
+      <button class="btn" id="btnSalvarCurso" onclick="salvarCurso()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL="https://ltasijrhkotyyrxnavab.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const N=v=>Number(v||0).toLocaleString('pt-BR');
+const dt=s=>s?s.split('-').reverse().join('/'):'';
+let LINHAS=[], ORFAS=[], CURSOS=[];
+
+async function enviarLink(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const msg=document.getElementById('loginMsg');
+  if(!email){msg.innerHTML='<div class="msg err">Digite um e-mail.</div>';return;}
+  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href}});
+  msg.innerHTML=error?`<div class="msg err">Erro: ${error.message}</div>`
+    :`<div class="msg ok">Link enviado para ${email}. Confira seu e-mail.</div>`;
+}
+async function sair(){ await sb.auth.signOut(); location.reload(); }
+function fechar(id){ document.getElementById(id).classList.remove('on'); }
+
+async function iniciar(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){document.getElementById('telaLogin').style.display='block';document.getElementById('telaApp').style.display='none';return;}
+  document.getElementById('telaLogin').style.display='none';
+  document.getElementById('telaApp').style.display='block';
+  document.getElementById('usuarioLogado').textContent=session.user.email;
+  await carregar();
+}
+
+async function carregar(){
+  const [a,b]=await Promise.all([sb.rpc('de_para_por_curso'), sb.rpc('conversoes_orfas',{p_dias:120})]);
+  if(a.error){document.getElementById('corpo').innerHTML=`<tr><td colspan="4" class="carregando">Erro: ${a.error.message}</td></tr>`;return;}
+  LINHAS=a.data||[]; ORFAS=b.data||[];
+  CURSOS=[...new Map(LINHAS.map(l=>[l.curso_id,{id:l.curso_id,nome:l.curso,tipo:l.tipo}])).values()]
+          .sort((x,y)=>x.nome.localeCompare(y.nome,'pt'));
+  document.getElementById('cCurso').innerHTML=CURSOS.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  renderOrfas(); render();
+}
+
+function renderOrfas(){
+  const box=document.getElementById('cardOrfas');
+  if(!ORFAS.length){box.style.display='none';return;}
+  box.style.display='block';
+  const totalLeads=ORFAS.reduce((a,o)=>a+Number(o.linhas),0);
+  document.getElementById('tagOrfas').textContent=`${ORFAS.length} conversões · ${N(totalLeads)} leads sem curso`;
+  document.getElementById('corpoOrfas').innerHTML=ORFAS.map(o=>`
+    <tr>
+      <td class="conv">${o.conversao}</td>
+      <td class="num"><b>${N(o.linhas)}</b></td>
+      <td class="num">${N(o.emails)}</td>
+      <td class="num">${dt(o.ultimo)}</td>
+      <td style="text-align:right"><button class="btn mini" onclick="abrirConv('${o.conversao.replace(/'/g,"\\'")}')">Vincular a um curso</button></td>
+    </tr>`).join('');
+}
+
+function render(){
+  const q=(document.getElementById('busca').value||'').toLowerCase();
+  const porCurso=new Map();
+  LINHAS.forEach(l=>{
+    if(!porCurso.has(l.curso_id)) porCurso.set(l.curso_id,{nome:l.curso,tipo:l.tipo,ativo:l.ativo,convs:[]});
+    if(l.conversao) porCurso.get(l.curso_id).convs.push(l);
+  });
+  let html='', nCursos=0, nConvs=0;
+  [...porCurso.entries()]
+    .sort((a,b)=>a[1].nome.localeCompare(b[1].nome,'pt'))
+    .forEach(([id,c])=>{
+      const bate = !q || c.nome.toLowerCase().includes(q) || c.convs.some(v=>v.conversao.toLowerCase().includes(q));
+      if(!bate) return;
+      nCursos++; nConvs+=c.convs.length;
+      const total=c.convs.reduce((a,v)=>a+Number(v.leads_total),0);
+      html+=`<tr class="curso"><td>${c.nome}
+        <span class="qtd">${c.tipo||''}${c.ativo?'':' · inativo'} · ${c.convs.length} conversão(ões)</span></td>
+        <td class="num">${N(total)}</td><td></td>
+        <td style="text-align:right"><button class="btn mini ghost" onclick="abrirConv('',${id})">+ conversão</button></td></tr>`;
+      if(!c.convs.length){
+        html+=`<tr><td colspan="4" class="sem" style="padding-left:22px">nenhuma conversão vinculada, este curso não recebe leads automaticamente</td></tr>`;
+      }
+      c.convs.sort((a,b)=>a.conversao.localeCompare(b.conversao))
+        .forEach(v=>{
+          const zero=Number(v.leads_total)===0;
+          html+=`<tr>
+            <td style="padding-left:22px" class="conv">${v.conversao}${zero?' <span class="badge b-cinza">sem leads ainda</span>':''}</td>
+            <td class="num">${N(v.leads_total)}</td>
+            <td class="num">${dt(v.ultimo_lead)}</td>
+            <td style="text-align:right"><button class="btn mini perigo" onclick="desvincular('${v.conversao.replace(/'/g,"\\'")}',${Number(v.leads_total)})">Remover</button></td>
+          </tr>`;
+        });
+    });
+  document.getElementById('corpo').innerHTML=html||'<tr><td colspan="4" class="carregando">Nada encontrado.</td></tr>';
+  document.getElementById('resumo').textContent=
+    `${nCursos} cursos e ${nConvs} conversões vinculadas. Em ordem alfabética; use a busca para filtrar por curso ou por identificador.`;
+}
+
+function abrirConv(conversao, cursoId){
+  document.getElementById('cConversao').value=conversao||'';
+  document.getElementById('msgConv').innerHTML='';
+  document.getElementById('tituloConv').textContent=conversao?'Vincular conversão':'Nova conversão';
+  document.getElementById('expConv').textContent= conversao
+    ? 'Escolha o curso que deve receber estes leads. Os que já entraram sem curso serão corrigidos.'
+    : 'Cadastre uma conversão nova, por exemplo um formulário recém-criado.';
+  if(cursoId) document.getElementById('cCurso').value=cursoId;
+  document.getElementById('ovConv').classList.add('on');
+}
+
+async function salvarConv(){
+  const conversao=document.getElementById('cConversao').value.trim();
+  const cursoId=document.getElementById('cCurso').value;
+  const msg=document.getElementById('msgConv'), btn=document.getElementById('btnSalvarConv');
+  if(!conversao){msg.innerHTML='<div class="msg err">Informe o identificador da conversão.</div>';return;}
+  btn.disabled=true; btn.textContent='Vinculando…';
+  const {data,error}=await sb.rpc('vincula_conversao',{p_conversao:conversao,p_curso_id:Number(cursoId)});
+  btn.disabled=false; btn.textContent='Vincular';
+  if(error){msg.innerHTML=`<div class="msg err">Erro: ${error.message}</div>`;return;}
+  msg.innerHTML=`<div class="msg ok">Vinculada. ${Number(data)>0?N(data)+' lead(s) que estavam sem curso foram corrigidos.':'Nenhum lead anterior precisou de correção.'}</div>`;
+  await carregar();
+  setTimeout(()=>fechar('ovConv'),1600);
+}
+
+async function desvincular(conversao, leads){
+  if(!confirm(`Remover a conversão ${conversao}?\n\nOs ${N(leads)} leads que ela trouxe deixam de contar para o curso e voltam a ficar sem curso.`)) return;
+  const {error}=await sb.rpc('desvincula_conversao',{p_conversao:conversao});
+  if(error){alert('Erro: '+error.message);return;}
+  await carregar();
+}
+
+function abrirNovoCurso(){
+  document.getElementById('nCurso').value='';
+  document.getElementById('nConversao').value='';
+  document.getElementById('msgCurso').innerHTML='';
+  document.getElementById('ovCurso').classList.add('on');
+}
+
+async function salvarCurso(){
+  const nome=document.getElementById('nCurso').value.trim();
+  const tipo=document.getElementById('nTipo').value;
+  const conv=document.getElementById('nConversao').value.trim();
+  const msg=document.getElementById('msgCurso'), btn=document.getElementById('btnSalvarCurso');
+  if(!nome){msg.innerHTML='<div class="msg err">Informe o nome do curso.</div>';return;}
+  btn.disabled=true; btn.textContent='Cadastrando…';
+  const {data,error}=await sb.from('cursos').insert({nome,tipo,ativo:true}).select('id').single();
+  if(error){btn.disabled=false;btn.textContent='Cadastrar';msg.innerHTML=`<div class="msg err">Erro: ${error.message}</div>`;return;}
+  let extra='';
+  if(conv){
+    const r=await sb.rpc('vincula_conversao',{p_conversao:conv,p_curso_id:data.id});
+    extra = r.error ? ` Curso criado, mas a conversão falhou: ${r.error.message}`
+                    : ` Conversão vinculada${Number(r.data)>0?', com '+N(r.data)+' lead(s) recuperados':''}.`;
+  }
+  btn.disabled=false; btn.textContent='Cadastrar';
+  msg.innerHTML=`<div class="msg ok">Curso cadastrado.${extra}</div>`;
+  await carregar();
+  setTimeout(()=>fechar('ovCurso'),1800);
+}
+
+sb.auth.onAuthStateChange(()=>iniciar());
+iniciar();
+</script>
+</body>
+</html>
