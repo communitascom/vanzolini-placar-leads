@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Campanhas por mês · Fundação Vanzolini</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#060653;--azul:#4848B5;--off:#F7F7FC;--txt:#1a1a2e;--mut:#6f6f8a;--borda:#e4e4f1;--verde:#2e9e5b;--verm:#d64545;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Work Sans',-apple-system,Segoe UI,sans-serif;background:#fff;color:var(--txt);font-size:12px;line-height:1.3;}
+.pag{width:210mm;min-height:297mm;margin:0 auto;padding:11mm 13mm 7mm;}
+.pag + .pag{page-break-before:always;}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:9px;margin-bottom:12px;}
+.logo{height:36px}
+h1{font-family:'Inter Tight';font-size:15.5px;color:var(--navy);line-height:1.15}
+.sub{font-size:10.5px;color:var(--mut);margin-top:2px}
+.per{text-align:right;font-size:10.5px;color:var(--mut);white-space:nowrap}
+.per b{display:block;font-size:15px;color:var(--navy);font-family:'Inter Tight'}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:12px;}
+.kpi{border:1px solid var(--borda);border-radius:8px;padding:7px 9px;border-left:3px solid var(--azul);}
+.kpi .v{font-family:'Inter Tight';font-size:16px;font-weight:700;color:var(--navy);}
+.kpi .l{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+table{width:100%;border-collapse:collapse;font-size:9.6px;}
+th,td{padding:2px 6px;text-align:right;border-bottom:1px solid #f2f2f8;}
+th:first-child,td:first-child{text-align:left}
+th{background:var(--navy);color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+tbody tr:nth-child(even){background:var(--off)}
+tr.total td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f8!important;font-size:10px}
+.z{color:#c3c3d4}
+.tipo{color:var(--mut);font-size:8.6px}
+.faixa{color:var(--mut);font-size:8.8px;white-space:nowrap}
+.nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:6px 10px;font-size:8.8px;color:var(--mut);margin-top:8px;line-height:1.35}
+.nota b{color:var(--txt)}
+.rodape{margin-top:7px;padding-top:5px;border-top:1px solid var(--borda);font-size:8.6px;color:var(--mut);display:flex;justify-content:space-between}
+.carregando{padding:60px;text-align:center;color:var(--mut)}
+@page{size:A4;margin:0}
+@media print{.pag{margin:0;min-height:0}.pag + .pag{page-break-before:always}tr{page-break-inside:avoid}thead{display:table-header-group}.kpis,.nota{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<div id="root"><div class="carregando">Carregando…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const sb=supabase.createClient("https://ltasijrhkotyyrxnavab.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c");
+const N=v=>Number(v||0).toLocaleString('pt-BR');
+const BRL=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
+const BRL2=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const PCT=v=>(v===null||v===undefined)?'<span class="z">sem mídia</span>':Number(v).toFixed(2).replace('.',',')+'%';
+const P=v=>(v===null||v===undefined)?'<span class="z">não rodou</span>':Number(v).toFixed(2).replace('.',',')+'%';
+const faixa=l=>(l.ctr_min===null||l.ctr_max===null)?'<span class="z">sem dado</span>'
+  :(Number(l.ctr_min)===Number(l.ctr_max)?Number(l.ctr_min).toFixed(2).replace('.',',')+'%'
+    :Number(l.ctr_min).toFixed(2).replace('.',',')+'% a '+Number(l.ctr_max).toFixed(2).replace('.',',')+'%');
+const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function pagina(mes, todas, total){
+  const [ano,m]=mes.split('-');
+  const linhas=todas.filter(l=>Number(l.campanhas)>0);
+  const semCampanha=todas.filter(l=>Number(l.campanhas)===0);
+  const leadsListados=linhas.reduce((a,l)=>a+Number(l.leads),0);
+  const leadsFora=semCampanha.reduce((a,l)=>a+Number(l.leads),0);
+  const el=document.createElement('div');
+  el.className='pag';
+  el.innerHTML=`
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div><h1>Campanhas do mês</h1>
+      <div class="sub">Leads, custo por lead e CTR medianos das campanhas de cada curso</div></div>
+    </div>
+    <div class="per"><b>${MES[+m-1].replace(/^./,c=>c.toUpperCase())} de ${ano}</b>emitido em ${new Date().toLocaleDateString('pt-BR')}</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">${N(leadsListados)}</div><div class="l">Leads dos cursos com campanha</div></div>
+    <div class="kpi"><div class="v">${N(total.campanhas)}</div><div class="l">Campanhas no ar</div></div>
+    <div class="kpi"><div class="v">${BRL(total.investimento)}</div><div class="l">Investimento</div></div>
+    <div class="kpi"><div class="v">${BRL2(total.cpl_mediano)}</div><div class="l">CPL mediano</div></div>
+    <div class="kpi"><div class="v">${PCT(total.ctr_mediano)}</div><div class="l">CTR mediano</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Curso</th><th>Leads</th><th>CPL mediano</th><th>CTR Meta</th><th>CTR Google</th><th>CTR LinkedIn</th><th>Faixa de CTR</th></tr></thead>
+    <tbody>
+    ${linhas.map(l=>`<tr>
+      <td>${l.curso} <span class="tipo">${l.tipo||''}</span></td>
+      <td><b>${N(l.leads)}</b></td>
+      <td>${l.cpl_mediano!==null?BRL2(l.cpl_mediano):'<span class="z">sem dado</span>'}</td>
+      <td>${P(l.ctr_meta)}</td>
+      <td>${P(l.ctr_google)}</td>
+      <td>${P(l.ctr_linkedin)}</td>
+      <td class="faixa">${faixa(l)}</td></tr>`).join('')}
+    <tr class="total"><td>Total do mês · ${N(total.campanhas)} campanhas</td><td>${N(leadsListados)}</td>
+      <td>${BRL2(total.cpl_mediano)}</td><td colspan="3" style="text-align:center">CTR mediano geral ${PCT(total.ctr_mediano)}</td>
+      <td class="faixa">${PCT(total.ctr_mediano)}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nota"><b>Como ler o CTR.</b> Ele aparece separado por plataforma porque <b>as três operam em faixas muito diferentes</b>, e comparar um curso que roda no Google Search com outro que roda no LinkedIn leva à conclusão errada.
+  No Google Search o CTR é naturalmente alto, já que a pessoa buscou pelo nome do curso. No Meta fica em torno de 1% a 2%, e no LinkedIn abaixo de 1%.
+  Um curso sem número em uma coluna simplesmente não rodou naquela plataforma no mês. A faixa mostra o menor e o maior CTR entre as campanhas do curso.
+  <b>CPL e CTR são medianas entre as campanhas</b>, não a média do curso, então uma campanha pequena e cara não distorce o retrato. O CPL usa o lead que a própria plataforma registrou, o único atribuível a uma campanha.
+  A coluna Leads traz a nossa contagem oficial, um lead por curso a cada 90 dias, que inclui também origens sem mídia paga.
+  <b>O total do mês recalcula a mediana sobre todas as ${N(total.campanhas)} campanhas</b>, e por isso não é a média das linhas acima.
+  <b>Entram aqui apenas os ${linhas.length} cursos que tiveram campanha no mês.</b>${leadsFora>0?` Outros ${semCampanha.length} cursos somaram ${N(leadsFora)} leads sem nenhuma campanha de mídia ativa, vindos de busca, base e demais origens, e ficam fora deste recorte: o mês inteiro fechou com ${N(total.leads)} leads.`:''}</div>
+
+  <div class="rodape"><span>Fundação Vanzolini · Campanhas e captação</span><span>Fonte: RD Station e plataformas de mídia · consolidado pela Communitas</span></div>`;
+  return el;
+}
+
+async function montar(){
+  const par=new URLSearchParams(location.search);
+  const de=par.get('de')||'2026-01', ate=par.get('ate')||'2026-07';
+  const {data:tot,error:e1}=await sb.rpc('campanhas_totais',{p_ini:de+'-01',p_fim:ate+'-01'});
+  if(e1){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+e1.message+'</p>';return;}
+  const respostas=await Promise.all(tot.map(t=>sb.rpc('campanhas_mes',{p_mes:t.mes+'-01'})));
+  const err=respostas.find(r=>r.error);
+  if(err){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+err.error.message+'</p>';return;}
+  const pacotes=tot.map((t,i)=>({mes:t.mes, linhas:respostas[i].data, total:t}));
+  const root=document.getElementById('root');
+  root.innerHTML='';
+  pacotes.forEach(p=>root.appendChild(pagina(p.mes,p.linhas,p.total)));
+  document.title='Vanzolini_Campanhas_'+de+'_a_'+ate;
+  window.__ok=true;
+}
+montar();
+</script>
+</body>
+</html>
