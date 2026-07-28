@@ -112,25 +112,41 @@ def rodape(sl, txt):
 
 
 def card(sl, x, y, w, h, plataforma, escopo, nosso, contexto):
-    """Card de destaque: o CTR da Vanzolini contra a referencia da plataforma."""
+    """Card de destaque: o CTR da Vanzolini lado a lado com a referencia da plataforma.
+
+    `nosso` pode ser None, para plataforma que nao rodou no periodo. Nesse caso o
+    card continua na tela, porque canal nao usado tambem e informacao.
+    """
     b = BENCH[plataforma]
     retangulo(sl, x, y, w, h, BRANCO, BORDA)
-    topo = retangulo(sl, x, y, w, 0.07, AZUL, None, 0)
-    txbox(sl, x+0.28, y+0.24, w-0.5, 0.32, plataforma, 18, NAVY, True, H1F)
-    txbox(sl, x+0.28, y+0.58, w-0.5, 0.24, escopo, 10.5, MUT)
-    txbox(sl, x+0.28, y+0.86, 2.5, 0.72, pct(nosso), 40, NAVY, True, H1F)
-    txbox(sl, x+2.72, y+0.96, w-3.0, 0.6,
-          f"CTR mediano da Vanzolini\nmercado: {pct(b['v'])}", 11, MUT, espaco=1.25)
-    # Ate 10% de diferenca a comparacao e ruido entre metodologias, nao desempenho.
-    razao = nosso / b["v"]
-    if razao >= 1.0:    rotulo, bom = f"{num(razao,1)}x acima do mercado", True
-    elif razao >= 0.90: rotulo, bom = "em linha com o mercado", True
-    else:               rotulo, bom = "abaixo da referência geral", False
-    largura = 0.115 * len(rotulo) + 0.4
-    retangulo(sl, x+0.28, y+1.66, largura, 0.32, VERDEBG if bom else AMBBG, None, 0.5)
-    txbox(sl, x+0.28, y+1.72, largura, 0.24, rotulo, 11, VERDE if bom else AMB,
-          True, align=PP_ALIGN.CENTER)
-    txbox(sl, x+0.28, y+2.12, w-0.56, 0.42, contexto, 10, MUT, espaco=1.2)
+    retangulo(sl, x, y, w, 0.07, AZUL, None, 0)
+    txbox(sl, x+0.26, y+0.2, w-0.5, 0.3, plataforma, 17, NAVY, True, H1F)
+    txbox(sl, x+0.26, y+0.52, w-0.5, 0.22, escopo, 10, MUT)
+
+    meio = w * 0.52
+    txbox(sl, x+0.26, y+0.82, meio-0.35, 0.2, "VANZOLINI", 8, MUT, True)
+    txbox(sl, x+0.26, y+1.0, meio-0.35, 0.5,
+          pct(nosso) if nosso is not None else "não rodou",
+          30 if nosso is not None else 19, NAVY if nosso is not None else CINZA, True, H1F)
+    # Caixa propria para a referencia, para o numero de mercado ter o mesmo peso visual.
+    retangulo(sl, x+meio, y+0.76, w-meio-0.26, 0.86, OFF, BORDA, 0.08)
+    txbox(sl, x+meio+0.18, y+0.86, w-meio-0.6, 0.2, "MERCADO", 8, MUT, True)
+    txbox(sl, x+meio+0.18, y+1.04, w-meio-0.6, 0.5, pct(b["v"]), 30, AZUL, True, H1F)
+
+    if nosso is None:
+        rotulo, bom = "canal não testado", None
+    else:
+        # Ate 10% de diferenca a comparacao e ruido entre metodologias, nao desempenho.
+        razao = nosso / b["v"]
+        if razao >= 1.0:    rotulo, bom = f"{num(razao,1)}x acima do mercado", True
+        elif razao >= 0.90: rotulo, bom = "em linha com o mercado", True
+        else:               rotulo, bom = "abaixo da referência geral", False
+    fundo = {True: VERDEBG, False: AMBBG, None: OFF}[bom]
+    cor   = {True: VERDE,   False: AMB,   None: MUT}[bom]
+    largura = 0.108 * len(rotulo) + 0.4
+    retangulo(sl, x+0.26, y+1.7, largura, 0.3, fundo, None, 0.5)
+    txbox(sl, x+0.26, y+1.755, largura, 0.22, rotulo, 10.5, cor, True, align=PP_ALIGN.CENTER)
+    txbox(sl, x+0.26, y+2.1, w-0.52, 0.68, contexto, 9.5, MUT, espaco=1.2)
 
 
 def tabela(sl, x, y, w, colunas, linhas, larguras, alt_lin=0.245, tam=10.5):
@@ -232,43 +248,48 @@ def main(destino, logo):
     prs = Presentation()
     prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
     branco = prs.slide_layouts[6]
-    FONTE_CURTA = ("Fontes: LocaliQ (Google), Superads (Meta) e benchmarks públicos de LinkedIn Ads. "
-                   "Método na última página.")
+    RODAPE = "Método e fontes na página de anotações"
+    COLS = [0.55, 4.685, 8.82]   # tres cards, 3,91 de largura, ocupando a faixa util
+    LARG, ALTO, TOPO = 3.91, 2.86, 1.2
+    COLUNAS = ["Mês", "Leads", "Investimento", "CPL", "CTR Google", "CTR Meta", "CTR LinkedIn"]
+    LARGURAS = [0.16, 0.13, 0.17, 0.13, 0.14, 0.135, 0.135]
 
-    # ---- Slide 1: MBAs
-    sl = prs.slides.add_slide(branco)
-    cabecalho(sl, "MBAs", "CTR das campanhas contra a referência de mercado, e a evolução mês a mês",
-              "Primeiro semestre", logo)
-    g, m = acha(d["cons_mba"], "Google"), acha(d["cons_mba"], "Meta")
-    card(sl, 0.55, 1.22, 5.95, 2.62, "Google", "Rede de Pesquisa", pesquisa["ctr_mediano"],
-         f"{pesquisa['campanhas']} campanhas de Pesquisa. Nas de Display e Demand Gen o CTR mediano "
-         f"foi de {pct(display['ctr_mediano'])}.")
-    card(sl, 6.83, 1.22, 5.95, 2.62, "Meta", "todas as campanhas", m["ctr_mediano"],
-         f"São as campanhas de maior alcance do semestre, {num(m['impressoes'])} impressões, "
-         f"volume que puxa o CTR para baixo e sustenta o funil.")
-    tabela(sl, 0.55, 4.08, 12.23,
-           ["Mês", "Leads", "Investimento", "CPL", "CTR Google", "CTR Meta", "CTR LinkedIn"],
-           linhas_evolucao(d["ev_mba"], ["Google", "Meta", "LinkedIn"]),
-           [0.16, 0.13, 0.17, 0.13, 0.14, 0.135, 0.135])
-    rodape(sl, FONTE_CURTA)
-
-    # ---- Slide 2: Cursos
+    # ---- Slide 1: Cursos de curta duração
     sl = prs.slides.add_slide(branco)
     cabecalho(sl, "Cursos de curta duração",
               "CTR das campanhas contra a referência de mercado, e a evolução mês a mês",
               "Primeiro semestre", logo)
     m, li = acha(d["cons_curso"], "Meta"), acha(d["cons_curso"], "LinkedIn")
-    card(sl, 0.55, 1.22, 5.95, 2.62, "Meta", "todas as campanhas", m["ctr_mediano"],
-         f"{m['campanhas']} campanhas no semestre. O CTR subiu de {pct(d['ev_curso'][0]['ctr_meta'])} "
-         f"em janeiro para {pct(d['ev_curso'][-1]['ctr_meta'])} em junho.")
-    card(sl, 6.83, 1.22, 5.95, 2.62, "LinkedIn", "todas as campanhas", li["ctr_mediano"],
-         f"{li['campanhas']} campanhas no semestre. Nenhum curso de curta duração rodou Google, "
-         f"canal ainda não testado para esta linha.")
-    tabela(sl, 0.55, 4.08, 12.23,
-           ["Mês", "Leads", "Investimento", "CPL", "CTR Meta", "CTR LinkedIn"],
-           linhas_evolucao(d["ev_curso"], ["Meta", "LinkedIn"]),
-           [0.19, 0.15, 0.19, 0.15, 0.16, 0.16])
-    rodape(sl, FONTE_CURTA)
+    card(sl, COLS[0], TOPO, LARG, ALTO, "Google", "não rodou no semestre", None,
+         "Nenhum curso usou Google no período. É o canal com maior espaço para teste "
+         "nesta linha.")
+    card(sl, COLS[1], TOPO, LARG, ALTO, "Meta", f"{m['campanhas']} campanhas", m["ctr_mediano"],
+         f"O CTR subiu de {pct(d['ev_curso'][0]['ctr_meta'])} em janeiro para "
+         f"{pct(d['ev_curso'][-1]['ctr_meta'])} em junho, com o CPL caindo no mesmo período.")
+    card(sl, COLS[2], TOPO, LARG, ALTO, "LinkedIn", f"{li['campanhas']} campanhas", li["ctr_mediano"],
+         f"{num(li['impressoes'])} impressões no semestre. É o canal que fica acima da "
+         f"referência com mais consistência.")
+    tabela(sl, 0.55, 4.26, 12.23, COLUNAS,
+           linhas_evolucao(d["ev_curso"], ["Google", "Meta", "LinkedIn"]), LARGURAS)
+    rodape(sl, RODAPE)
+
+    # ---- Slide 2: MBAs
+    sl = prs.slides.add_slide(branco)
+    cabecalho(sl, "MBAs", "CTR das campanhas contra a referência de mercado, e a evolução mês a mês",
+              "Primeiro semestre", logo)
+    m, li = acha(d["cons_mba"], "Meta"), acha(d["cons_mba"], "LinkedIn")
+    card(sl, COLS[0], TOPO, LARG, ALTO, "Google", "Rede de Pesquisa", pesquisa["ctr_mediano"],
+         f"{pesquisa['campanhas']} campanhas de Pesquisa. Nas de Display e Demand Gen o CTR "
+         f"mediano foi de {pct(display['ctr_mediano'])}.")
+    card(sl, COLS[1], TOPO, LARG, ALTO, "Meta", f"{m['campanhas']} campanhas", m["ctr_mediano"],
+         f"As campanhas de maior alcance do semestre, {num(m['impressoes'])} impressões. "
+         f"Alcance amplo derruba o CTR e sustenta o volume.")
+    card(sl, COLS[2], TOPO, LARG, ALTO, "LinkedIn", f"{li['campanhas']} campanhas", li["ctr_mediano"],
+         f"Só {num(li['impressoes'])} impressões no semestre. O canal rodou pouco nos MBAs, "
+         f"então o número ainda é frágil.")
+    tabela(sl, 0.55, 4.26, 12.23, COLUNAS,
+           linhas_evolucao(d["ev_mba"], ["Google", "Meta", "LinkedIn"]), LARGURAS)
+    rodape(sl, RODAPE)
 
     # ---- Slide 3: campanhas por plataforma, MBA em cima e Cursos embaixo
     sl = prs.slides.add_slide(branco)
@@ -285,7 +306,7 @@ def main(destino, logo):
     li_mba = acha(d["cons_mba"], "LinkedIn")
     linha_h(sl, 0.55, 6.98, 12.23, BORDA)
     txbox(sl, 0.55, 7.06, 8.4, 0.3,
-          f"O LinkedIn não aparece nos MBAs porque rodou pouco no semestre, "
+          f"O LinkedIn não aparece nos exemplos de MBA porque rodou pouco no semestre, "
           f"{num(li_mba['impressoes'])} impressões em {li_mba['campanhas']} campanhas.", 8.5, MUT)
     txbox(sl, 9.1, 7.06, 3.68, 0.3, "Campanhas com pelo menos 20 mil impressões no semestre",
           8.5, MUT, align=PP_ALIGN.RIGHT)
@@ -314,18 +335,23 @@ def main(destino, logo):
          "As campanhas de maior alcance têm CTR menor porque falam com um público mais amplo, que ainda "
          "não conhece o curso. É o caso dos MBAs no Meta, e é esse volume que sustenta o funil. "
          "Nenhuma das duas leituras sozinha conta a história."),
-        ("Limite das fontes",
-         "Superads declara que usa mediana entre campanhas, então a comparação do Meta é direta. "
-         "LocaliQ e os agregadores de LinkedIn não declaram o método, então essas duas comparações "
-         "são indicativas, não exatas. Vale dizer isso se o cliente perguntar."),
+        ("Quando dizemos que está em linha",
+         "Diferença de até 10% para a referência é tratada como em linha, e não como abaixo. "
+         "A variação entre metodologias de benchmark é maior que isso, então apontar uma diferença "
+         "de 8% como queda seria criar um problema que os dados não sustentam."),
     ]
     for i, (t, c) in enumerate(blocos):
         col, lin = i % 2, i // 2
-        x, y = 0.55 + col * 6.28, 1.24 + lin * 1.86
-        retangulo(sl, x, y, 5.95, 1.66, OFF, BORDA)
-        retangulo(sl, x, y, 0.055, 1.66, AZUL, None, 0)
-        txbox(sl, x+0.28, y+0.2, 5.4, 0.26, t, 12.5, NAVY, True, H1F)
-        txbox(sl, x+0.28, y+0.54, 5.4, 1.0, c, 9.5, MUT, espaco=1.3)
+        x, y = 0.55 + col * 6.28, 1.2 + lin * 1.72
+        retangulo(sl, x, y, 5.95, 1.6, OFF, BORDA)
+        retangulo(sl, x, y, 0.055, 1.6, AZUL, None, 0)
+        txbox(sl, x+0.28, y+0.16, 5.4, 0.26, t, 12, NAVY, True, H1F)
+        txbox(sl, x+0.28, y+0.48, 5.4, 1.0, c, 9, MUT, espaco=1.28)
+    y = 1.2 + 3 * 1.72
+    retangulo(sl, 0.55, y, 12.23, 0.62, BRANCO, BORDA)
+    txbox(sl, 0.83, y+0.11, 11.6, 0.2, "REFERÊNCIAS CITADAS", 8, MUT, True)
+    txbox(sl, 0.83, y+0.31, 11.6, 0.24,
+          " · ".join(f"{p}: {b['fonte']} ({b['met']})" for p, b in BENCH.items()), 8.5, TXT)
     rodape(sl, "Dados: plataformas de mídia e RD Station · consolidado pela Communitas")
 
     prs.save(destino)
