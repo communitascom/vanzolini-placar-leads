@@ -29,6 +29,9 @@ tr.total td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f
 .z{color:#c3c3d4}
 .tipo{color:var(--mut);font-size:8.6px}
 .faixa{color:var(--mut);font-size:8.8px;white-space:nowrap}
+h2{font-family:'Inter Tight';font-size:11.5px;color:var(--navy);margin:11px 0 5px;padding-bottom:3px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
+h2 span{font-size:9px;color:var(--mut);font-weight:400;font-family:'Work Sans'}
+.vazio{font-size:9.5px;color:var(--mut);padding:6px 2px;font-style:italic}
 .nota{background:var(--off);border:1px solid var(--borda);border-left:3px solid var(--azul);border-radius:8px;padding:6px 10px;font-size:8.8px;color:var(--mut);margin-top:8px;line-height:1.35}
 .nota b{color:var(--txt)}
 .rodape{margin-top:7px;padding-top:5px;border-top:1px solid var(--borda);font-size:8.6px;color:var(--mut);display:flex;justify-content:space-between}
@@ -52,12 +55,34 @@ const faixa=l=>(l.ctr_min===null||l.ctr_max===null)?'<span class="z">sem dado</s
     :Number(l.ctr_min).toFixed(2).replace('.',',')+'% a '+Number(l.ctr_max).toFixed(2).replace('.',',')+'%');
 const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
-function pagina(mes, todas, total){
+function bloco(titulo, linhas, total){
+  if(!linhas.length) return `<h2>${titulo}</h2><div class="vazio">Nenhuma campanha no mês.</div>`;
+  return `
+  <h2>${titulo} <span>${linhas.length} curso(s) · ${N(total.campanhas)} campanha(s)</span></h2>
+  <table>
+    <thead><tr><th>Curso</th><th>Leads</th><th>CPL mediano</th><th>CTR Meta</th><th>CTR Google</th><th>CTR LinkedIn</th><th>Faixa de CTR</th></tr></thead>
+    <tbody>
+    ${linhas.map(l=>`<tr>
+      <td>${l.curso}</td>
+      <td><b>${N(l.leads)}</b></td>
+      <td>${l.cpl_mediano!==null?BRL2(l.cpl_mediano):'<span class="z">sem dado</span>'}</td>
+      <td>${P(l.ctr_meta)}</td>
+      <td>${P(l.ctr_google)}</td>
+      <td>${P(l.ctr_linkedin)}</td>
+      <td class="faixa">${faixa(l)}</td></tr>`).join('')}
+    <tr class="total"><td>Total ${titulo}</td>
+      <td>${N(linhas.reduce((a,l)=>a+Number(l.leads),0))}</td>
+      <td>${BRL2(total.cpl_mediano)}</td>
+      <td colspan="3" style="text-align:center">CTR mediano ${PCT(total.ctr_mediano)} · investimento ${BRL(total.investimento)}</td>
+      <td class="faixa">${PCT(total.ctr_mediano)}</td></tr>
+    </tbody>
+  </table>`;
+}
+
+function pagina(mes, todas, totMBA, totCurso){
   const [ano,m]=mes.split('-');
-  const linhas=todas.filter(l=>Number(l.campanhas)>0);
-  const semCampanha=todas.filter(l=>Number(l.campanhas)===0);
-  const leadsListados=linhas.reduce((a,l)=>a+Number(l.leads),0);
-  const leadsFora=semCampanha.reduce((a,l)=>a+Number(l.leads),0);
+  const mbas=todas.filter(l=>l.tipo==='MBA');
+  const cursos=todas.filter(l=>l.tipo!=='MBA');
   const el=document.createElement('div');
   el.className='pag';
   el.innerHTML=`
@@ -65,43 +90,15 @@ function pagina(mes, todas, total){
     <div style="display:flex;align-items:center;gap:12px">
       <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
       <div><h1>Campanhas do mês</h1>
-      <div class="sub">Leads, custo por lead e CTR medianos das campanhas de cada curso</div></div>
+      <div class="sub">Leads, custo por lead e CTR medianos das campanhas, separados por MBA e curso</div></div>
     </div>
     <div class="per"><b>${MES[+m-1].replace(/^./,c=>c.toUpperCase())} de ${ano}</b>emitido em ${new Date().toLocaleDateString('pt-BR')}</div>
   </header>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">${N(leadsListados)}</div><div class="l">Leads dos cursos com campanha</div></div>
-    <div class="kpi"><div class="v">${N(total.campanhas)}</div><div class="l">Campanhas no ar</div></div>
-    <div class="kpi"><div class="v">${BRL(total.investimento)}</div><div class="l">Investimento</div></div>
-    <div class="kpi"><div class="v">${BRL2(total.cpl_mediano)}</div><div class="l">CPL mediano</div></div>
-    <div class="kpi"><div class="v">${PCT(total.ctr_mediano)}</div><div class="l">CTR mediano</div></div>
-  </div>
+  ${bloco('MBAs', mbas, totMBA)}
+  ${bloco('Cursos', cursos, totCurso)}
 
-  <table>
-    <thead><tr><th>Curso</th><th>Leads</th><th>CPL mediano</th><th>CTR Meta</th><th>CTR Google</th><th>CTR LinkedIn</th><th>Faixa de CTR</th></tr></thead>
-    <tbody>
-    ${linhas.map(l=>`<tr>
-      <td>${l.curso} <span class="tipo">${l.tipo||''}</span></td>
-      <td><b>${N(l.leads)}</b></td>
-      <td>${l.cpl_mediano!==null?BRL2(l.cpl_mediano):'<span class="z">sem dado</span>'}</td>
-      <td>${P(l.ctr_meta)}</td>
-      <td>${P(l.ctr_google)}</td>
-      <td>${P(l.ctr_linkedin)}</td>
-      <td class="faixa">${faixa(l)}</td></tr>`).join('')}
-    <tr class="total"><td>Total do mês · ${N(total.campanhas)} campanhas</td><td>${N(leadsListados)}</td>
-      <td>${BRL2(total.cpl_mediano)}</td><td colspan="3" style="text-align:center">CTR mediano geral ${PCT(total.ctr_mediano)}</td>
-      <td class="faixa">${PCT(total.ctr_mediano)}</td></tr>
-    </tbody>
-  </table>
-
-  <div class="nota"><b>Como ler o CTR.</b> Ele aparece separado por plataforma porque <b>as três operam em faixas muito diferentes</b>, e comparar um curso que roda no Google Search com outro que roda no LinkedIn leva à conclusão errada.
-  No Google Search o CTR é naturalmente alto, já que a pessoa buscou pelo nome do curso. No Meta fica em torno de 1% a 2%, e no LinkedIn abaixo de 1%.
-  Um curso sem número em uma coluna simplesmente não rodou naquela plataforma no mês. A faixa mostra o menor e o maior CTR entre as campanhas do curso.
-  <b>CPL e CTR são medianas entre as campanhas</b>, não a média do curso, então uma campanha pequena e cara não distorce o retrato. O CPL usa o lead que a própria plataforma registrou, o único atribuível a uma campanha.
-  A coluna Leads traz a nossa contagem oficial, um lead por curso a cada 90 dias, que inclui também origens sem mídia paga.
-  <b>O total do mês recalcula a mediana sobre todas as ${N(total.campanhas)} campanhas</b>, e por isso não é a média das linhas acima.
-  <b>Entram aqui apenas os ${linhas.length} cursos que tiveram campanha no mês.</b>${leadsFora>0?` Outros ${semCampanha.length} cursos somaram ${N(leadsFora)} leads sem nenhuma campanha de mídia ativa, vindos de busca, base e demais origens, e ficam fora deste recorte: o mês inteiro fechou com ${N(total.leads)} leads.`:''}</div>
+  <div class="nota"><b>Como ler o CTR.</b> Cada plataforma opera numa faixa própria: no Google Search ele é naturalmente alto, porque a pessoa buscou pelo nome do curso; no Meta fica em torno de 1% a 2%; no LinkedIn, abaixo de 1%. Por isso a comparação só faz sentido dentro da mesma coluna. Curso sem número não rodou naquela plataforma. CPL e CTR são medianas entre as campanhas, e o total recalcula a mediana sobre todas elas.</div>
 
   <div class="rodape"><span>Fundação Vanzolini · Campanhas e captação</span><span>Fonte: RD Station e plataformas de mídia · consolidado pela Communitas</span></div>`;
   return el;
@@ -109,16 +106,20 @@ function pagina(mes, todas, total){
 
 async function montar(){
   const par=new URLSearchParams(location.search);
-  const de=par.get('de')||'2026-01', ate=par.get('ate')||'2026-07';
-  const {data:tot,error:e1}=await sb.rpc('campanhas_totais',{p_ini:de+'-01',p_fim:ate+'-01'});
-  if(e1){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+e1.message+'</p>';return;}
-  const respostas=await Promise.all(tot.map(t=>sb.rpc('campanhas_mes',{p_mes:t.mes+'-01'})));
+  const de=par.get('de')||'2026-01', ate=par.get('ate')||'2026-06';
+  const [tMBA,tCurso]=await Promise.all([
+    sb.rpc('campanhas_totais',{p_ini:de+'-01',p_fim:ate+'-01',p_tipo:'MBA'}),
+    sb.rpc('campanhas_totais',{p_ini:de+'-01',p_fim:ate+'-01',p_tipo:'Curso'})
+  ]);
+  if(tMBA.error||tCurso.error){
+    document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+((tMBA.error||tCurso.error).message)+'</p>';return;}
+  const meses=tMBA.data.map(t=>t.mes);
+  const respostas=await Promise.all(meses.map(m=>sb.rpc('campanhas_mes',{p_mes:m+'-01'})));
   const err=respostas.find(r=>r.error);
   if(err){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+err.error.message+'</p>';return;}
-  const pacotes=tot.map((t,i)=>({mes:t.mes, linhas:respostas[i].data, total:t}));
   const root=document.getElementById('root');
   root.innerHTML='';
-  pacotes.forEach(p=>root.appendChild(pagina(p.mes,p.linhas,p.total)));
+  meses.forEach((m,i)=>root.appendChild(pagina(m, respostas[i].data, tMBA.data[i], tCurso.data[i])));
   document.title='Vanzolini_Campanhas_'+de+'_a_'+ate;
   window.__ok=true;
 }
