@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Qualidade das campanhas · CTR contra o mercado</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#060653;--azul:#4848B5;--off:#F7F7FC;--txt:#1a1a2e;--mut:#6f6f8a;--borda:#e4e4f1;--verde:#1f8a4c;--verde-bg:#e8f5ee;--amb:#b8860b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Work Sans',-apple-system,Segoe UI,sans-serif;background:#e9e9f2;color:var(--txt);font-size:13px;line-height:1.35;}
+.slide{width:338.7mm;height:190.5mm;background:#fff;margin:0 auto 8mm;padding:12mm 15mm 9mm;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid var(--navy);padding-bottom:9px;margin-bottom:12px;flex:none;}
+.logo{height:38px}
+h1{font-family:'Inter Tight','Work Sans',-apple-system,Segoe UI,sans-serif;font-size:20px;color:var(--navy);line-height:1.1}
+.sub{font-size:12px;color:var(--mut);margin-top:2px}
+.per{text-align:right;font-size:11px;color:var(--mut);white-space:nowrap}
+.per b{display:block;font-size:14px;color:var(--navy);font-family:'Inter Tight','Work Sans',-apple-system,Segoe UI,sans-serif}
+.corpo{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:16px;min-height:0}
+h2{font-family:'Inter Tight','Work Sans',-apple-system,Segoe UI,sans-serif;font-size:16px;color:var(--navy);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:baseline}
+h2 span{font-size:11.5px;color:var(--mut);font-weight:400;font-family:'Work Sans'}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid #f2f2f8;}
+th:first-child,td:first-child{text-align:left}
+th{background:var(--navy);color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+tbody tr:nth-child(even){background:var(--off)}
+tr.total td{font-weight:700;border-top:1.5px solid var(--navy);background:#eef0f8!important}
+tr.bench td{background:var(--verde-bg)!important;color:#155e35;font-size:12px;border-top:1px dashed #9fcdb3}
+tr.bench td:first-child{font-weight:600}
+.z{color:#c3c3d4}
+.g{color:var(--verde);font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border:1px solid var(--borda);border-radius:12px;padding:18px 20px 16px;border-top:5px solid var(--azul);}
+.card .pl{font-family:'Inter Tight','Work Sans',-apple-system,Segoe UI,sans-serif;font-size:19px;color:var(--navy);font-weight:700}
+.card .cmp{display:flex;align-items:baseline;gap:12px;margin-top:10px}
+.card .num{font-family:'Inter Tight','Work Sans',-apple-system,Segoe UI,sans-serif;font-size:44px;font-weight:700;color:var(--navy);line-height:1}
+.card .vs{font-size:12.5px;color:var(--mut);line-height:1.3}
+.card .vs b{color:var(--txt)}
+.selo{display:inline-block;margin-top:12px;background:var(--verde-bg);color:#155e35;border-radius:20px;padding:4px 14px;font-size:12.5px;font-weight:600;font-family:'Work Sans'}
+.selo.neutro{background:#fdf3e0;color:#7a5b00}
+.duas{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.tres{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start}
+.nota{background:var(--off);border:1px solid var(--borda);border-left:4px solid var(--azul);border-radius:8px;padding:12px 15px;font-size:12px;color:var(--mut);line-height:1.45}
+.nota b{color:var(--txt)}
+.destaque{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:600}
+.mini{font-size:11.5px;color:var(--mut)}
+.rodape{margin-top:8px;padding-top:6px;border-top:1px solid var(--borda);font-size:9.5px;color:var(--mut);display:flex;justify-content:space-between;flex:none}
+.carregando{padding:80px;text-align:center;color:var(--mut)}
+@page{size:338.7mm 190.5mm;margin:0}
+@media print{body{background:#fff}.slide{margin:0;page-break-after:always}.slide:last-child{page-break-after:auto}}
+</style>
+</head>
+<body>
+<div id="root"><div class="carregando">Carregando…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const sb=supabase.createClient("https://ltasijrhkotyyrxnavab.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0YXNpanJoa290eXlyeG5hdmFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk5NDAsImV4cCI6MjA5NjcwNTk0MH0.XAJmbTSm6d5Y6xobOLceHlVr0e_iratHW_u6atzUC5c");
+const N=v=>Number(v||0).toLocaleString('pt-BR');
+const BRL=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
+const BRL2=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const P=v=>(v===null||v===undefined)?'<span class="z">não rodou</span>':Number(v).toFixed(2).replace('.',',')+'%';
+const X=(a,b)=>(Number(a)/Number(b)).toFixed(1).replace('.',',')+'x';
+const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const rotulo=m=>{const[a,x]=m.split('-');return MES[+x-1]+'/'+a.slice(2);};
+
+// Referencias de mercado. Cada uma com a metodologia declarada pela fonte,
+// para que a comparacao seja feita do mesmo jeito dos dois lados.
+const BENCH={
+  Meta:{v:1.80,fonte:'Superads, benchmark de anúncios de Educação, 2025',met:'mediana entre campanhas'},
+  Google:{v:7.56,fonte:'LocaliQ, Google Ads Benchmarks, setor Educação e Instrução, 2025',met:'média do setor na Rede de Pesquisa'},
+  LinkedIn:{v:0.61,fonte:'Benchmarks públicos de LinkedIn Ads, média geral de todos os setores',met:'média geral'}
+};
+
+function cabecalho(titulo,sub,tag){
+  return `<header>
+    <div style="display:flex;align-items:center;gap:14px">
+      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+      <div><h1>${titulo}</h1><div class="sub">${sub}</div></div>
+    </div>
+    <div class="per"><b>${tag}</b>janeiro a junho de 2026</div>
+  </header>`;
+}
+function slide(html){const d=document.createElement('div');d.className='slide';d.innerHTML=html;return d;}
+function rodape(txt){return `<div class="rodape"><span>Fundação Vanzolini · Qualidade de mídia</span><span>${txt}</span></div>`;}
+
+/* ---------- 1. Consolidado com o benchmark ---------- */
+function slideConsolidado(geral,gsd){
+  const card=p=>{
+    const l=geral.find(x=>x.plataforma===p); if(!l) return '';
+    const b=BENCH[p];
+    // No Google a comparacao honesta e Rede de Pesquisa contra benchmark de Pesquisa.
+    const nosso=(p==='Google')?Number(gsd.find(g=>g.formato==='Rede de Pesquisa').ctr_mediano):Number(l.ctr_mediano);
+    const escopo=(p==='Google')?'Rede de Pesquisa':'todas as campanhas';
+    const acima=nosso>=b.v;
+    return `<div class="card">
+      <div class="pl">${p}</div>
+      <div class="mini">${escopo}</div>
+      <div class="cmp">
+        <div class="num">${P(nosso)}</div>
+        <div class="vs">CTR mediano da Vanzolini<br>mercado: <b>${P(b.v)}</b></div>
+      </div>
+      <div class="selo${acima?'':' neutro'}">${acima?X(nosso,b.v)+' acima do mercado':'em linha com o mercado'}</div>
+      <div class="mini" style="margin-top:11px">No semestre a plataforma teve ${N(l.campanhas)} campanhas, ${BRL(l.investimento)} e ${N(l.impressoes)} impressões</div>
+    </div>`;
+  };
+  return slide(cabecalho('O CTR das campanhas contra o mercado',
+    'Mediana do CTR entre campanhas, no primeiro semestre de 2026, comparada às referências públicas de cada plataforma','Consolidado')+
+  `<div class="corpo">
+    <div class="cards">${card('Google')}${card('Meta')}${card('LinkedIn')}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="nota"><b>Como a comparação foi feita.</b> Cada plataforma tem uma faixa própria de CTR e só faz sentido comparar cada uma com a referência dela. O número da Vanzolini é a <b>mediana entre as campanhas</b>, e não a média, porque a mediana não é puxada por uma campanha isolada. Ficaram de fora as campanhas institucionais, que são de alcance e não de clique, e as campanhas com menos de mil impressões, que ainda não têm volume para gerar um CTR estável. No Google a comparação usa apenas a Rede de Pesquisa, porque a referência de mercado é de Pesquisa; as campanhas de Display e Demand Gen aparecem à parte no detalhamento por plataforma.</div>
+    <div class="nota"><b>Fontes.</b> Google: ${BENCH.Google.fonte} (${BENCH.Google.met}). Meta: ${BENCH.Meta.fonte} (${BENCH.Meta.met}). LinkedIn: ${BENCH.LinkedIn.fonte} (${BENCH.LinkedIn.met}). Onde a fonte não declara o método, a comparação é indicativa, não exata.</div>
+    </div>
+  </div>`+rodape('Dados: plataformas de mídia e RD Station · consolidado pela Communitas'));
+}
+
+/* ---------- 2 e 3. Evolucao mensal ---------- */
+function slideEvolucao(tipo,linhas,titulo,sub,nota){
+  const tot=linhas.reduce((a,l)=>({l:a.l+Number(l.leads),i:a.i+Number(l.investimento)}),{l:0,i:0});
+  const mediana=arr=>{const v=arr.filter(x=>x!==null&&x!==undefined).map(Number).sort((a,b)=>a-b);
+    if(!v.length) return null; const m=Math.floor(v.length/2);
+    return v.length%2?v[m]:(v[m-1]+v[m])/2;};
+  const mM=mediana(linhas.map(l=>l.ctr_meta)), mG=mediana(linhas.map(l=>l.ctr_google)), mL=mediana(linhas.map(l=>l.ctr_linkedin));
+  const cel=(v,b)=>v===null?'<span class="z">não rodou</span>':`<span class="${Number(v)>=b?'g':''}">${P(v)}</span>`;
+  return slide(cabecalho(titulo,sub,'Evolução mensal')+
+  `<div class="corpo">
+    <table>
+      <thead><tr><th>Mês</th><th>Leads</th><th>Investimento</th><th>CPL</th><th>CTR Google</th><th>CTR Meta</th><th>CTR LinkedIn</th><th>Campanhas</th></tr></thead>
+      <tbody>
+      ${linhas.map(l=>`<tr><td>${rotulo(l.mes)}</td><td>${N(l.leads)}</td><td>${BRL(l.investimento)}</td>
+        <td>${l.cpl!==null?BRL2(l.cpl):'<span class="z">sem dado</span>'}</td>
+        <td>${cel(l.ctr_google,BENCH.Google.v)}</td><td>${cel(l.ctr_meta,BENCH.Meta.v)}</td><td>${cel(l.ctr_linkedin,BENCH.LinkedIn.v)}</td>
+        <td>${N(l.campanhas)}</td></tr>`).join('')}
+      <tr class="total"><td>Semestre</td><td>${N(tot.l)}</td><td>${BRL(tot.i)}</td><td>${BRL2(tot.i/tot.l)}</td>
+        <td>${P(mG)}</td><td>${P(mM)}</td><td>${P(mL)}</td><td></td></tr>
+      <tr class="bench"><td>Referência de mercado</td><td colspan="3">comparação por plataforma</td>
+        <td>${P(BENCH.Google.v)}</td><td>${P(BENCH.Meta.v)}</td><td>${P(BENCH.LinkedIn.v)}</td><td></td></tr>
+      </tbody>
+    </table>
+    <div class="nota">${nota}</div>
+  </div>`+rodape('CTR mediano entre campanhas · CPL = investimento do mês dividido pelos leads do mês · campanhas institucionais excluídas'));
+}
+
+/* ---------- 4. Por plataforma, com exemplos ---------- */
+// O nome cru da campanha nao diz nada ao cliente. O que importa e o formato,
+// que e o que explica a diferenca de CTR entre duas campanhas do mesmo curso.
+function formato(c){
+  const n=(c||'').toLowerCase();
+  if(n.startsWith('search')) return 'Rede de Pesquisa';
+  if(n.startsWith('display')) return 'Display e Demand Gen';
+  if(n.includes('lkd')||n.includes('linkedin')) return 'LinkedIn, geração de leads';
+  return 'Meta, geração de leads';
+}
+function slidePlataformas(geral,gsd,ex){
+  const bloco=p=>{
+    const l=geral.find(x=>x.plataforma===p); if(!l) return '';
+    const b=BENCH[p], linhas=ex[p]||[];
+    const extra=(p==='Google')?`<div class="mini" style="margin-bottom:6px">Rede de Pesquisa ${P(gsd.find(g=>g.formato==='Rede de Pesquisa').ctr_mediano)} · Display e Demand Gen ${P(gsd.find(g=>g.formato==='Display e Demand Gen').ctr_mediano)}</div>`:'';
+    return `<div>
+      <h2>${p} <span>mediana ${P(l.ctr_mediano)} · mercado ${P(b.v)}</span></h2>
+      ${extra}
+      <div class="mini" style="margin-bottom:4px">Metade das campanhas ficou entre ${P(l.ctr_p25)} e ${P(l.ctr_p75)}</div>
+      <table>
+        <thead><tr><th>Campanha</th><th>CTR</th><th>Impressões</th></tr></thead>
+        <tbody>
+        ${['CTR','ESCALA'].map(d=>{
+          const g=linhas.filter(x=>x.destaque===d);
+          if(!g.length) return '';
+          return `<tr><td colspan="3" class="destaque" style="padding-top:8px;border:0">${d==='CTR'?'Maior CTR':'Maior escala'}</td></tr>`+
+            g.map(x=>`<tr><td>${x.curso}<div class="mini" style="font-size:10px">${formato(x.campanha)}</div></td>
+              <td><b>${P(x.ctr)}</b></td><td>${N(x.impressoes)}</td></tr>`).join('');
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  };
+  return slide(cabecalho('Onde o CTR se sustenta, campanha a campanha',
+    'Para cada plataforma, as campanhas de maior CTR e as de maior escala','Por plataforma')+
+  `<div class="corpo">
+    <div class="tres">${bloco('Google')}${bloco('Meta')}${bloco('LinkedIn')}</div>
+    <div class="nota"><b>Maior CTR e maior escala não são a mesma coisa, e nenhuma das duas é o erro.</b> As campanhas de maior alcance costumam ter CTR menor, porque falam com um público mais amplo, que ainda não conhece o curso. É o que acontece nos MBAs no Meta: as duas campanhas de maior escala do semestre rodaram na faixa de 0,8% a 1,2% de CTR e, juntas, somaram 1,34 milhão de impressões e cerca de 2 mil leads registrados na própria plataforma. As campanhas de maior CTR falam com um público mais quente e menor. A leitura correta é a das duas juntas, e não a de um número só.</div>
+  </div>`+rodape('Campanhas com pelo menos 20 mil impressões no semestre'));
+}
+
+async function montar(){
+  const ini='2026-01-01', fim='2026-06-30';
+  const [geral,gsd,evC,evM,exM,exG,exL]=await Promise.all([
+    sb.rpc('consolidado_plataforma',{p_ini:ini,p_fim:fim,p_tipo:null}),
+    sb.rpc('google_search_display',{p_ini:ini,p_fim:fim}),
+    sb.rpc('evolucao_mensal_ctr',{p_ini:ini,p_fim:fim,p_tipo:'Curso'}),
+    sb.rpc('evolucao_mensal_ctr',{p_ini:ini,p_fim:fim,p_tipo:'MBA'}),
+    sb.rpc('campanhas_exemplo',{p_ini:ini,p_fim:fim,p_plataforma:'Meta'}),
+    sb.rpc('campanhas_exemplo',{p_ini:ini,p_fim:fim,p_plataforma:'Google'}),
+    sb.rpc('campanhas_exemplo',{p_ini:ini,p_fim:fim,p_plataforma:'LinkedIn'})
+  ]);
+  const err=[geral,gsd,evC,evM,exM,exG,exL].find(r=>r.error);
+  if(err){document.getElementById('root').innerHTML='<p style="padding:40px">Erro: '+err.error.message+'</p>';return;}
+  const ex={Meta:exM.data,Google:exG.data,LinkedIn:exL.data};
+  const root=document.getElementById('root'); root.innerHTML='';
+  root.appendChild(slideConsolidado(geral.data,gsd.data));
+  root.appendChild(slideEvolucao('Curso',evC.data,'Cursos de curta duração, mês a mês',
+    'O CTR sobe e o custo por lead cai ao longo do semestre',
+    '<b>O que a tabela mostra.</b> O CTR mediano no Meta subiu de 1,63% em janeiro para 1,89% em junho, e o custo por lead caiu de R$ 5,51 para R$ 4,59 no mesmo período. Os dois movimentos na mesma direção indicam anúncio mais relevante para o público, e não apenas leilão mais barato. Junho foi o melhor mês do semestre nos dois indicadores. Nenhum curso de curta duração rodou Google no período, o que deixa esse canal como oportunidade ainda não testada para essa linha.'));
+  root.appendChild(slideEvolucao('MBA',evM.data,'MBAs, mês a mês',
+    'O CTR se mantém estável nas três plataformas ao longo do semestre',
+    '<b>O que a tabela mostra.</b> No Google, o CTR mediano dos MBAs fica entre 15% e 30% ao longo de todo o semestre, sempre bem acima da referência de mercado. No Meta ele se mantém na faixa de 1,1% a 1,9%, com custo por lead maior que o dos cursos de curta duração, o que é esperado num produto de ticket e ciclo de decisão maiores. <b>Abril é um mês atípico:</b> apenas uma campanha ativa e R$ 1.140 investidos, por isso os 84 leads do mês não são comparáveis aos demais.'));
+  root.appendChild(slidePlataformas(geral.data,gsd.data,ex));
+  document.title='Vanzolini_Qualidade_CTR_1sem2026';
+  window.__ok=true;
+}
+montar();
+</script>
+</body>
+</html>
