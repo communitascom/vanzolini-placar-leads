@@ -82,7 +82,7 @@ function bloco(titulo, linhas, total){
 function pagina(mes, todas, totMBA, totCurso){
   const [ano,m]=mes.split('-');
   const mbas=todas.filter(l=>l.tipo==='MBA');
-  const cursos=todas.filter(l=>l.tipo!=='MBA');
+  const cursos=todas.filter(l=>l.tipo==='Curso');
   const el=document.createElement('div');
   el.className='pag';
   el.innerHTML=`
