@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Cursos com turmas do Professor | Mídia, posicionamento e captura</title>
+<title>Cursos com turmas do Professor | Mídia por turma, posicionamento e captura</title>
 <style>
 :root{
   --primary:#32327F; --unidade:#16D6BA;
@@ -10,44 +10,50 @@
   --ink:#2B2B32; --body:#565758; --muted:#808285;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Lato',-apple-system,Segoe UI,sans-serif;color:var(--body);font-size:10pt;line-height:1.4;background:#fff}
-.pag{width:210mm;height:297mm;padding:11mm 12mm 8mm;background:#fff;display:flex;flex-direction:column}
+body{font-family:'Lato',-apple-system,Segoe UI,sans-serif;color:var(--body);font-size:9pt;line-height:1.4;background:#fff}
+.pag{width:297mm;height:210mm;padding:8mm 9mm 6mm;background:#fff;display:flex;flex-direction:column}
 
-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--border);padding-bottom:9px;margin-bottom:13px}
-header img{height:38px}
-h1{font-size:16pt;color:var(--primary);line-height:1.15;font-weight:700}
-header .sub{font-size:9.5pt;color:var(--body);margin-top:3px}
-header .per{text-align:right;font-size:8.5pt;color:var(--muted);white-space:nowrap}
-header .per b{display:block;font-size:12pt;color:var(--primary)}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--border);padding-bottom:7px;margin-bottom:9px}
+header img{height:36px}
+h1{font-size:15pt;color:var(--primary);line-height:1.1;font-weight:700}
+header .sub{font-size:9pt;color:var(--body);margin-top:2px}
+header .per{text-align:right;font-size:8pt;color:var(--muted);white-space:nowrap}
+header .per b{display:block;font-size:11pt;color:var(--primary)}
 
-h2{font-size:11pt;color:var(--primary);margin:16px 0 6px;font-weight:700}
+h2{font-size:10pt;color:var(--primary);margin:0 0 5px;font-weight:700}
+h2.sec{margin-top:9px}
 
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.kpi{border:1px solid var(--border);border-top:4px solid var(--unidade);padding:7px 9px}
-.kpi .v{font-size:15pt;font-weight:700;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
-.kpi .l{font-size:7pt;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:9px}
+.kpi{border:1px solid var(--border);border-top:3px solid var(--unidade);padding:5px 8px}
+.kpi .v{font-size:14pt;font-weight:700;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:6.5pt;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
 
-table{width:100%;border-collapse:collapse;font-size:8.2pt}
-th,td{padding:3.2px 5px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+.g2{display:grid;grid-template-columns:1.42fr 1fr;gap:10px;align-items:start}
+.col{min-width:0}
+
+table{width:100%;border-collapse:collapse;font-size:7.2pt}
+th,td{padding:2.1px 4px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
 th:first-child,td:first-child{text-align:left;white-space:normal}
-th{background:var(--primary);color:#fff;font-size:7pt;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
+th{background:var(--primary);color:#fff;font-size:6.5pt;text-transform:uppercase;letter-spacing:.2px;font-weight:700}
 td{font-variant-numeric:tabular-nums}
-tr.plat td{color:var(--muted);font-size:7.8pt}
-tr.plat td:first-child{padding-left:14px}
-tr.tot td,tr.solo td{font-weight:700;color:var(--ink);background:var(--surface2);border-bottom:1px solid var(--border-strong)}
+tr.turma td{color:var(--muted)}
+tr.turma td:first-child{padding-left:12px}
+tr.tot td{font-weight:700;color:var(--ink);background:var(--surface2);border-bottom:1px solid var(--border-strong)}
+tr.geral td{font-weight:700;color:#fff;background:var(--primary)}
 table.seo th:nth-child(n+4),table.seo td:nth-child(n+4){text-align:left}
 .z{color:var(--muted)}
 
-.guia{border:1px solid var(--border);border-left:5px solid var(--unidade);padding:9px 12px;margin-top:6px}
-.guia .link{font-size:8pt;color:var(--primary);word-break:break-all;margin-bottom:6px}
-.guia ul{list-style:none;font-size:8.5pt}
-.guia li{padding:3px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px}
-.guia li:last-child{border-bottom:0}
-.guia li b{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.card{border:1px solid var(--border);border-left:4px solid var(--unidade);padding:6px 10px;background:#fff;margin-top:5px}
+.card .link{font-size:7pt;color:var(--primary);word-break:break-all;margin-bottom:4px}
+.card ul{list-style:none;font-size:7.2pt}
+.card li{padding:1.6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px}
+.card li:last-child{border-bottom:0}
+.card li b{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 
-.rodape{margin-top:auto;padding-top:6px;border-top:1px solid var(--border);font-size:7pt;color:var(--muted);display:flex;justify-content:space-between}
+.nota{font-size:6.2pt;color:var(--muted);margin-top:4px;line-height:1.35}
+.rodape{margin-top:auto;padding-top:5px;border-top:1px solid var(--border);font-size:6.8pt;color:var(--muted);display:flex;justify-content:space-between}
 
-@page{size:A4 portrait;margin:0}
+@page{size:A4 landscape;margin:0}
 @media print{tr{page-break-inside:avoid}}
 </style>
 </head>
@@ -57,7 +63,7 @@ table.seo th:nth-child(n+4),table.seo td:nth-child(n+4){text-align:left}
 <header>
   <div>
     <h1>Cursos com turmas do Professor</h1>
-    <div class="sub">Mídia paga, posicionamento orgânico e captura de leads</div>
+    <div class="sub">Mídia paga por turma, posicionamento orgânico e captura de leads</div>
   </div>
   <div class="per">Período<b>Jan a jun de 2026</b></div>
   <img src="data:image/png;base64,LOGO_B64" alt="Fundação Vanzolini">
@@ -65,67 +71,91 @@ table.seo th:nth-child(n+4),table.seo td:nth-child(n+4){text-align:left}
 
 <div class="kpis">
   <div class="kpi"><div class="v">5</div><div class="l">Cursos</div></div>
+  <div class="kpi"><div class="v">11</div><div class="l">Turmas com mídia</div></div>
   <div class="kpi"><div class="v">22</div><div class="l">Campanhas</div></div>
   <div class="kpi"><div class="v">R$ 23.819</div><div class="l">Investimento</div></div>
   <div class="kpi"><div class="v">2.850</div><div class="l">Leads</div></div>
-  <div class="kpi"><div class="v">R$ 8,36</div><div class="l">CPL médio</div></div>
 </div>
 
-<h2>Mídia paga por curso e plataforma</h2>
-<table>
-<thead>
-<tr><th>Curso e plataforma</th><th>Camp.</th><th>Criativos</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Investimento</th><th>Leads</th><th>CPL</th></tr>
-</thead>
-<tbody>
-  <tr class="tot"><td>Green Belt Lean Seis Sigma</td><td>9</td><td></td><td>669.534</td><td>7.947</td><td>1,19%</td><td>R$ 1,56</td><td>R$ 12.431</td><td>1.587</td><td>R$ 7,83</td></tr>
-  <tr class="plat"><td>Meta</td><td>6</td><td>n/d</td><td>652.103</td><td>7.787</td><td>1,19%</td><td>R$ 1,48</td><td>R$ 11.539</td><td></td><td></td></tr>
-  <tr class="plat"><td>LinkedIn</td><td>3</td><td>8</td><td>17.431</td><td>160</td><td>0,92%</td><td>R$ 5,58</td><td>R$ 893</td><td></td><td></td></tr>
-  <tr class="tot"><td>Upgrade para Black Belt em Lean Seis Sigma</td><td>3</td><td></td><td>230.691</td><td>2.642</td><td>1,15%</td><td>R$ 1,79</td><td>R$ 4.718</td><td>392</td><td>R$ 12,03</td></tr>
-  <tr class="plat"><td>Meta</td><td>2</td><td>n/d</td><td>167.304</td><td>2.140</td><td>1,28%</td><td>R$ 1,27</td><td>R$ 2.715</td><td></td><td></td></tr>
-  <tr class="plat"><td>LinkedIn</td><td>1</td><td>6</td><td>63.387</td><td>502</td><td>0,79%</td><td>R$ 3,99</td><td>R$ 2.003</td><td></td><td></td></tr>
-  <tr class="solo"><td>Yellow Belt Lean Seis Sigma <span class="z" style="font-weight:400">(só Meta)</span></td><td>6</td><td>n/d</td><td>148.390</td><td>2.568</td><td>1,73%</td><td>R$ 1,40</td><td>R$ 3.594</td><td>332</td><td>R$ 10,83</td></tr>
-  <tr class="tot"><td>Experimentos na Prática com JASP</td><td>2</td><td></td><td>210.789</td><td>3.210</td><td>1,52%</td><td>R$ 0,62</td><td>R$ 1.997</td><td>333</td><td>R$ 6,00</td></tr>
-  <tr class="plat"><td>Meta</td><td>1</td><td>n/d</td><td>209.914</td><td>3.207</td><td>1,53%</td><td>R$ 0,60</td><td>R$ 1.926</td><td></td><td></td></tr>
-  <tr class="plat"><td>LinkedIn</td><td>1</td><td>4</td><td>875</td><td>3</td><td>0,34%</td><td>R$ 23,53</td><td>R$ 71</td><td></td><td></td></tr>
-  <tr class="solo"><td>Lean: Ferramentas para Excelência Operacional <span class="z" style="font-weight:400">(só Meta)</span></td><td>2</td><td>n/d</td><td>114.932</td><td>1.763</td><td>1,53%</td><td>R$ 0,61</td><td>R$ 1.079</td><td>206</td><td>R$ 5,24</td></tr>
-</tbody>
-</table>
+<div class="g2">
+  <div class="col">
+    <h2>Mídia paga por turma e plataforma</h2>
+    <table>
+    <thead>
+    <tr><th>Curso e turma</th><th>Camp.</th><th>Janela</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Investim.</th><th>Leads plat.</th><th>Leads RD</th><th>CPL</th></tr>
+    </thead>
+    <tbody>
+      <tr class="turma"><td>T101 · Meta</td><td>2</td><td>05/01 a 23/01</td><td>142.391</td><td>1.633</td><td>1,15%</td><td>R$ 1,48</td><td>R$ 2.424</td><td>226</td><td></td><td></td></tr>
+      <tr class="turma"><td>T102 · Meta</td><td>2</td><td>27/01 a 13/03</td><td>277.844</td><td>2.800</td><td>1,01%</td><td>R$ 1,32</td><td>R$ 3.704</td><td>442</td><td></td><td></td></tr>
+      <tr class="turma"><td>T103 · Meta</td><td>1</td><td>17/04 a 26/05</td><td>186.700</td><td>2.639</td><td>1,41%</td><td>R$ 1,58</td><td>R$ 4.163</td><td>387</td><td></td><td></td></tr>
+      <tr class="turma"><td>T103 · LinkedIn</td><td>1</td><td>07/05 a 08/05</td><td>1.713</td><td>12</td><td>0,70%</td><td>R$ 23,13</td><td>R$ 278</td><td>0</td><td></td><td></td></tr>
+      <tr class="turma"><td>T99 continuada · LinkedIn</td><td>1</td><td>28/04 a 30/04</td><td>2.303</td><td>16</td><td>0,69%</td><td>R$ 12,19</td><td>R$ 195</td><td>2</td><td></td><td></td></tr>
+      <tr class="turma"><td>T104 · Meta</td><td>1</td><td>10/06 a 30/06</td><td>45.168</td><td>715</td><td>1,58%</td><td>R$ 1,74</td><td>R$ 1.247</td><td>138</td><td></td><td></td></tr>
+      <tr class="turma"><td>T104 · LinkedIn</td><td>1</td><td>18/06 a 30/06</td><td>13.415</td><td>132</td><td>0,98%</td><td>R$ 3,18</td><td>R$ 420</td><td>32</td><td></td><td></td></tr>
+      <tr class="tot"><td>Green Belt Lean Seis Sigma</td><td>9</td><td>05/01 a 30/06</td><td>669.534</td><td>7.947</td><td>1,19%</td><td>R$ 1,56</td><td>R$ 12.431</td><td>1.227</td><td>1.587</td><td>R$ 7,83</td></tr>
 
-<h2>Posicionamento orgânico nos temas da linha</h2>
-<table class="seo">
-<thead>
-<tr><th>Tema</th><th>Volume mensal</th><th>Dificuldade</th><th>Vanzolini</th><th>Melhor concorrente posicionado</th><th>Diagnóstico</th></tr>
-</thead>
-<tbody>
-  <tr><td>Lean Six Sigma</td><td>5.400</td><td>23</td><td>2ª</td><td>FM2S (1ª)</td><td>Paridade competitiva</td></tr>
-  <tr><td>Black Belt</td><td>5.400</td><td>17</td><td>8ª</td><td>FM2S (1ª)</td><td>Desvantagem competitiva</td></tr>
-  <tr><td>Green Belt</td><td>4.400</td><td>16</td><td>3ª</td><td>FM2S (9ª)</td><td>Liderança consolidada</td></tr>
-  <tr><td>DMAIC</td><td>3.600</td><td>19</td><td>Não posicionada</td><td>FM2S (2ª)</td><td>Ausência de cobertura</td></tr>
-  <tr><td>JASP</td><td>1.900</td><td>40</td><td>Não posicionada</td><td>Sem concorrente setorial</td><td>Intenção incompatível</td></tr>
-  <tr><td>Melhoria contínua</td><td>1.300</td><td>24</td><td>4ª</td><td>Sem concorrente no top 10</td><td>Cobertura indireta</td></tr>
-  <tr><td>Excelência operacional</td><td>720</td><td>17</td><td>Não posicionada</td><td>FM2S (6ª)</td><td>Ausência de cobertura</td></tr>
-  <tr><td>IA aplicada à melhoria contínua</td><td class="z">Sem dados</td><td class="z">Não aplicável</td><td class="z">Não aplicável</td><td class="z">Não aplicável</td><td>Demanda inexistente</td></tr>
-</tbody>
-</table>
+      <tr class="turma"><td>CCUPON T42 · Meta</td><td>2</td><td>12/01 a 31/03</td><td>167.304</td><td>2.140</td><td>1,28%</td><td>R$ 1,27</td><td>R$ 2.715</td><td>213</td><td></td><td></td></tr>
+      <tr class="turma"><td>CCUPON T42 · LinkedIn</td><td>1</td><td>24/02 a 26/03</td><td>63.387</td><td>502</td><td>0,79%</td><td>R$ 3,99</td><td>R$ 2.003</td><td>100</td><td></td><td></td></tr>
+      <tr class="tot"><td>Upgrade para Black Belt em Lean Seis Sigma</td><td>3</td><td>12/01 a 31/03</td><td>230.691</td><td>2.642</td><td>1,15%</td><td>R$ 1,79</td><td>R$ 4.718</td><td>313</td><td>392</td><td>R$ 12,03</td></tr>
 
-<h2>Guia Lean Seis Sigma</h2>
-<div class="guia">
-  <div class="link">vanzolini.org.br/blog/lean-seis-sigma-estruturacao-precisao-e-impacto/</div>
-  <ul>
-    <li><span>Pessoas captadas pelo guia, de abril de 2025 a julho de 2026</span><b>22</b></li>
-    <li><span>Conversões brutas registradas do guia no mesmo período</span><b>59</b></li>
-    <li><span>Conversões do guia em 2026</span><b>15</b></li>
-    <li><span>Pessoas captadas pelo pop-up do guia, no ar em 13 e 14/08/2025</span><b>13</b></li>
-    <li><span>Dessas 35 pessoas, quantas converteram depois em algum curso</span><b>7</b></li>
-    <li><span>Cursos diferentes atingidos por essas 7 pessoas</span><b>7</b></li>
-    <li><span>Cliques orgânicos da página do guia no semestre</span><b>59</b></li>
-    <li><span>Cliques orgânicos das 28 páginas da linha Lean Seis Sigma</span><b>4.914</b></li>
-    <li><span>Participação da página do guia no tráfego da linha</span><b>1,2%</b></li>
-  </ul>
+      <tr class="turma"><td>T26 · Meta</td><td>2</td><td>05/01 a 30/01</td><td>50.542</td><td>821</td><td>1,62%</td><td>R$ 1,17</td><td>R$ 962</td><td>64</td><td></td><td></td></tr>
+      <tr class="turma"><td>T27 · Meta</td><td>1</td><td>04/03 a 29/03</td><td>55.432</td><td>748</td><td>1,35%</td><td>R$ 1,70</td><td>R$ 1.269</td><td>81</td><td></td><td></td></tr>
+      <tr class="turma"><td>T28 · Meta</td><td>3</td><td>18/05 a 10/06</td><td>42.416</td><td>999</td><td>2,36%</td><td>R$ 1,36</td><td>R$ 1.363</td><td>114</td><td></td><td></td></tr>
+      <tr class="tot"><td>Yellow Belt Lean Seis Sigma</td><td>6</td><td>05/01 a 10/06</td><td>148.390</td><td>2.568</td><td>1,73%</td><td>R$ 1,40</td><td>R$ 3.594</td><td>259</td><td>332</td><td>R$ 10,83</td></tr>
+
+      <tr class="turma"><td>T1 · Meta</td><td>1</td><td>24/03 a 07/05</td><td>209.914</td><td>3.207</td><td>1,53%</td><td>R$ 0,60</td><td>R$ 1.926</td><td>350</td><td></td><td></td></tr>
+      <tr class="turma"><td>T1 · LinkedIn</td><td>1</td><td>24/03 a 25/03</td><td>875</td><td>3</td><td>0,34%</td><td>R$ 23,53</td><td>R$ 71</td><td>0</td><td></td><td></td></tr>
+      <tr class="tot"><td>Experimentos na Prática com JASP</td><td>2</td><td>24/03 a 07/05</td><td>210.789</td><td>3.210</td><td>1,52%</td><td>R$ 0,62</td><td>R$ 1.997</td><td>350</td><td>333</td><td>R$ 6,00</td></tr>
+
+      <tr class="turma"><td>T25 · Meta</td><td>2</td><td>11/05 a 19/06</td><td>114.932</td><td>1.763</td><td>1,53%</td><td>R$ 0,61</td><td>R$ 1.079</td><td>157</td><td></td><td></td></tr>
+      <tr class="tot"><td>Lean: Ferramentas para Excelência Operacional</td><td>2</td><td>11/05 a 19/06</td><td>114.932</td><td>1.763</td><td>1,53%</td><td>R$ 0,61</td><td>R$ 1.079</td><td>157</td><td>206</td><td>R$ 5,24</td></tr>
+
+      <tr class="geral"><td>Total</td><td>22</td><td>05/01 a 30/06</td><td>1.374.336</td><td>18.130</td><td>1,32%</td><td>R$ 1,31</td><td>R$ 23.819</td><td>2.306</td><td>2.850</td><td>R$ 8,36</td></tr>
+    </tbody>
+    </table>
+    <div class="nota">
+      A T104 do Green Belt seguia no ar em 30/06, então os números dela param na data de corte. Leads plat. é o que Meta e LinkedIn reportam; Leads RD é pessoa única por curso pela régua anti-refire de 90 dias, e por isso existe só na linha do curso. CTR, CPC e CPL recalculados sobre impressões, cliques e investimento, nunca a coluna pronta de cada plataforma.
+    </div>
+  </div>
+
+  <div class="col">
+    <h2>Posicionamento orgânico nos temas da linha</h2>
+    <table class="seo">
+    <thead>
+    <tr><th>Tema</th><th>Volume mensal</th><th>Dific.</th><th>Vanzolini</th><th>Melhor concorrente</th><th>Diagnóstico</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Lean Six Sigma</td><td>5.400</td><td>23</td><td>2ª</td><td>FM2S (1ª)</td><td>Paridade competitiva</td></tr>
+      <tr><td>Black Belt</td><td>5.400</td><td>17</td><td>8ª</td><td>FM2S (1ª)</td><td>Desvantagem competitiva</td></tr>
+      <tr><td>Green Belt</td><td>4.400</td><td>16</td><td>3ª</td><td>FM2S (9ª)</td><td>Liderança consolidada</td></tr>
+      <tr><td>DMAIC</td><td>3.600</td><td>19</td><td>Não posicionada</td><td>FM2S (2ª)</td><td>Ausência de cobertura</td></tr>
+      <tr><td>JASP</td><td>1.900</td><td>40</td><td>Não posicionada</td><td>Sem concorrente setorial</td><td>Intenção incompatível</td></tr>
+      <tr><td>Melhoria contínua</td><td>1.300</td><td>24</td><td>4ª</td><td>Sem concorrente no top 10</td><td>Cobertura indireta</td></tr>
+      <tr><td>Excelência operacional</td><td>720</td><td>17</td><td>Não posicionada</td><td>FM2S (6ª)</td><td>Ausência de cobertura</td></tr>
+      <tr><td>IA aplicada à melhoria contínua</td><td class="z">Sem dados</td><td class="z">n/a</td><td class="z">Não aplicável</td><td class="z">Não aplicável</td><td>Demanda inexistente</td></tr>
+    </tbody>
+    </table>
+
+    <h2 class="sec">Guia Lean Seis Sigma</h2>
+    <div class="card">
+      <div class="link">vanzolini.org.br/blog/lean-seis-sigma-estruturacao-precisao-e-impacto/</div>
+      <ul>
+        <li><span>Pessoas captadas pelo guia, de abril de 2025 a julho de 2026</span><b>22</b></li>
+        <li><span>Conversões brutas registradas do guia no mesmo período</span><b>59</b></li>
+        <li><span>Conversões do guia em 2026</span><b>15</b></li>
+        <li><span>Pessoas captadas pelo pop-up, no ar em 13 e 14/08/2025</span><b>13</b></li>
+        <li><span>Dessas 35 pessoas, quantas converteram depois em algum curso</span><b>7</b></li>
+        <li><span>Cursos diferentes atingidos por essas 7 pessoas</span><b>7</b></li>
+        <li><span>Cliques orgânicos da página do guia no semestre</span><b>59</b></li>
+        <li><span>Cliques orgânicos das 28 páginas da linha Lean Seis Sigma</span><b>4.914</b></li>
+        <li><span>Participação da página do guia no tráfego da linha</span><b>1,2%</b></li>
+      </ul>
+    </div>
+  </div>
 </div>
 
 <div class="rodape">
-  <span>Fundação Vanzolini | n/d: criativo por campanha não é exposto pela API do Meta</span>
+  <span>Fundação Vanzolini | Comunicação e performance</span>
   <span>Fontes: Meta Ads, LinkedIn Ads, RD Station, Search Console e pesquisa de palavras-chave. Mídia de 01/01 a 30/06/2026.</span>
 </div>
 </div>
