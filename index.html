@@ -97,6 +97,31 @@
   .rodape b{color:var(--txt)}
   .loading{padding:40px;text-align:center;color:var(--sub)}
   .erro{padding:14px;background:var(--verm-bg);color:var(--verm);border-radius:10px;margin-bottom:14px}
+
+  .so-print{display:none}
+  @media print{
+    @page{size:A4 landscape;margin:8mm}
+    body{background:#fff;padding:0;font-size:10.5px}
+    .barra,#erro,.alerta,header .toggle,#tagTopo{display:none!important}
+    header{background:#fff;border:none;border-bottom:2px solid var(--azul);
+      border-radius:0;padding:0 0 10px;margin-bottom:10px}
+    .so-print{display:block;font-size:11px;color:var(--sub);text-align:right;line-height:1.5}
+    .so-print b{color:var(--azul)}
+    .cards{gap:8px;margin-bottom:10px}
+    .kpi{padding:10px 12px}
+    .kpi .val{font-size:20px}
+    .tabela{max-height:none;overflow:visible;border:none;border-radius:0}
+    table{min-width:0}
+    th{position:static;background:var(--azul)!important;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact}
+    th.curso,td.curso{position:static}
+    .total td{position:static}
+    th,td{padding:4px 7px;font-size:9.5px}
+    tr{page-break-inside:avoid}
+    thead{display:table-header-group}
+    tbody tr:hover,tbody tr:hover td.curso{background:inherit}
+    .rodape{font-size:9px}
+  }
 </style>
 </head>
 <body>
@@ -114,8 +139,10 @@
       <a class="toggle" href="historico.html" style="text-decoration:none">📈 Histórico &amp; investimento</a>
       <a class="toggle" href="historico-dinamico.html" style="text-decoration:none">⚡ Histórico Dinâmico</a>
       <a class="toggle" href="conversoes.html" style="text-decoration:none">🔗 Conversões por curso</a>
+      <button class="toggle" onclick="window.print()" title="Gera um PDF do placar pelo diálogo de impressão">📄 Salvar PDF</button>
       <div class="tag" id="tagTopo">conectando…</div>
     </div>
+    <div class="so-print" id="printInfo"></div>
   </header>
 
   <div class="barra">
@@ -217,6 +244,11 @@ async function carregar(){
   document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos no período`;
   document.getElementById('atualizado').textContent =
     `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  const br = iso => iso ? iso.split('-').reverse().join('/') : '';
+  document.getElementById('printInfo').innerHTML =
+    `<b>Placar de Leads · Fundação Vanzolini</b><br>` +
+    `Período: ${br(ini)} a ${br(fim)}<br>` +
+    `Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   renderizar(data);
 }
 
