@@ -4,60 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Placar de Leads · Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet">
 <style>
   :root{
-    --azul:#003a70; --azul2:#0060b0; --claro:#eef3f8; --linha:#e2e8f0;
-    --txt:#1f2b3a; --sub:#64748b; --verde:#1a9d5a; --verde-bg:#e7f6ee;
-    --verm:#c73a3a; --verm-bg:#fbe9e9; --zebra:#f7fafd;
+    --md-primary:#32327F; --md-primary-hover:#4848B5; --md-background:#F3F3FB;
+    --md-surface-container:#F8F7FC; --md-on-surface:#1D1B2C; --md-on-surface-variant:#5F5E76;
+    --md-outline:#DEDDEE; --md-shape-xs:4px; --md-shape-sm:8px; --md-shape-md:12px;
+    --md-shape-lg:16px; --md-shape-full:999px;
+    --md-elev-1:0 1px 2px rgba(6,6,83,.06),0 1px 3px rgba(6,6,83,.08);
+    --azul:var(--md-primary); --azul2:var(--md-primary-hover); --claro:var(--md-background); --linha:var(--md-outline);
+    --txt:var(--md-on-surface); --sub:var(--md-on-surface-variant);
+    --verde:#218A4E; --verde-bg:#E3F5EA; --verm:#C23B34; --verm-bg:#FBEAE8; --zebra:var(--md-surface-container);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:#f6f8fb;color:var(--txt);font-size:13px;padding:20px}
+  body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--md-background);color:var(--txt);font-size:13px;padding:20px}
+  h1,h2,h3{font-family:'Inter Tight','Work Sans',sans-serif}
+  .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;display:inline-block;line-height:1;vertical-align:middle;-webkit-font-smoothing:antialiased;font-size:16px}
   .wrap{max-width:1100px;margin:0 auto}
   header{display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:14px;background:var(--claro);border:1px solid #dfe9f5;
-    border-radius:14px;padding:14px 20px}
-  .brand{display:flex;align-items:center;gap:16px}
-  .logo{height:30px}
-  h1{font-size:16px;color:var(--azul);font-weight:700}
+    margin-bottom:16px;background:transparent;border-bottom:1px solid var(--linha);padding:10px 2px 14px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{height:32px}
+  h1{font-size:15px;color:var(--azul);font-weight:600}
   .sub{color:var(--sub);font-size:11px}
-  .btn{background:var(--azul);color:#fff;border:none;border-radius:8px;
-    padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn{background:var(--azul);color:#fff;border:none;border-radius:var(--md-shape-full);
+    padding:8px 18px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
   .btn:hover{background:var(--azul2)}
-  .btn.ghost{background:#fff;color:var(--azul);border:1px solid var(--azul)}
-  .btn.danger{background:#fff;color:var(--verm);border:1px solid var(--verm)}
+  .btn.ghost{background:#fff;color:var(--azul);border:1px solid var(--linha)}
+  .btn.ghost:hover{background:var(--md-background)}
+  .btn.danger{background:#fff;color:var(--verm);border:1px solid #f0c9c9}
 
-  .card{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:20px;max-width:420px;margin:60px auto}
-  .card h2{color:var(--azul);font-size:16px;margin-bottom:6px}
+  .card{background:#fff;border:1px solid var(--linha);border-radius:var(--md-shape-lg);padding:20px;max-width:420px;margin:60px auto;box-shadow:var(--md-elev-1)}
+  .card h2{color:var(--azul);font-size:16px;margin-bottom:6px;font-weight:600}
   .card p{color:var(--sub);font-size:12.5px;margin-bottom:16px;line-height:1.5}
-  .card input{width:100%;border:1px solid var(--linha);border-radius:8px;
-    padding:9px 11px;font-size:14px;margin-bottom:10px}
-  .msg{font-size:12.5px;padding:8px 10px;border-radius:8px;margin-bottom:10px}
-  .msg.ok{background:var(--verde-bg);color:var(--verde)}
-  .msg.err{background:var(--verm-bg);color:var(--verm)}
+  .card input{width:100%;border:1px solid var(--linha);border-radius:var(--md-shape-xs);
+    padding:9px 11px;font-size:14px;margin-bottom:10px;font-family:inherit}
+  .msg{font-size:12.5px;padding:8px 10px;border-radius:var(--md-shape-sm);margin-bottom:10px}
+  .msg.ok{background:var(--verde-bg);color:#0F5C30}
+  .msg.err{background:var(--verm-bg);color:#7A241D}
 
   .barra{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
-  .barra input{flex:1;min-width:200px;border:1px solid var(--linha);border-radius:8px;padding:8px 11px;font-size:13px}
+  .barra input{flex:1;min-width:200px;border:1px solid var(--linha);border-radius:var(--md-shape-xs);padding:8px 11px;font-size:13px;font-family:inherit}
 
-  .tabela{background:#fff;border:1px solid var(--linha);border-radius:12px;overflow:auto}
+  .tabela{background:#fff;border:1px solid var(--linha);border-radius:var(--md-shape-md);overflow:auto;box-shadow:var(--md-elev-1)}
   table{width:100%;border-collapse:collapse;min-width:900px}
-  th,td{padding:8px 10px;text-align:left;white-space:nowrap;font-size:12.5px}
-  th{background:var(--azul);color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+  th,td{padding:8px 10px;text-align:left;white-space:nowrap;font-size:12.5px;border-bottom:1px solid var(--md-outline-variant,#EDECF6)}
+  th{background:var(--md-surface-container);color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;border-bottom:1px solid var(--linha)}
   tbody tr:nth-child(even){background:var(--zebra)}
-  tbody tr:hover{background:#eef4fb}
-  .z{color:#cbd5e1}
+  tbody tr:hover{background:var(--claro)}
+  .z{color:#c3c2d6}
   .acoes{display:flex;gap:6px}
-  .ico{border:1px solid var(--linha);background:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px}
+  .ico{border:1px solid var(--linha);background:#fff;border-radius:var(--md-shape-full);padding:4px 10px;cursor:pointer;font-size:12px;font-family:inherit;display:inline-flex;align-items:center;gap:4px}
   .ico:hover{background:var(--claro)}
 
-  .overlay{position:fixed;inset:0;background:rgba(15,30,50,.45);display:none;align-items:center;justify-content:center;z-index:50}
+  .overlay{position:fixed;inset:0;background:rgba(29,27,44,.5);display:none;align-items:center;justify-content:center;z-index:50}
   .overlay.on{display:flex}
-  .modal{background:#fff;border-radius:14px;width:480px;max-width:92vw;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
-  .modal h3{color:var(--azul);font-size:16px;margin-bottom:14px}
+  .modal{background:#fff;border-radius:var(--md-shape-lg);width:480px;max-width:92vw;padding:22px;box-shadow:0 8px 28px rgba(6,6,83,.22)}
+  .modal h3{color:var(--azul);font-size:16px;margin-bottom:14px;font-weight:600}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .fld{margin-bottom:10px}
-  .fld label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);margin-bottom:3px}
-  .fld input,.fld select{width:100%;border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:13px}
+  .fld label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);margin-bottom:3px;font-weight:600}
+  .fld input,.fld select{width:100%;border:1px solid var(--linha);border-radius:var(--md-shape-xs);padding:8px 10px;font-size:13px;font-family:inherit}
   .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
   .loading{padding:30px;text-align:center;color:var(--sub)}
 </style>
@@ -199,8 +209,8 @@ function renderizar(){
       <td>${r.cursos?.nome || '<span class="z">sem curso</span>'}</td>
       <td>${r.canais?.nome || '<span class="z">sem canal</span>'}</td>
       <td class="acoes">
-        <button class="ico" onclick="abrirEdicao('${r.id}')">✎ editar</button>
-        <button class="ico" onclick="apagar('${r.id}')">🗑</button>
+        <button class="ico" onclick="abrirEdicao('${r.id}')"><span class="material-symbols-outlined" style="font-size:14px">edit</span>editar</button>
+        <button class="ico" onclick="apagar('${r.id}')"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
       </td>
     </tr>`).join('');
 }
