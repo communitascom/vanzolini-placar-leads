@@ -56,6 +56,7 @@ th:hover{background:var(--azul);}
 tbody tr:hover{background:#eeeefb;}
 .scrollt{max-height:430px;overflow:auto;border:1px solid var(--borda);border-radius:11px;}
 .bad{color:var(--verm);font-weight:600;} .good{color:var(--verde);font-weight:600;}
+.z{color:#c3c3d4;}
 .note{background:#eeeefb;border:1px solid #c9c9ee;border-radius:11px;padding:12px 16px;font-size:12.5px;color:var(--navy);margin-top:16px;}
 .tsearch{padding:7px 11px;border:1px solid var(--borda);border-radius:9px;font-size:12px;margin-bottom:10px;width:260px;font-family:inherit;}
 .empty{padding:40px;text-align:center;color:var(--mut);font-size:13px;}
@@ -154,13 +155,19 @@ tbody tr:hover{background:#eeeefb;}
 </div>
 
 <div class="sec">
+<h2><span class="tag">Vendas</span> Conversão e CAC por curso</h2>
+<div class="hint">Matrícula e custo real (mídia + imposto do Meta + assessoria) cruzados com a planilha comercial, por curso, só turmas com matrícula carregada no período filtrado. CAC = custo total ÷ pagantes.</div>
+<div class="card"><div class="scrollt" id="t-vendas"></div></div>
+</div>
+
+<div class="sec">
 <h2><span class="tag">Vendas</span> Pipeline por turma</h2>
-<div class="hint">Base para dimensionar o pipeline antes de cada turma. Clique no cabeçalho para ordenar. "Mediana curso" e "vs mediana" comparam o CPL desta turma contra a mediana das OUTRAS turmas do mesmo curso (histórico completo, não só o período filtrado) — verde é mais barato que o normal do curso, vermelho é mais caro.</div>
+<div class="hint">Base para dimensionar o pipeline antes de cada turma. Clique no cabeçalho para ordenar. "Pagantes" e "CAC" só aparecem nas turmas com matrícula carregada. "Mediana curso" e "vs mediana" comparam o CPL desta turma contra a mediana das OUTRAS turmas do mesmo curso, histórico completo, não só o período filtrado: verde é mais barato que o normal do curso, vermelho é mais caro.</div>
 <input type="text" class="tsearch" id="busca" placeholder="Buscar curso na tabela...">
 <div class="card"><div class="scrollt" id="t-camp"></div></div>
 </div>
 
-<div class="note"><b>Para a visão de vendas completa</b> (conversão lead&#8594;matrícula, CAC e ROI por curso) é necessário cruzar com matrículas/receita do CRM (RD Station). Este painel cobre captação, custo e potencial de pipeline.</div>
+<div class="note"><b>Conversão e CAC</b> (seção Vendas acima) cruzam a planilha comercial da Vanzolini por turma, carga inicial de 03/08/2026 cobrindo 92 turmas de 2025-2026. Turma sem matrícula carregada aparece em branco nas colunas de CAC e conversão, não é erro.</div>
 
 <div class="foot">Leitura ao vivo do Supabase (base <code>communitas</code>) · regra anti-refire de 90 dias (1 lead = 1 e-mail por curso, sem refire nos 90 dias anteriores) · Fundação Vanzolini</div>
 </div>
@@ -231,6 +238,12 @@ function render(){
  for(let i=state.ini;i<=state.fim;i++){const v=cs.reduce((a,h)=>a+(h.vals[i]||0),0);const yy=+DATA.months[i].slice(0,4),mm=+DATA.months[i].slice(5,7);daily.push(v/new Date(yy,mm,0).getDate());}
  const dsort=[...daily].sort((a,b)=>a-b);
  const medDay=dsort.length?(dsort.length%2?dsort[(dsort.length-1)/2]:(dsort[dsort.length/2-1]+dsort[dsort.length/2])/2):0;
+ const vcamps=camps.filter(c=>c.pagantes!=null);
+ const totInsc=vcamps.reduce((a,c)=>a+(c.inscritos||0),0);
+ const totPag=vcamps.reduce((a,c)=>a+(c.pagantes||0),0);
+ const totCustoV=vcamps.reduce((a,c)=>a+(c.custoTotal||0),0);
+ const convGlobal=totInsc?totPag/totInsc*100:null;
+ const cacGlobal=totPag?totCustoV/totPag:null;
  const kpis=[
   {v:N(totLeads),l:'Leads no período',s:(l25+l26>0)?('2025: '+N(l25)+' · 2026: '+N(l26)):'',c:''},
   {v:N(Math.round(medDay)),l:'Mediana diária',s:'leads/dia em mês típico',c:''},
@@ -238,6 +251,8 @@ function render(){
   {v:BRL(inv),l:'Investimento (mkt)',s:'no período',c:''},
   {v:cplMed?'R$ '+cplMed.toFixed(0):'—',l:'CPL mediano/turma',s:'custo por lead',c:''},
   {v:turmas?N(Math.round(totLeads/Math.max(1,turmas))):'—',l:'Leads médios/turma',s:'',c:''},
+  {v:convGlobal!=null?convGlobal.toFixed(0)+'%':'—',l:'Conversão insc.→pagante',s:totPag?N(totPag)+' matrículas':'sem dado comercial',c:''},
+  {v:cacGlobal!=null?'R$ '+cacGlobal.toFixed(0):'—',l:'CAC médio',s:'custo total ÷ matrícula',c:''},
  ];
  document.getElementById('kpis').innerHTML=kpis.map(k=>'<div class="kpi"><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div><div class="s '+k.c+'">'+k.s+'</div></div>').join('');
 
@@ -253,7 +268,7 @@ function render(){
    .filter(x=>x.leads>0).sort((a,b)=>b.leads-a.leads).slice(0,12);
  mkChart('c-topcursos','bar',{labels:ranked.map(t=>t.curso.length>32?t.curso.slice(0,32)+'…':t.curso),
    datasets:[{label:'Leads',data:ranked.map(t=>t.leads),backgroundColor:ranked.map(t=>state.curso&&t.curso===state.curso?AZUL:NAVY)}]},
-  {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true},y:{ticks:{font:{size:10}}}}});
+  {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>ranked[items[0].dataIndex].curso}}},scales:{x:{beginAtZero:true},y:{ticks:{font:{size:10}}}}});
 
  renderPareto();
  renderAltaQueda();
@@ -261,7 +276,7 @@ function render(){
 
  const pts=camps.filter(c=>c.inv>0&&c.leads>0&&c.cpl).map(c=>({x:c.inv,y:c.leads,r:Math.max(4,Math.min(26,Math.sqrt(c.cpl)*2)),curso:c.curso,cpl:c.cpl}));
  mkChart('c-disp','bubble',{datasets:[{label:'Turmas',data:pts,backgroundColor:'rgba(72,72,181,.4)',borderColor:NAVY}]},
-  {plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>{const d=p.raw;return [d.curso.slice(0,40),'Invest: '+BRL(d.x)+' · Leads: '+N(d.y)+' · CPL: R$ '+d.cpl.toFixed(2)];}}}},
+  {plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0].raw.curso,label:p=>{const d=p.raw;return 'Invest: '+BRL(d.x)+' · Leads: '+N(d.y)+' · CPL: R$ '+d.cpl.toFixed(2);}}}},
    scales:{x:{type:'logarithmic',title:{display:true,text:'investimento (R$, escala log)'}},y:{beginAtZero:true,title:{display:true,text:'leads na janela'}}}});
 
  const valid=camps.filter(c=>c.cpl&&c.leads>0);
@@ -272,7 +287,27 @@ function render(){
  document.getElementById('t-best').innerHTML=tbl(best,'good');
  document.getElementById('t-worst').innerHTML=tbl(worst,'bad');
 
+ renderVendas();
  renderCamp();
+}
+
+function renderVendas(){
+ const camps=campSel().filter(c=>c.pagantes!=null);
+ const map={};
+ camps.forEach(c=>{
+   const o=(map[c.curso]=map[c.curso]||{curso:c.curso,turmas:0,inscritos:0,pagantes:0,custo:0,receita:0});
+   o.turmas++; o.inscritos+=c.inscritos||0; o.pagantes+=c.pagantes||0;
+   o.custo+=c.custoTotal||0; o.receita+=c.receita||0;
+ });
+ const arr=Object.values(map).map(o=>Object.assign(o,{
+   conv:o.inscritos?o.pagantes/o.inscritos*100:null,
+   cac:o.pagantes?o.custo/o.pagantes:null,
+   roi:o.custo?o.receita/o.custo:null
+ })).sort((a,b)=>b.pagantes-a.pagantes);
+ const box=document.getElementById('t-vendas');
+ if(!arr.length){box.innerHTML='<div class="empty">Sem matrícula carregada para este filtro ainda. A carga de comercial cobre 92 turmas de 2025-2026, ver Metodologia Leitura Estratégica de Mídia.</div>';return;}
+ box.innerHTML='<table><thead><tr><th>Curso</th><th>Turmas c/ dado</th><th>Inscritos</th><th>Pagantes</th><th>Conversão</th><th>CAC</th><th>Receita</th><th>ROI</th></tr></thead><tbody>'+
+   arr.map(o=>'<tr><td>'+(o.curso.length>38?o.curso.slice(0,38)+'…':o.curso)+'</td><td>'+o.turmas+'</td><td>'+N(o.inscritos)+'</td><td>'+N(o.pagantes)+'</td><td>'+(o.conv!=null?o.conv.toFixed(0)+'%':'—')+'</td><td>'+(o.cac!=null?'R$ '+o.cac.toFixed(2):'—')+'</td><td>'+BRL(o.receita)+'</td><td>'+(o.roi!=null?o.roi.toFixed(1)+'x':'—')+'</td></tr>').join('')+'</tbody></table>';
 }
 
 function renderPerene(){
@@ -290,7 +325,7 @@ function renderPerene(){
  arr.sort((a,b)=> b.idx-a.idx || b.turmas-a.turmas || b.inv-a.inv);
  const pts=arr.map(o=>({x:o.turmas,y:o.inv,r:Math.max(5,Math.min(28,Math.sqrt(o.leads)/3)),curso:o.curso,leads:o.leads}));
  mkChart('c-perene','bubble',{datasets:[{label:'Cursos',data:pts,backgroundColor:'rgba(46,158,91,.38)',borderColor:'#2e9e5b'}]},
-  {plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>{const d=p.raw;return [d.curso.slice(0,40),'Turmas: '+d.x+' · Invest: '+BRL(d.y)+' · Leads: '+N(d.leads)];}}}},
+  {plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>items[0].raw.curso,label:p=>{const d=p.raw;return 'Turmas: '+d.x+' · Invest: '+BRL(d.y)+' · Leads: '+N(d.leads);}}}},
    scales:{x:{beginAtZero:true,title:{display:true,text:'nº de turmas no período'}},y:{type:'logarithmic',title:{display:true,text:'investimento (R$, escala log)'}}}});
  const top=arr.slice(0,15);
  document.getElementById('t-perene').innerHTML= top.length? '<table><thead><tr><th>Curso</th><th>Índice</th><th>Turmas</th><th>Meses</th><th>Investim.</th><th>Leads</th><th>CPL</th></tr></thead><tbody>'+
@@ -303,15 +338,22 @@ function renderPareto(){
  const total=arr.reduce((a,b)=>a+b.leads,0)||1;
  const top=arr.slice(0,15);
  let cum=0;const cumpct=top.map(x=>{cum+=x.leads;return +(cum/total*100).toFixed(1);});
+ const pct=top.map(t=>+(t.leads/total*100).toFixed(1));
  mkChart('c-pareto','bar',{labels:top.map(t=>t.curso.length>24?t.curso.slice(0,24)+'…':t.curso),
    datasets:[
-    {type:'bar',label:'Leads',data:top.map(t=>t.leads),backgroundColor:NAVY,yAxisID:'y',order:2},
-    {type:'line',label:'% acumulado',data:cumpct,borderColor:AZUL,backgroundColor:AZUL,yAxisID:'y2',tension:.2,borderWidth:2,pointRadius:3,order:1}
+    {type:'bar',label:'% dos leads',data:pct,backgroundColor:NAVY,order:2},
+    {type:'line',label:'% acumulado',data:cumpct,borderColor:AZUL,backgroundColor:AZUL,tension:.2,borderWidth:2,pointRadius:3,order:1}
    ]},
-  {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}}},scales:{
+  {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}},
+    tooltip:{callbacks:{
+      title:items=>top[items[0].dataIndex].curso,
+      label:ctx=>ctx.datasetIndex===0
+        ? 'Leads: '+N(top[ctx.dataIndex].leads)+' ('+ctx.raw+'% do total)'
+        : '% acumulado: '+ctx.raw+'%'
+    }}
+  },scales:{
     x:{ticks:{font:{size:9},maxRotation:60,minRotation:45}},
-    y:{beginAtZero:true,position:'left',title:{display:true,text:'leads'}},
-    y2:{beginAtZero:true,max:100,position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'% acumulado'},ticks:{callback:v=>v+'%'}}
+    y:{beginAtZero:true,max:100,title:{display:true,text:'% dos leads'},ticks:{callback:v=>v+'%'}}
   }});
  let c2=0,n80=0;for(const x of arr){c2+=x.leads;n80++;if(c2/total>=0.8)break;}
  const top5=arr.slice(0,5).reduce((a,b)=>a+b.leads,0)/total*100;
@@ -325,7 +367,7 @@ function renderAltaQueda(){
  const comb=[...up,...down.reverse()];
  mkChart('c-altaqueda','bar',{labels:comb.map(t=>t.curso.length>30?t.curso.slice(0,30)+'…':t.curso),
    datasets:[{label:'Δ leads',data:comb.map(t=>t.d),backgroundColor:comb.map(t=>t.d>=0?'#2e9e5b':'#d64545')}]},
-  {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>(p.raw>=0?'+':'')+N(p.raw)+' leads (jan–jun 26 vs 25)'}}},scales:{x:{title:{display:true,text:'variação de leads'}},y:{ticks:{font:{size:9}}}}});
+  {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>comb[items[0].dataIndex].curso,label:p=>(p.raw>=0?'+':'')+N(p.raw)+' leads (jan–jun 26 vs 25)'}}},scales:{x:{title:{display:true,text:'variação de leads'}},y:{ticks:{font:{size:9}}}}});
 }
 function mkChart(id,type,data,opts){
  if(charts[id])charts[id].destroy();
@@ -347,7 +389,7 @@ function renderCamp(){
  const q=document.getElementById('busca').value.toLowerCase();
  let rows=campSel().filter(c=>c.curso.toLowerCase().includes(q));
  rows.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];if(typeof x==='string'){x=x||'';y=y||'';return sortDir*x.localeCompare(y);}return sortDir*((x||0)-(y||0));});
- const cols=[['curso','Curso'],['mes','Mês'],['dias','Dias'],['leads','Leads'],['leads_dia','Leads/dia'],['inv','Investim.'],['cpl','CPL turma'],['med_outras','Mediana curso'],['delta_cpl','vs mediana']];
+ const cols=[['curso','Curso'],['mes','Mês'],['dias','Dias'],['leads','Leads'],['leads_dia','Leads/dia'],['inv','Investim.'],['cpl','CPL turma'],['pagantes','Pagantes'],['cac','CAC'],['med_outras','Mediana curso'],['delta_cpl','vs mediana']];
  if(!rows.length){document.getElementById('t-camp').innerHTML='<div class="empty">Sem turmas para este filtro.</div>';return;}
  rows=rows.map(c=>{
    const medOutras=medianaOutrasTurmas(c);
@@ -363,7 +405,9 @@ function renderCamp(){
    const deltaTxt=c.delta_cpl!=null
      ? '<span class="'+(c.delta_cpl<=0?'good':'bad')+'">'+(c.delta_cpl>=0?'+':'')+c.delta_cpl.toFixed(0)+'%</span>'
      : '<span class="z">—</span>';
-   return '<tr><td>'+(c.curso.length>40?c.curso.slice(0,40)+'…':c.curso)+'</td><td>'+(c.mes||'')+'</td><td>'+(c.dias||'')+'</td><td>'+N(c.leads)+'</td><td>'+(c.leads_dia?c.leads_dia.toFixed(1):'')+'</td><td>'+BRL(c.inv)+'</td><td>'+(c.cpl?'R$ '+c.cpl.toFixed(2):'—')+'</td><td>'+medTxt+'</td><td>'+deltaTxt+'</td></tr>';
+   const pagTxt=c.pagantes!=null?N(c.pagantes):'<span class="z">—</span>';
+   const cacTxt=c.cac!=null?'R$ '+c.cac.toFixed(2):'<span class="z">—</span>';
+   return '<tr><td>'+(c.curso.length>40?c.curso.slice(0,40)+'…':c.curso)+'</td><td>'+(c.mes||'')+'</td><td>'+(c.dias||'')+'</td><td>'+N(c.leads)+'</td><td>'+(c.leads_dia?c.leads_dia.toFixed(1):'')+'</td><td>'+BRL(c.inv)+'</td><td>'+(c.cpl?'R$ '+c.cpl.toFixed(2):'—')+'</td><td>'+pagTxt+'</td><td>'+cacTxt+'</td><td>'+medTxt+'</td><td>'+deltaTxt+'</td></tr>';
  }).join('');
  h+='</tbody></table>';
  const el=document.getElementById('t-camp');el.innerHTML=h;
@@ -411,11 +455,13 @@ async function carregarDados(){
    porCurso[r.curso][idx]=Number(r.leads);
  });
  const hist=Object.keys(porCurso).map(curso=>({curso,vals:porCurso[curso]}));
+ const num=v=>(v!==null&&v!==undefined)?Number(v):null;
  const camp=turmas.map(t=>({
    curso:t.curso, mes:t.mes, ini:t.data_inicio, fim:t.data_fim, dias:t.dias,
    leads:Number(t.leads), inv:Number(t.investimento)||0,
-   cpl:(t.cpl!==null&&t.cpl!==undefined)?Number(t.cpl):null,
-   leads_dia:(t.leads_dia!==null&&t.leads_dia!==undefined)?Number(t.leads_dia):null
+   cpl:num(t.cpl), leads_dia:num(t.leads_dia),
+   inscritos:num(t.inscritos), pagantes:num(t.pagantes), taxaPagante:num(t.taxa_pagante),
+   custoTotal:num(t.custo_total), cac:num(t.cac), receita:num(t.receita), roi:num(t.roi)
  }));
  DATA={months,hist,camp};
  iniciarComDados();
