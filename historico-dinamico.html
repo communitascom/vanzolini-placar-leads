@@ -17,7 +17,7 @@ header{display:flex;align-items:center;justify-content:space-between;
   margin:0 auto 20px;max-width:1300px;flex-wrap:wrap;gap:10px;background:transparent;
   border-bottom:1px solid var(--borda);padding:10px 32px 14px}
 .brand{display:flex;align-items:center;gap:14px}
-.logo{height:36px;width:auto;display:block}
+.logo{height:59px;width:auto;display:block}
 .brand .divisor{width:1px;align-self:stretch;background:var(--borda)}
 header h1{font-size:15px;font-weight:600;color:var(--azul);letter-spacing:0;line-height:1.2;}
 .brand small{color:var(--mut);font-size:11px;display:block;margin-top:1px}
@@ -93,7 +93,7 @@ tbody tr:hover{background:#EEEDFB;}
     <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
     <div class="divisor"></div>
     <div><h1>Histórico Dinâmico <span style="font-weight:600;color:var(--azul2);font-size:11px;background:#E4E2F7;border:1px solid #cfcdef;border-radius:999px;padding:2px 9px;margin-left:6px;">ao vivo</span></h1>
-      <small id="subhead">Visão de Marketing e Vendas · leitura ao vivo do Supabase · regra anti-refire de 90 dias</small></div>
+      <small id="subhead">Visão de Marketing e Vendas · leitura ao vivo · regra anti-refire de 90 dias</small></div>
   </div>
   <nav style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
     <a class="chip" href="historico.html"><span class="material-symbols-outlined">description</span>Versão estática (xlsx)</a>
@@ -108,7 +108,7 @@ tbody tr:hover{background:#EEEDFB;}
  <div class="fgrp"><label>Mês de</label><select id="f-ini"></select></div>
  <div class="fgrp"><label>Mês até</label><select id="f-fim"></select></div>
  <button id="limpar">Limpar filtros</button>
- <button id="imprimir" class="chip chip-action"><span class="material-symbols-outlined">picture_as_pdf</span>Imprimir / Salvar PDF</button>
+ <button id="imprimir" class="chip chip-action" title="Gera um PDF pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar</button>
  <span class="activeflt" id="activeflt"></span>
 </div>
 
@@ -174,7 +174,7 @@ tbody tr:hover{background:#EEEDFB;}
 
 <div class="note"><b>Conversão e CAC</b> (seção Vendas acima) cruzam a planilha comercial da Vanzolini por turma, carga inicial de 03/08/2026 cobrindo 92 turmas de 2025-2026. Turma sem matrícula carregada aparece em branco nas colunas de CAC e conversão, não é erro.</div>
 
-<div class="foot">Leitura ao vivo do Supabase (base <code>communitas</code>) · regra anti-refire de 90 dias (1 lead = 1 e-mail por curso, sem refire nos 90 dias anteriores) · Fundação Vanzolini</div>
+<div class="foot">Leitura ao vivo · regra anti-refire de 90 dias (1 lead = 1 e-mail por curso, sem refire nos 90 dias anteriores) · Fundação Vanzolini</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -437,7 +437,7 @@ document.getElementById('imprimir').onclick=()=>{
 };
 
 async function carregarDados(){
- document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">…</div><div class="l">carregando leitura ao vivo do Supabase…</div></div>';
+ document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">…</div><div class="l">carregando leitura ao vivo…</div></div>';
  const [m1,m2]=await Promise.all([sb.rpc('historico_mensal'),sb.rpc('historico_turmas')]);
  if(m1.error||m2.error){
    document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v" style="color:#d64545;font-size:16px">Erro ao carregar</div><div class="l">'+((m1.error&&m1.error.message)||(m2.error&&m2.error.message))+'</div></div>';

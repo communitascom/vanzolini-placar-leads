@@ -15,7 +15,7 @@ h1,h2,h3,.v{font-family:'Inter Tight','Work Sans',sans-serif;}
 .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;display:inline-block;line-height:1;vertical-align:middle;-webkit-font-smoothing:antialiased;font-size:16px}
 header{display:flex;align-items:center;justify-content:space-between;margin:0 auto 20px;max-width:1300px;flex-wrap:wrap;gap:10px;background:transparent;border-bottom:1px solid var(--borda);padding:10px 32px 14px}
 .brand{display:flex;align-items:center;gap:14px}
-.logo{height:36px;width:auto;display:block}
+.logo{height:59px;width:auto;display:block}
 .brand .divisor{width:1px;align-self:stretch;background:var(--borda)}
 header h1{font-size:15px;font-weight:600;color:var(--azul);line-height:1.2;}
 .brand small{color:var(--mut);font-size:11px;display:block;margin-top:1px}
@@ -79,6 +79,7 @@ tbody tr:hover{background:#EEEDFB;}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 <body>
 <header>
@@ -89,7 +90,7 @@ tbody tr:hover{background:#EEEDFB;}
       <small>ritmo de captação, projeção de fechamento e ritmo de verba</small></div>
   </div>
   <nav style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-    <button id="imprimir" class="chip chip-action"><span class="material-symbols-outlined">picture_as_pdf</span>Imprimir / Salvar PDF</button>
+    <button id="imprimir" class="chip chip-action" title="Gera um PDF pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar</button>
     <a class="chip" href="historico-dinamico.html"><span class="material-symbols-outlined">bolt</span>Histórico dinâmico</a>
     <a class="chip" href="index.html"><span class="material-symbols-outlined">arrow_back</span>Voltar ao placar</a>
   </nav>
@@ -147,6 +148,8 @@ const BRL2 = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDi
 const PCT = v => (v===null||v===undefined) ? '<span class="z">—</span>' : Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
 const NAVY='#060653', AZUL='#4848B5', CINZA='#c9c9ee', VERDE='#2e9e5b';
 let CAMP=[], RITMO=[], CURVA=[], MIDIA=[], ALERTAS=[], MIDIA_ATE=null, charts={};
+Chart.register(ChartDataLabels);
+Chart.defaults.plugins.datalabels.display = false;
 
 function mkChart(id,type,data,opts){
   if(charts[id]) charts[id].destroy();
@@ -228,8 +231,10 @@ function render(){
   mkChart('c-verba','bar',{
     labels: ord.map(c=>c.curso.length>34?c.curso.slice(0,34)+'…':c.curso),
     datasets:[
-      {label:'% do tempo decorrido', data:ord.map(c=>Number(c.pct_tempo||0)), backgroundColor:CINZA},
-      {label:'% da verba gasta', data:ord.map(c=>Number(c.pct_gasto||0)), backgroundColor:AZUL}
+      {label:'% do tempo decorrido', data:ord.map(c=>Number(c.pct_tempo||0)), backgroundColor:CINZA,
+        datalabels:{display:true,color:'#5F5E76',anchor:'end',align:'end',font:{size:9,weight:600},formatter:v=>v.toFixed(0)+'%'}},
+      {label:'% da verba gasta', data:ord.map(c=>Number(c.pct_gasto||0)), backgroundColor:AZUL,
+        datalabels:{display:true,color:'#fff',anchor:'end',align:'start',font:{size:9,weight:600},formatter:v=>v.toFixed(0)+'%'}}
     ]},
     {indexAxis:'y', plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}}},
      scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}});
@@ -328,7 +333,7 @@ async function carregar(){
   CAMP=a.data; RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
   MIDIA_ATE = f.data || null;
   document.getElementById('rodape').innerHTML =
-    `Leitura do Supabase · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''} · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    `Leitura ao vivo · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''} · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   render();
 }
 carregar();
