@@ -44,7 +44,7 @@
     margin-bottom:16px;flex-wrap:wrap;gap:10px;background:transparent;
     border-bottom:1px solid var(--linha);padding:10px 2px 14px}
   .brand{display:flex;align-items:center;gap:14px}
-  .logo{height:36px;width:auto;display:block}
+  .logo{height:49px;width:auto;display:block}
   .brand .divisor{width:1px;align-self:stretch;background:var(--linha)}
   h1{font-size:15px;color:var(--azul);font-weight:600;line-height:1.2}
   .brand small{color:var(--sub);font-size:11px;display:block;margin-top:1px}
@@ -173,7 +173,7 @@
       <a class="chip" href="historico.html"><span class="material-symbols-outlined">history</span>Histórico &amp; investimento</a>
       <a class="chip" href="historico-dinamico.html"><span class="material-symbols-outlined">bolt</span>Histórico Dinâmico</a>
       <a class="chip" href="conversoes.html"><span class="material-symbols-outlined">link</span>Conversões por curso</a>
-      <button class="chip chip-action" onclick="window.print()" title="Gera um PDF do placar pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar PDF</button>
+      <button class="chip chip-action" onclick="window.print()" title="Gera um PDF do placar pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar</button>
       <span class="tag" id="tagTopo">conectando…</span>
     </nav>
     <div class="so-print" id="printInfo"></div>
@@ -275,7 +275,7 @@ async function carregar(){
     return;
   }
   ultimoData = data;
-  document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos no período`;
+  document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos`;
   document.getElementById('atualizado').textContent =
     `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   const br = iso => iso ? iso.split('-').reverse().join('/') : '';
