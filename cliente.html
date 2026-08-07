@@ -218,11 +218,11 @@
       <thead><tr>
         <th class="curso">Curso</th>
         <th>Campanha</th><th>Meta</th><th>LinkedIn</th><th>Form Prog.</th>
-        <th>Form Pág.</th><th>Popup</th><th>WhatsApp</th><th>Outros</th>
+        <th>Form Pág.</th><th>Outros</th>
         <th>Leads</th><th>Δ%</th><th>Média/dia</th><th>Mediana/dia</th>
         <th>Situação</th>
       </tr></thead>
-      <tbody id="corpo"><tr><td colspan="14" class="loading">Carregando…</td></tr></tbody>
+      <tbody id="corpo"><tr><td colspan="12" class="loading">Carregando…</td></tr></tbody>
     </table>
   </div>
 
@@ -312,7 +312,7 @@ function renderizar(data){
 
   corpo.innerHTML = '';
   let tipoAtual='';
-  const soma={meta_ads:0,linkedin:0,form_prog:0,form_pagina:0,popup:0,whatsapp:0,outros:0,leads:0};
+  const soma={meta_ads:0,linkedin:0,form_prog:0,form_pagina:0,outros:0,leads:0};
   let ativos=0, leadsAtivos=0, semLeadAtiva=0;
   let investTotal=0, leadsComInvest=0;
   data.forEach(r=>{
@@ -326,12 +326,12 @@ function renderizar(data){
     if(r.tipo!==tipoAtual){
       tipoAtual=r.tipo;
       corpo.insertAdjacentHTML('beforeend',
-        `<tr class="grupo"><td class="curso" colspan="14">${rotulos[r.tipo]||r.tipo}</td></tr>`);
+        `<tr class="grupo"><td class="curso" colspan="12">${rotulos[r.tipo]||r.tipo}</td></tr>`);
     }
+    const outrosJunto = (Number(r.popup)||0) + (Number(r.whatsapp)||0) + (Number(r.outros)||0);
     if(r.campanha_ativa){
       soma.meta_ads+=r.meta_ads; soma.linkedin+=r.linkedin; soma.form_prog+=r.form_prog;
-      soma.form_pagina+=r.form_pagina; soma.popup+=r.popup; soma.whatsapp+=r.whatsapp;
-      soma.outros+=r.outros; soma.leads+=r.leads;
+      soma.form_pagina+=r.form_pagina; soma.outros+=outrosJunto; soma.leads+=r.leads;
       ativos++; leadsAtivos+=r.leads;
       if(r.leads===0) semLeadAtiva++;
     }
@@ -354,7 +354,7 @@ function renderizar(data){
         <td>${camp}</td>
         <td>${cel(r.meta_ads)}</td><td>${cel(r.linkedin)}</td>
         <td>${cel(r.form_prog)}</td><td>${cel(r.form_pagina)}</td>
-        <td>${cel(r.popup)}</td><td>${cel(r.whatsapp)}</td><td>${cel(r.outros)}</td>
+        <td>${cel(outrosJunto)}</td>
         <td class="leads">${fmt(r.leads)}</td>
         <td>${dstr}</td>
         <td>${fmt(r.media_dia)}</td>
@@ -367,7 +367,7 @@ function renderizar(data){
     <tr class="total">
       <td class="curso">Total · campanhas ativas (${ativos})</td><td></td>
       <td>${fmt(soma.meta_ads)}</td><td>${fmt(soma.linkedin)}</td><td>${fmt(soma.form_prog)}</td>
-      <td>${fmt(soma.form_pagina)}</td><td>${fmt(soma.popup)}</td><td>${fmt(soma.whatsapp)}</td><td>${fmt(soma.outros)}</td>
+      <td>${fmt(soma.form_pagina)}</td><td>${fmt(soma.outros)}</td>
       <td class="leads">${fmt(soma.leads)}</td><td></td><td></td><td></td><td></td>
     </tr>`);
 
