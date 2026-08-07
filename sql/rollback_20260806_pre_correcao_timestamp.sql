@@ -1,0 +1,95 @@
+-- =====================================================================
+-- PONTO DE RETORNO do Placar de Leads Vanzolini
+-- Criado em 06/08/2026, ANTES de qualquer correcao da causa raiz
+-- (data_conversao e a hora em que o n8n gravou, nao a da conversao).
+--
+-- Projeto Supabase: ltasijrhkotyyrxnavab
+-- Diagnostico completo: memory/vanzolini-placar-causa-raiz-timestamp.md
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- O QUE FOI SALVO
+-- ---------------------------------------------------------------------
+-- 1) Definicoes de 35 funcoes + a materialized view leads_validos,
+--    na tabela _backup_funcoes, com motivo = 'pre-correcao-timestamp-20260806'
+--
+-- 2) Copia fisica das tabelas, com contagem conferida no momento da copia:
+--      _snapshot_conversoes_20260806            143.318 linhas
+--      _snapshot_midia_diaria_20260806           20.381
+--      _snapshot_investimento_semanal_20260806    1.143
+--      _snapshot_de_para_conversao_20260806         803
+--      _snapshot_turmas_20260806                    149
+--      _snapshot_cursos_20260806                     75
+--      _snapshot_lista_placar_20260806               58
+--      _snapshot_de_para_campanha_20260806           37
+--      _snapshot_campanhas_20260806                  25
+--      _snapshot_canais_20260806                      7
+--
+-- 3) Numeros congelados do placar em _snapshot_placar_20260806:
+--      2026-01  7.139 leads      2026-05  3.433
+--      2026-02  4.168            2026-06  4.819
+--      2026-03  4.522            2026-07  8.060
+--      2026-04  3.060            2026-08 (ate 06)  1.958
+--      campanha-mba-25mai-06ago  15.630
+--    Esses sao os numeros que o cliente ve HOJE. Servem para provar
+--    exatamente o que mudou depois de qualquer correcao.
+
+-- ---------------------------------------------------------------------
+-- COMO RESTAURAR UMA FUNCAO
+-- ---------------------------------------------------------------------
+-- Ver o que existe:
+--   select proname, criado_em from _backup_funcoes
+--   where motivo = 'pre-correcao-timestamp-20260806' order by proname;
+--
+-- Pegar a definicao e executar o texto devolvido:
+--   select definicao from _backup_funcoes
+--   where motivo = 'pre-correcao-timestamp-20260806' and proname = 'placar';
+
+-- ---------------------------------------------------------------------
+-- COMO RESTAURAR DADO
+-- ---------------------------------------------------------------------
+-- ATENCAO: restaurar a conversoes DESCARTA tudo o que entrou depois de
+-- 06/08/2026. So faca isso se a correcao tiver corrompido a base, e
+-- depois de salvar o que entrou no intervalo. O caminho preferido de
+-- rollback e trocar a FUNCAO de volta, nao mexer no dado.
+
+-- Preservar o que entrou depois, antes de qualquer restauracao:
+--   create table _conversoes_pos_20260806 as
+--   select * from conversoes
+--   where id not in (select id from _snapshot_conversoes_20260806);
+
+-- Restauracao completa (destrutiva, usar em transacao):
+--   begin;
+--     truncate conversoes cascade;
+--     insert into conversoes select * from _snapshot_conversoes_20260806;
+--     select setval(pg_get_serial_sequence('conversoes','id'),
+--                   (select max(id) from conversoes));
+--   commit;
+--   select atualiza_leads_validos();
+
+-- Mesma logica para as demais: truncate + insert a partir do _snapshot_*.
+-- As tabelas de referencia (cursos, canais, de_para_*, campanhas, turmas,
+-- lista_placar) sao pequenas e podem ser restauradas isoladamente.
+
+-- ---------------------------------------------------------------------
+-- COMO CONFERIR QUE VOLTOU AO ESTADO ORIGINAL
+-- ---------------------------------------------------------------------
+--   select s.periodo, s.curso, s.leads as antes, p.leads as agora
+--   from _snapshot_placar_20260806 s
+--   join lateral placar(
+--          case s.periodo when 'campanha-mba-25mai-06ago' then date '2026-05-25'
+--               else date_trunc('month', to_date(s.periodo,'YYYY-MM'))::date end,
+--          case s.periodo when 'campanha-mba-25mai-06ago' then date '2026-08-06'
+--               else (date_trunc('month', to_date(s.periodo,'YYYY-MM'))
+--                     + interval '1 month - 1 day')::date end
+--        ) p on p.curso = s.curso
+--   where s.leads <> p.leads;
+-- Zero linhas = estado identico ao congelado.
+
+-- ---------------------------------------------------------------------
+-- LIMPEZA (so depois da correcao validada e estavel)
+-- ---------------------------------------------------------------------
+-- Os _snapshot_* ocupam espaco, principalmente conversoes. Nao apagar
+-- antes de o cutover estar validado e os relatorios reemitidos ou
+-- congelados formalmente.
+--   drop table if exists _snapshot_conversoes_20260806;  -- etc.
