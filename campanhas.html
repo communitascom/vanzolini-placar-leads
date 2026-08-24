@@ -184,7 +184,7 @@ function render(){
   let aviso = '';
   if(MIDIA_ATE){
     const diasAtras = Math.round((new Date().setHours(0,0,0,0) - new Date(MIDIA_ATE+'T00:00:00').getTime())/86400000);
-    if(diasAtras > 1) aviso = `<div class="avisodef"><span class="material-symbols-outlined" style="font-size:15px">warning</span> Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ou seja, ${diasAtras} dias atrás. Parte do atraso de verba apontado abaixo pode ser só a carga pendente, não subinvestimento real. Os leads estão ao vivo.</div>`;
+    if(diasAtras > 1) aviso = `<div class="avisodef"><span class="material-symbols-outlined" style="font-size:15px">warning</span> Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ou seja, ${diasAtras} dias atrás. A carga roda sozinha às 6h e às 18h, então esse atraso vem da própria planilha, não do placar: parte do atraso de verba apontado abaixo pode ser lançamento que ainda não chegou lá, não subinvestimento real. Os leads estão ao vivo.</div>`;
   }
   if(ALERTAS.length || aviso){
     sec.style.display='block';
@@ -333,7 +333,7 @@ async function carregar(){
   CAMP=a.data; RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
   MIDIA_ATE = f.data || null;
   document.getElementById('rodape').innerHTML =
-    `Leitura ao vivo · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''} · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    `Leitura ao vivo · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''}, carga automática às 6h e às 18h · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   render();
 }
 carregar();
