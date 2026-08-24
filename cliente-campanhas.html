@@ -7,11 +7,46 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet">
+<!-- Mesmo CSS da versao interna, de proposito: duas copias divergiriam. -->
 <link rel="stylesheet" href="campanhas.css">
+<style>
+  /* So o que e exclusivo desta versao: a trava de PIN. */
+  #pinGate{position:fixed;inset:0;background:var(--off);z-index:100;
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  #pinGate .cartao{background:var(--card);border:1px solid var(--borda);border-radius:12px;
+    box-shadow:var(--elev-1);padding:32px 36px;text-align:center;max-width:320px;width:100%}
+  #pinGate .logo{height:44px;width:auto;display:block;margin:0 auto 18px}
+  #pinGate h2{font-size:14px;color:var(--azul);font-weight:600;margin-bottom:4px}
+  #pinGate p{font-size:12px;color:var(--mut);margin-bottom:18px}
+  #pinGate input{border:1px solid var(--borda);border-radius:4px;padding:10px 12px;font-size:20px;
+    letter-spacing:8px;text-align:center;width:100%;font-family:inherit;color:var(--txt);background:var(--card)}
+  #pinGate input:focus{outline:none;border-color:var(--azul);border-width:1.5px}
+  #pinGate button{margin-top:12px;width:100%;background:var(--azul);color:#fff;border:none;
+    border-radius:var(--shape-full);padding:9px 18px;font-size:12.5px;font-weight:600;
+    cursor:pointer;font-family:inherit}
+  #pinGate button:hover{background:var(--azul2)}
+  #pinGate .erroPin{color:var(--verm);font-size:11.5px;margin-top:10px;min-height:14px}
+  .oculto{display:none!important}
+  @media print{ #pinGate{display:none!important} }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 <body>
+
+<div id="pinGate">
+  <div class="cartao">
+    <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
+    <h2>Campanhas em andamento</h2>
+    <p>Digite o código de acesso para ver os dados.</p>
+    <input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••">
+    <button onclick="verificarPin()">Entrar</button>
+    <div class="erroPin" id="erroPin"></div>
+  </div>
+</div>
+
+<div id="conteudo" class="oculto">
+
 <header>
   <div class="brand">
     <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
@@ -21,8 +56,7 @@
   </div>
   <nav style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
     <button id="imprimir" class="chip chip-action" title="Gera um PDF pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar</button>
-    <a class="chip" href="historico-dinamico.html"><span class="material-symbols-outlined">history</span>Histórico &amp; investimento</a>
-    <a class="chip" href="index.html"><span class="material-symbols-outlined">arrow_back</span>Voltar ao placar</a>
+    <a class="chip" href="cliente.html"><span class="material-symbols-outlined">arrow_back</span>Voltar ao placar</a>
   </nav>
 </header>
 <div class="wrap">
@@ -32,12 +66,6 @@
 <div class="kpis" id="kpis"><div class="kpi"><div class="v">…</div><div class="l">carregando</div></div></div>
 
 <div id="aviso-midia"></div>
-
-<div class="sec" id="sec-alertas" style="display:none">
-<h2><span class="tag">Alertas</span> O que pede atenção</h2>
-<div class="hint">A captação é comparada com a mediana do <b>mesmo dia da semana</b> no histórico do curso, porque zero lead num domingo é normal e zero numa terça não é. Só aparece aqui o que está fora do padrão.</div>
-<div id="alertas"></div>
-</div>
 
 <div class="sec">
 <h2><span class="tag">Ritmo</span> Campanhas no ar</h2>
@@ -66,8 +94,43 @@
 
 <div class="foot" id="rodape"></div>
 </div>
+</div>
 
+<script>window.AGUARDA_PIN = true;</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="campanhas.js"></script>
+<script>
+// Mesmo PIN e mesma chave de sessao do cliente.html, para o cliente nao ter
+// que digitar de novo ao navegar entre as duas telas.
+const PIN = "2665";
+
+function liberarAcesso(){
+  document.getElementById('pinGate').classList.add('oculto');
+  document.getElementById('conteudo').classList.remove('oculto');
+  carregar();
+}
+
+function verificarPin(){
+  const valor = document.getElementById('pinInput').value.trim();
+  if(valor === PIN){
+    sessionStorage.setItem('vanzolini_placar_pin_ok', '1');
+    liberarAcesso();
+  } else {
+    document.getElementById('erroPin').textContent = 'Código incorreto.';
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinInput').focus();
+  }
+}
+
+document.getElementById('pinInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') verificarPin();
+});
+
+if(sessionStorage.getItem('vanzolini_placar_pin_ok') === '1'){
+  liberarAcesso();
+} else {
+  document.getElementById('pinInput').focus();
+}
+</script>
 </body>
 </html>
