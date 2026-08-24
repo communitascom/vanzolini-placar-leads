@@ -74,8 +74,51 @@ Achados do recálculo:
 Para refazer o cálculo no futuro, a query está em
 `sql/recalcula_mediana.sql`.
 
+## O que roda sozinho (desde 24/08/2026)
+
+Três jobs de `pg_cron` no Supabase, sem depender de máquina ligada nem de n8n.
+Detalhes em `sql/automacao_diaria_20260824.md`.
+
+| Job | Quando | O que faz |
+|---|---|---|
+| `carga-midia-manha` | 06:00 (Brasília) | carrega a mídia da planilha, janela de 14 dias |
+| `carga-midia-tarde` | 18:00 (Brasília) | idem, para o caso de a planilha ter atualizado depois |
+| `refresh-leads-validos` | de hora em hora | atualiza a materialized view `leads_validos` |
+
+Acompanhar por `select * from midia_carga_log order by id desc`. O campo
+`detalhe` avisa quando aparece campanha sem curso identificado, que é o sinal de
+que falta cadastrar o padrão em `de_para_campanha`.
+
+**O que ainda é manual e envelhece sozinho:**
+
+- `campanhas.verba`, que vem do campo MKT do Monday. O `sync_campanhas_monday`
+  só sincroniza datas, então campanha nova nasce sem verba.
+- `turmas.investimento_midia`, parado em 20/05/2026. Vem da planilha
+  GESTÃO VANZOLINI e alimenta o Investimento/CPL do placar e do histórico.
+
+## Histórico
+
+Só existe uma página de histórico: `historico-dinamico.html`, lida ao vivo.
+A `historico.html` virou redirecionamento — era uma cópia estática congelada em
+jun/2026 e na régua antiga de contagem. Ver `sql/historico_ao_vivo_20260824.md`.
+
 ## Ponto de restauração
 
 `sql/rollback_20260720_pre_dedupe.sql` restaura as funções ao estado anterior.
 Cópia exata também no banco (`_backup_funcoes`) e os números de antes em
 `_backup_placar_snapshot`.
+
+Marcos posteriores, em ordem: `backup-campanhas-20260824`,
+`marco-carga-midia-20260824`, `marco-automacao-20260824`,
+`marco-pre-hardening-seguranca-20260824`, `marco-pos-hardening-seguranca-20260824`,
+`marco-historico-ao-vivo-20260824`.
+
+## Publicação (GitHub Pages)
+
+Em 24/08/2026 o build automático parou de disparar: o workflow segue ativo, mas
+nenhum run é criado nos pushes novos. Se o site não refletir o repositório:
+
+```
+gh api -X POST repos/communitascom/vanzolini-placar-leads/pages/builds
+gh api repos/communitascom/vanzolini-placar-leads/pages/builds/latest --jq .commit
+```
