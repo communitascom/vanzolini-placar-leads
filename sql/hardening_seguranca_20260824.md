@@ -111,13 +111,20 @@ turma com `data_inicio` na janela de agosto.
 - 22 + 25 `*_security_definer_function_executable` — as RPCs de leitura acima, intencional
 - 23 INFO `rls_enabled_no_policy` — RLS negando tudo, intencional
 - 1 `extension_in_public` (`unaccent`) — custo alto, ganho baixo
-- 1 `auth_leaked_password_protection` — **pendente**, liga no painel em
-  Authentication > Policies. O `admin.html` entra por magic link e não usa
-  senha, então é barato
+- 1 `auth_leaked_password_protection` — **não dá para ligar neste projeto.**
+  Tentado em 24/08/2026 no painel (Authentication > Attack Protection >
+  Configure in email provider). O toggle aceita ligar na tela, mas o Save
+  devolve: *"Failed to update auth configuration: Configuring leaked password
+  protection via HaveIBeenPwned.org is available on Pro Plans and up."* A org
+  Communitas está no plano **Free**. Continua DISABLED, nada foi alterado.
+  Só sai do advisor com upgrade para Pro, que é decisão de custo, não técnica.
+  Impacto real aqui é baixo: o `admin.html` entra por magic link (OTP) e não
+  usa senha, então não existe senha de usuário para vazar
 
 ## Pendências
 
-1. Ligar a proteção de senha vazada no painel (único achado acionável restante).
+1. Proteção de senha vazada: só com upgrade para o plano Pro (ver acima).
+   Como o login é por magic link, dá para conviver com esse WARN.
 2. Avaliar trocar o `email` da `leads_validos` por hash. A view existe para
    contar lead distinto; o endereço em si provavelmente não é necessário ali, e
    sem ele um vazamento futuro não vale nada.
