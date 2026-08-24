@@ -1,256 +1,96 @@
 -- =====================================================================
 -- HARDENING DE SEGURANCA | Placar de Leads Vanzolini
--- 24/08/2026 | projeto Supabase ltasijrhkotyyrxnavab
+-- APLICADO em 24/08/2026 | projeto Supabase ltasijrhkotyyrxnavab
 --
--- PRE-REQUISITO: rodar antes o BLOCO 0 de
---   sql/rollback_20260824_pre_hardening_seguranca.sql
+-- Registro do que foi rodado, na ordem, como migrations. Analise e
+-- resultado em sql/hardening_seguranca_20260824.md
+-- Ponto de retorno em sql/rollback_20260824_pre_hardening_seguranca.sql
 --
--- Ordem: BLOCO 1 e o unico urgente. Os demais sao higiene.
--- Cada bloco e independente e reversivel pelo rollback.
+-- Advisor: 118 achados antes, 74 depois, nenhum ERROR.
 -- =====================================================================
 
+-- migration: fecha_leitura_publica_leads_validos_e_vw_midia_cursos
+revoke all on public.leads_validos   from anon, authenticated;
+revoke all on public.vw_midia_cursos from anon, authenticated;
+revoke execute on function public.midia_cursos(date, date) from anon, authenticated;
 
--- =====================================================================
--- BLOCO 1 | CRITICO: leads_validos expoe 86.005 e-mails ao anon
--- ---------------------------------------------------------------------
--- Conferido em 24/08/2026 chamando a API REST com a chave anon que esta
--- escrita no index.html publico:
---   GET /rest/v1/leads_validos?select=email  ->  200, e-mails em texto
---   puro, 86.005 linhas, paginaveis. Sem login, sem nada.
---
--- As paginas do placar NAO leem esta view direto: elas chamam RPC. As
--- RPCs sao security definer e rodam como dono, entao continuam lendo a
--- view normalmente depois do revoke.
--- =====================================================================
+-- migration: tira_do_anon_as_rpcs_de_escrita_e_de_infraestrutura
+revoke execute on function public.vincula_conversao(text, bigint)  from anon;
+revoke execute on function public.desvincula_conversao(text)       from anon;
+revoke execute on function public.cria_curso(text, text)           from anon;
+revoke execute on function public.insere_conversao(text, text, timestamptz, text, text, jsonb)
+  from anon, authenticated;
+revoke execute on function public.atualiza_leads_validos()     from anon, authenticated;
+revoke execute on function public.sync_campanhas_monday(jsonb) from anon, authenticated;
+revoke execute on function public.midia_diaria_preenche()      from anon, authenticated;
 
-begin;
-
-  revoke select on public.leads_validos from anon, authenticated;
-
-  -- teste dentro da propria transacao, fingindo ser o anon
-  set local role anon;
-
-  -- 1) a leitura direta tem que falhar
-  do $$
-  begin
-    perform 1 from public.leads_validos limit 1;
-    raise exception 'FALHOU: anon ainda le leads_validos direto';
-  exception
-    when insufficient_privilege then
-      raise notice 'OK: anon perdeu a leitura direta de leads_validos';
-  end $$;
-
-  -- 2) as 7 RPCs do placar tem que continuar de pe
-  select count(*) as placar              from placar('2026-08-01','2026-08-24');
-  select count(*) as campanhas_andamento from campanhas_andamento();
-  select count(*) as ritmo_diario        from ritmo_diario();
-  select count(*) as curva_ritmo         from curva_ritmo();
-  select count(*) as midia_por_curso     from midia_por_curso('2026-08-01','2026-08-24');
-  select count(*) as alertas_captacao    from alertas_captacao();
-  select midia_atualizada_ate()          as midia_atualizada_ate;
-
-  reset role;
-
--- Confira os numeros contra o baseline no arquivo de rollback
--- (79 / 15 / 496 / 21 / 54 / 10 / 2026-08-23; ritmo e curva crescem com
--- o tempo, o que nao pode e virar zero ou dar erro).
--- Bateu -> commit;   qualquer erro -> rollback;
-commit;
-
--- Depois do commit, confirmar pela API de fora:
---   curl -s "$URL/rest/v1/leads_validos?select=email&limit=1" \
---        -H "apikey: $ANON" -H "Authorization: Bearer $ANON"
---   esperado: 401 permission denied for materialized view leads_validos
-
-
--- =====================================================================
--- BLOCO 2 | Dado comercial em tabela aberta ao anon
--- ---------------------------------------------------------------------
--- turmas    expoe valor, receita, docente, coordenador, inscritos, pagantes
--- campanhas expoe verba
--- Nenhuma das duas e lida por index.html / campanhas.html / cliente.html
--- (essas so chamam RPC). O admin.html le cursos e canais, mas so depois
--- do magic link, ou seja como authenticated, nao como anon.
--- =====================================================================
-
-begin;
-
-  revoke select on public.turmas, public.campanhas from anon;
-  -- cursos e canais ficam legiveis pelo authenticated (admin.html)
-  revoke select on public.cursos, public.canais    from anon;
-
-  set local role anon;
-  select count(*) as placar              from placar('2026-08-01','2026-08-24');
-  select count(*) as campanhas_andamento from campanhas_andamento();
-  select count(*) as midia_por_curso     from midia_por_curso('2026-08-01','2026-08-24');
-  reset role;
-
-commit;
-
--- Depois: abrir admin.html, entrar pelo magic link e conferir que os
--- selects de curso e canal continuam populando.
-
-
--- =====================================================================
--- BLOCO 3 | function_search_path_mutable (33 WARN)
--- ---------------------------------------------------------------------
--- Fixa search_path em toda funcao do public que ainda nao tem. Nao muda
--- assinatura, nao muda corpo, nao mexe em grant. Baixo risco.
--- Pre-requisito real: a funcao referenciar objeto por nome simples que
--- exista em public. Se alguma usar extensao instalada em outro schema
--- (ver BLOCO 6), ela quebra: por isso o teste no fim.
--- =====================================================================
-
--- 3.1 ver o que sera alterado ANTES de alterar
-select p.proname,
-       pg_get_function_identity_arguments(p.oid) as args,
-       p.prosecdef as security_definer
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public'
-  and p.prokind = 'f'
-  and (p.proconfig is null
-       or not exists (select 1 from unnest(p.proconfig) c
-                      where c like 'search\_path=%'))
-order by p.proname;
-
--- 3.2 aplicar
+-- migration: tira_do_anon_escrita_em_tabela_e_leitura_de_dado_comercial
 do $$
 declare r record;
 begin
-  for r in
-    select p.oid::regprocedure as sig
-    from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'public'
-      and p.prokind = 'f'
-      and (p.proconfig is null
-           or not exists (select 1 from unnest(p.proconfig) c
-                          where c like 'search\_path=%'))
+  for r in select c.oid::regclass as t
+           from pg_class c join pg_namespace n on n.oid = c.relnamespace
+           where n.nspname = 'public' and c.relkind in ('r','p')
+  loop
+    execute format('revoke insert, update, delete, truncate on %s from anon', r.t);
+  end loop;
+end $$;
+revoke select on public.turmas, public.campanhas, public.cursos, public.canais from anon;
+
+-- migration: fixa_search_path_nas_funcoes_do_public
+do $$
+declare r record;
+begin
+  for r in select p.oid::regprocedure as sig
+           from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname = 'public' and p.prokind = 'f'
+             and p.proname not in ('unaccent','unaccent_init','unaccent_lexize')
+             and (p.proconfig is null
+                  or not exists (select 1 from unnest(p.proconfig) c
+                                 where c like 'search\_path=%'))
   loop
     execute format('alter function %s set search_path = public, pg_temp', r.sig);
-    raise notice 'search_path fixado: %', r.sig;
   end loop;
 end $$;
 
--- 3.3 conferir que o placar nao sentiu
-set role anon;
-select count(*) from placar('2026-08-01','2026-08-24');
-select count(*) from campanhas_andamento();
-select count(*) from ritmo_diario();
-select count(*) from curva_ritmo();
-select count(*) from midia_por_curso('2026-08-01','2026-08-24');
-select count(*) from alertas_captacao();
-select midia_atualizada_ate();
-reset role;
+-- migration: tira_execute_do_public_nas_funcoes_do_schema
+-- ESTE e o que realmente fechou a escrita. Sem ele, os revokes em `anon`
+-- acima eram inocuos: o anon herdava EXECUTE de PUBLIC (`=X/postgres`).
+do $$
+declare r record;
+begin
+  for r in select p.oid::regprocedure as sig
+           from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname = 'public' and p.prokind = 'f'
+             and p.proname not like 'unaccent%'
+  loop
+    execute format('revoke execute on function %s from public', r.sig);
+  end loop;
+end $$;
+alter default privileges in schema public revoke execute on functions from public;
 
--- 3.4 conferir a carga automatica no proximo ciclo (06:00 / 18:00)
---   select executado_em, status, linhas_recebidas, detalhe
---   from midia_carga_log order by id desc limit 5;
+-- migration: fecha_as_tabelas_de_backup_do_hardening
+alter table public._backup_grants_20260824  enable row level security;
+alter table public._backup_tabelas_20260824 enable row level security;
+revoke all on public._backup_grants_20260824,
+                 public._backup_tabelas_20260824 from anon, authenticated;
 
-
--- =====================================================================
--- BLOCO 4 | ERROR security_definer_view
 -- ---------------------------------------------------------------------
--- Uma view do public roda com os privilegios do dono em vez dos de quem
--- chama, entao ela fura RLS para o anon. Achar qual:
--- =====================================================================
-
-select c.relname as view,
-       pg_get_userbyid(c.relowner) as dono,
-       c.reloptions,
-       has_table_privilege('anon', c.oid, 'select') as anon_le
-from pg_class c
-join pg_namespace n on n.oid = c.relnamespace
-where n.nspname = 'public'
-  and c.relkind = 'v'
-  and (c.reloptions is null
-       or not ('security_invoker=true' = any(c.reloptions)))
-order by c.relname;
-
--- Decisao, para CADA view que aparecer acima:
---
---  a) se nenhuma pagina precisa dela pelo anon:
---       revoke select on public.<view> from anon, authenticated;
---
---  b) se alguma pagina precisa e a view so mostra dado agregado que ja
---     e publico no placar: deixar como esta e registrar como intencional
---     neste arquivo, dizendo qual pagina depende.
---
---  c) se precisa e a view toca tabela com RLS:
---       alter view public.<view> set (security_invoker = true);
---     e depois conferir se ainda devolve linha para o anon. Se zerar,
---     e sinal de que ela dependia mesmo de furar a RLS: nesse caso o
---     certo e trocar a view por uma RPC security definer que devolva
---     so o agregado, no mesmo padrao das outras.
---
--- Definicao da view, para decidir:
---   select pg_get_viewdef('public.<view>'::regclass, true);
-
-
--- =====================================================================
--- BLOCO 5 | Funcoes de escrita e de infraestrutura executaveis por anon
+-- CONFERENCIA (rodar como anon, de fora, com a chave do index.html)
 -- ---------------------------------------------------------------------
--- 29 funcoes security definer executaveis por anon e 29 por authenticated.
--- Sete sao o placar e ficam. O resto precisa de decisao caso a caso.
--- Listar o que existe alem das sete:
--- =====================================================================
-
-select p.proname,
-       pg_get_function_identity_arguments(p.oid) as args,
-       p.prosecdef as sec_definer,
-       has_function_privilege('anon',          p.oid, 'execute') as anon,
-       has_function_privilege('authenticated', p.oid, 'execute') as auth
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public'
-  and p.prokind = 'f'
-  and has_function_privilege('anon', p.oid, 'execute')
-  and p.proname not in ('placar','campanhas_andamento','ritmo_diario',
-                        'curva_ritmo','midia_por_curso','alertas_captacao',
-                        'midia_atualizada_ate')
-order by p.proname;
-
--- Revogar do anon tudo o que escreve ou e infraestrutura. A lista abaixo
--- vem dos nomes chamados pelo admin.html e pela automacao de carga, que
--- nunca rodam como anon. CONFIRA contra o resultado da consulta acima
--- antes de rodar, e comente a linha de qualquer funcao que nao existir.
-
--- escrita, so pelo admin.html logado (authenticated):
-revoke execute on function public.vincula_conversao   from anon;
-revoke execute on function public.desvincula_conversao from anon;
-revoke execute on function public.cria_curso           from anon;
-
--- infraestrutura da carga, roda pelo pg_cron, ninguem chama de fora:
-revoke execute on function public.carrega_midia_lote   from anon, authenticated;
-revoke execute on function public.dispara_carga_midia  from anon, authenticated;
-revoke execute on function public.carga_token_valido   from anon, authenticated;
-revoke execute on function public.atualiza_leads_validos from anon, authenticated;
-revoke execute on function public.sync_campanhas_monday  from anon, authenticated;
-
--- Depois de cada revoke, abrir a pagina que usa a funcao e conferir.
--- As RPCs de relatorio (historico_*, relatorio_mensal, consolidado_*,
--- evolucao_mensal_ctr, tabela_cursos_canal, de_para_por_curso,
--- google_search_display, campanhas_*, conversoes_orfas) sao leitura e
--- alimentam paginas publicas: decidir uma a uma se a pagina e mesmo
--- publica. conversoes_orfas e de_para_por_curso cheiram a admin.
-
-
--- =====================================================================
--- BLOCO 6 | Achados que ficam como estao (registro da decisao)
--- ---------------------------------------------------------------------
--- rls_enabled_no_policy (23 INFO): conferido de fora, essas tabelas
---   devolvem 0 linha para o anon. RLS ligada sem policy nega tudo, que e
---   o estado desejado. Nao criar policy nenhuma so para calar o advisor.
---   As unicas que precisam de policy sao as que o admin.html usa como
---   authenticated (conversoes) e essas ja tem.
+-- Tem que devolver 200:
+--   rpc/placar, campanhas_andamento, ritmo_diario, curva_ritmo,
+--   midia_por_curso, alertas_captacao, midia_atualizada_ate,
+--   historico_turmas, historico_mensal, relatorio_mensal, campanhas_totais,
+--   campanhas_mes, consolidado_plataforma, evolucao_mensal_ctr,
+--   google_search_display, campanhas_exemplo, tabela_cursos_canal,
+--   conversoes_orfas, de_para_por_curso
 --
--- extension_in_public (1 WARN): mover extensao de schema quebra toda
---   referencia nao qualificada, inclusive dentro das funcoes que o
---   BLOCO 3 acabou de amarrar em search_path = public. Custo alto,
---   ganho baixo. Fica. Ver qual e:
---     select extname, extnamespace::regnamespace from pg_extension;
+-- Tem que devolver 401:
+--   rest/v1/leads_validos, vw_midia_cursos, turmas, campanhas, cursos, canais,
+--   _backup_*, e rpc/cria_curso, vincula_conversao, desvincula_conversao,
+--   insere_conversao, atualiza_leads_validos, sync_campanhas_monday, midia_cursos
 --
--- auth_leaked_password_protection (1 WARN): ligar no painel, em
---   Authentication > Policies. O admin.html entra por magic link e nao
---   usa senha, entao e barato e nao muda nada para o time.
+-- E o n8n tem que continuar gravando:
+--   select executado_em from midia_carga_log order by id desc limit 3;
+--   e nos logs, insere_conversao com status 204.
