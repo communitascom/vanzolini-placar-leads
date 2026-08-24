@@ -88,3 +88,31 @@ descartado.
 
 Decisoes em aberto do Junior: tolerancia de divergencia (sugerido 5%) e CRM
 como regua oficial em caso de divergencia (sugerido sim).
+
+## Causa raiz encontrada e corrigida (24/08/2026, ~17h15 BRT)
+
+Lida a execucao real do n8n (workflow "Leads Vanzolini Placar", id
+I5TMKXQFJGFUXf3c) do caso-teste: o RD dispara webhook tambem para eventos
+que NAO sao conversao de formulario (ex.: marcacao de oportunidade). Nesses
+payloads `last_conversion.content` vem SEM `conversion_identifier`, e o node
+"Mapeia Campos do Lead" fazia fallback para
+`first_conversion.content.event_identifier`, a PRIMEIRA conversao da vida do
+contato (no caso-teste, uma conversao de jan/2024), gravada como lead novo
+de hoje. Como as conversoes historicas usam a nomenclatura antiga sem
+`-META`, o "Infere Canal" as classificava como LinkedIn.
+
+Correcao aplicada no proprio workflow (backup: duplicata inativa
+"Leads Vanzolini Placar (backup pre-correcao 20260824)", id Ra1z4QRFtSqjTA1t):
+
+1. "Mapeia Campos do Lead": `conversao_rd` so de
+   `last_conversion.content.conversion_identifier` (sem fallback); novo campo
+   `evento_ts` = `last_conversion.created_at`.
+2. "Infere Canal": canal decidido primeiro pelo payload
+   (`nome_campanha` com prefixo Meta/Lkd), texto do nome como fallback.
+3. "Prepara Supabase": descarta item sem conversao (`return []`);
+   `p_data_conversao` = `evento_ts` (timestamp real do RD, mata refire via
+   `on conflict (email, data_conversao, conversao_rd)` e o bug de fuso);
+   `evento_ts` tambem gravado em `p_origem_raw`.
+
+Os ramos de planilha (Google Sheets) nao foram alterados, continuam
+recebendo todo evento; apenas o ramo Supabase filtra.
