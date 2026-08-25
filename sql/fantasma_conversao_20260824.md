@@ -157,3 +157,19 @@ a quarentena.
 
 Proximas etapas do plano: reconciliacao recorrente placar x CRM (depende do
 conector RD Station CRM) e propagar o filtro de quarentena as demais funcoes.
+
+## Reconciliacao final dos 3 cursos (25/08/2026, periodo 01-23/08)
+
+Segunda rodada de quarentena, com prova dupla (sem deal no CRM export +
+conversao de outro curso em 10 min): mais 55 leads marcados, motivo
+`reconciliacao-crm 01-23/08`. Hashes dos emails do CRM preservados em
+`_reconc_crm_20260825` para reproduzir a checagem.
+
+Resultado: Green Belt 224 x 225 CRM; IA na Gestao de Projetos 179 x 177;
+Auditor Lider 200 x 189. A diferenca do AL decomposta nominalmente:
+5 leads de 31/07 empurrados para agosto pelo bug de fuso (deal criado em
+julho, fora do export), 11 reconversoes >90 dias de contatos com deal
+antigo no mesmo produto (CRM nao cria deal novo), 7 a conferir pelo
+comercial. Licao de metodologia: comparar sempre janela de criacao de deal
+do CRM = janela de campanha, nao mes fechado; reconversao apos 90 dias
+conta no placar mas nao gera deal novo.
