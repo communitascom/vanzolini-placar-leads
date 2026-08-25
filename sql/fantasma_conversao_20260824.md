@@ -126,5 +126,34 @@ evento sem conversao descartado antes do Supabase (execucao 269858, o caso que
 gerava fantasma). Linhas gravadas pela versao antiga ate 25/08 10:40 UTC ainda
 tem o padrao velho.
 
-Proximas etapas do plano: quarentena retroativa dos fantasmas no historico e
-reconciliacao recorrente placar x CRM (depende do conector RD Station CRM).
+## Quarentena retroativa (25/08/2026)
+
+Colunas novas em `conversoes`: `suspeito_fantasma boolean default false` e
+`fantasma_motivo text`. Nada apagado; `placar()` passou a ignorar marcados
+(migration `placar_ignora_fantasma`; versao anterior em `_backup_funcoes`).
+
+Criterio (validado contra o CRM no caso Green Belt): grupos
+(nome-base da conversao, canal, mes) com taxa de co-ocorrencia no nivel de
+lead >= 50% (base normal medida: 8 a 15%). Tres faixas:
+- pct >= 75% e n >= 5 leads: marca o grupo inteiro;
+- pct >= 75% e n >= 2: marca so os leads com co-ocorrencia;
+- 50% <= pct < 75% e n >= 5: marca so os leads com co-ocorrencia.
+Marcadas as linhas do par (email, curso) do lead ate 90 dias depois (cobre
+refire), somente linhas gravadas pela versao antiga (criado_em < 25/08
+10:40 UTC). Calculo auditavel em `_quarentena_calculo_20260825`.
+
+Resultado: 1.958 linhas marcadas (413 leads), maio a agosto/2026, nenhum
+grupo anomalo antes de maio. Prova no Green Belt 01-23/08: placar caiu de
+272 para 254 (LinkedIn 16 -> 0, Outros 2 -> 0, os 18 fantasmas da
+reconciliacao), contra 225 deals no CRM; diferenca restante explicada
+(7 leads antes da campanha + contatos que nao viram negociacao).
+
+Residuais conhecidos (regra conservadora, nao marcados): nomes com
+co-ocorrencia elevada mas abaixo de 50% (ex.: AI-GESTAO-DE-PROJETOS-RD-META-3
+com 32,5% em agosto) devem conter fantasmas que so a reconciliacao nominal
+com o CRM separa. Funcoes alem da placar() (historico_mensal,
+historico_turmas, relatorio_mensal, tabela_cursos_canal) ainda NAO filtram
+a quarentena.
+
+Proximas etapas do plano: reconciliacao recorrente placar x CRM (depende do
+conector RD Station CRM) e propagar o filtro de quarentena as demais funcoes.
