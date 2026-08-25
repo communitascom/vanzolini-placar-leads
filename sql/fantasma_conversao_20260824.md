@@ -116,3 +116,15 @@ Correcao aplicada no proprio workflow (backup: duplicata inativa
 
 Os ramos de planilha (Google Sheets) nao foram alterados, continuam
 recebendo todo evento; apenas o ramo Supabase filtra.
+
+**Publicacao e verificacao (25/08/2026, ~07h40 BRT).** Detalhe operacional:
+este n8n versiona e PUBLICA workflows; o PATCH via REST salva rascunho e a
+producao continua na versao publicada anterior. Foi preciso publicar pela UI
+(versao 3cb33485). Verificado em producao nas 2 primeiras execucoes: conversao
+real gravada com `evento_ts` e `data_conversao` no instante real do evento;
+evento sem conversao descartado antes do Supabase (execucao 269858, o caso que
+gerava fantasma). Linhas gravadas pela versao antiga ate 25/08 10:40 UTC ainda
+tem o padrao velho.
+
+Proximas etapas do plano: quarentena retroativa dos fantasmas no historico e
+reconciliacao recorrente placar x CRM (depende do conector RD Station CRM).
