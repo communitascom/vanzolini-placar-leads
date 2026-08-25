@@ -173,3 +173,34 @@ antigo no mesmo produto (CRM nao cria deal novo), 7 a conferir pelo
 comercial. Licao de metodologia: comparar sempre janela de criacao de deal
 do CRM = janela de campanha, nao mes fechado; reconversao apos 90 dias
 conta no placar mas nao gera deal novo.
+
+## Filtro de quarentena propagado (25/08/2026)
+
+O ponto unico e a materialized view `leads_validos`: 15 das 18 funcoes de
+leitura consomem ela. Recriada com `and not c.suspeito_fantasma` (definicao
+anterior salva em `_backup_funcoes` com motivo
+`marco-pre-filtro-quarentena-20260825`, junto com os DDL dos 2 indices).
+Passou de 86.205 para 85.737 linhas (468 leads removidos).
+
+As 3 funcoes que leem `conversoes` direto foram corrigidas uma a uma:
+`placar()` (ja estava), `historico_turmas(date,date)` e `midia_por_curso()`.
+Nao filtram de proposito, por serem ferramentas de diagnostico/manutencao:
+`conversoes_orfas`, `de_para_por_curso`, `vincula_conversao`,
+`desvincula_conversao`, `insere_conversao`.
+
+Consistencia verificada: Green Belt 01-25/08 da 239 tanto por `placar()`
+quanto por contagem direta em `leads_validos`.
+
+## Vigia pos-correcao (25/08 a 01/09/2026)
+
+Funcao `saude_ingestao(p_dias int)` retorna, por dia de gravacao: linhas,
+pessoas, linhas_por_pessoa, pct_evento_ts, leads_novos, co_ocorrencia,
+pct_co_ocorrencia. Baseline pre-correcao (17 a 24/08): 1,96 a 2,68 linhas
+por pessoa, pct_evento_ts 0, co-ocorrencia 5,6% a 21%.
+
+Alvos pos-correcao: pct_evento_ts 100%, linhas_por_pessoa perto de 1,0,
+co-ocorrencia entre 10% e 15%. Alerta se leads_novos cair mais de 50% contra
+a semana anterior (seria webhook parado, nao ruido saindo).
+
+Tarefa agendada no Claude Code (`vigia-ingestao-placar-vanzolini`, diaria
+09h) reporta em uma linha quando esta ok e detalha so quando desvia.
