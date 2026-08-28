@@ -94,3 +94,63 @@ identificador. Vale decidir depois de fechar as listas 1 e 2.
 Restam ~110 identificadores com 1 a 3 pessoas cada (pop-ups de curso, formulários
 de LP, nomes antigos em caixa alta). Somados dão ~200 pessoas. Baixa prioridade,
 mas a maioria é mapeável por regra de texto junto com o item 4.
+
+---
+
+# APLICADO EM 28/08/2026
+
+Cadastro feito em lote no banco (autorizado pelo Junior). **5.985 linhas
+recuperadas**: 5.431 pelo de-para e 554 pelo `curso_pagina`.
+
+## A causa do "Curso - Baixe o Programa" era um bug, não falta de cadastro
+
+A `insere_conversao()` **já tratava** esse identificador pelo campo
+`origem_raw->>'curso_pagina'` — mas comparava com o nome do curso de forma
+**exata** (`cursos.nome = curso_pagina`). Qualquer diferença de caixa, acento ou
+travessão derrubava o lead como órfão:
+
+- `IQNet: ISO 9001 - Auditor Interno` vs `IQNET: ISO 9001 - Auditor Interno`
+- `Gestão de Riscos... – ISO 31000` (travessão) vs `- ISO 31000` (hífen)
+- `Diretrizes para gestão de riscos psicossociais` vs `...Gestão de Riscos...`
+
+Passou a usar `norm_txt()`, o mesmo normalizador do resto do sistema. **Corrige
+daqui pra frente sem depender de cadastro manual.**
+
+## Resultado no placar (agosto)
+
+| Curso | Antes | Depois |
+|---|---|---|
+| Sistema de Gestão Integrado: Formação de auditor interno | 12 | **420** |
+| IQNET: Sistema de Gestão Integrado - Auditor Líder | 3 | **151** |
+| Interpretação dos Requisitos ISO 45001 | 2 | **145** |
+| Interpretação dos Requisitos ISO 14001 | 0 | **140** |
+| IA para Projetos de Melhoria e Gestão de Portfólio | — | **97** |
+
+## Armadilha encontrada na normalização das chaves
+
+`vincula_conversao` e `insere_conversao` removem `-9999` do fim da chave. Então
+`INTERPRETACAO-DOS-REQUISITOS-ISO-45001` vira `INTERPRETACAO-DOS-REQUISITOS-ISO`,
+uma chave genérica que capturaria outros cursos. Esses dois identificadores
+ficaram **de fora do lote de propósito** e precisam de tratamento à parte.
+
+## Excelência em Gestão de Operações: não era órfão, era curso trocado
+
+Os leads entram normalmente, mas no curso **"Gestão de Operações" (id 28)**:
+
+- `GESTAO-DE-OPERACOES-RD-META-3` — 399 pessoas
+- `GESTAO-DE-OPERACOES-RD` — 250 pessoas
+
+A mídia, porém, está atribuída a **"Excelência em Gestão de Operações" (id 77)**,
+que é o nome da campanha ativa no Monday. São dois registros de curso para o que
+operacionalmente é a mesma coisa: o gasto cai num, o lead cai no outro, e os dois
+ficam errados.
+
+**Decisão do Junior:** são o mesmo curso (aí vale unificar os dois ids) ou
+produtos diferentes? Não remapeei 649 pessoas por conta própria.
+
+## Rollback
+
+`_backup_de_para_conversao_20260828` (de-para anterior) e
+`_backup_curso_id_20260828` (ids das linhas alteradas, todas de null para valor).
+Reverter: `update conversoes set curso_id = null where id in (select id from
+_backup_curso_id_20260828)`.
