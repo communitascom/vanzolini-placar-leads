@@ -154,3 +154,56 @@ produtos diferentes? Não remapeei 649 pessoas por conta própria.
 `_backup_curso_id_20260828` (ids das linhas alteradas, todas de null para valor).
 Reverter: `update conversoes set curso_id = null where id in (select id from
 _backup_curso_id_20260828)`.
+
+---
+
+# DECISÕES DO JUNIOR APLICADAS (28/08/2026)
+
+## 1. Excelência em Gestão de Operações = Gestão de Operações (renomeação)
+
+Eram dois registros do mesmo curso. O gasto de mídia caía no 77 e os leads no
+28, então **os dois ficavam errados ao mesmo tempo**.
+
+Sobreviveu o **id 28**, que concentrava o histórico (5.420 conversões, 425 linhas
+de mídia, 2 turmas, 7 de-paras), e recebeu o nome novo. O 77 foi esvaziado
+(341 conversões, 33 linhas de mídia e a campanha ativa migradas) e desativado.
+
+Resultado: **0 → 549 leads** em agosto (Meta 283, LinkedIn 245), contra Meta 284
+e LinkedIn 245 reportados pelas plataformas. Fecha.
+
+## 2. ATUALIZACAO-REQUISITOS-ISO-14001-RD-META → Interpretação dos Requisitos ISO 14001
+
+Confirmado pela URL do curso (`/cursos/interpretacao-dos-requisitos-iso-14001-2015/`).
+Resultado: **140 → 255 leads** em agosto.
+
+## 3. CE*-LEADS e MBA-EP-LEADS: cursos descontinuados, marcados como ignorados
+
+Criada a tabela `conversao_ignorada` e a `conversoes_orfas()` passou a escondê-los.
+Nem todo órfão é erro, e sem esse mecanismo os descontinuados ficariam para sempre
+na lista de pendência, escondendo o que realmente precisa de cadastro.
+
+Marcados: CEGP-LEADS, CEQP-LEADS, CELOG-LEADS, CEAI-LEADS, MBA-EP-LEADS.
+
+Para marcar outros (o ruído de CRM, chat e newsletter é o maior candidato):
+`insert into conversao_ignorada (conversao_rd, motivo) values ('CHAVE','motivo');`
+
+## 4. PENDENTE: a tela de cadastro está somente-leitura
+
+O hardening de segurança de 25/08 revogou do papel `anon` as funções de escrita
+`vincula_conversao`, `desvincula_conversao` e `cria_curso`. A `conversoes.html` é
+um site estático que lê como `anon`: ela **lista** os órfãos normalmente, mas
+qualquer clique em "Vincular a um curso" falha.
+
+Não é caso de simplesmente devolver o grant: a anon key é pública, está no HTML,
+e qualquer pessoa poderia remapear curso de lead. O caminho é o mesmo já usado na
+carga de mídia: as RPCs de escrita passam a exigir um token conferido contra o
+Vault, e a tela pede esse token uma vez por sessão.
+
+## 5. PENDENTE: cursos com nome parecido
+
+Os identificadores `INTERPRETACAO-DOS-REQUISITOS-ISO` (truncado) e
+`INTERPRETACAO-DOS-REQUISITOS-ISO-45001` continuam de fora: a normalização das
+chaves remove `-45001` do fim e as duas viram a mesma chave genérica. Como há
+vários cursos que começam igual (ISO 9001, 14001, 45001, 7101, 27001, 42001),
+separar exige cruzar o período da conversão com o período de campanha no Monday
+e na planilha de gestão.
