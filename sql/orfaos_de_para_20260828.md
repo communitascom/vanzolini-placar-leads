@@ -207,3 +207,57 @@ chaves remove `-45001` do fim e as duas viram a mesma chave genérica. Como há
 vários cursos que começam igual (ISO 9001, 14001, 45001, 7101, 27001, 42001),
 separar exige cruzar o período da conversão com o período de campanha no Monday
 e na planilha de gestão.
+
+---
+
+# INTERPRETACAO-DOS-REQUISITOS-ISO = ISO 9001:2015 (confirmado, 28/08)
+
+Hipótese do Junior confirmada por **três evidências independentes**.
+
+**1. O valor bruto é o slug do próprio curso.** O identificador real é
+`interpretacao-dos-requisitos-iso-90012015` — o nome "Interpretação dos
+Requisitos ISO 9001:2015" slugificado, com o `:` do ano perdido. Os irmãos
+mantiveram o hífen e por isso **não** colapsam:
+
+| Curso | Identificador de página | Chave normalizada |
+|---|---|---|
+| ISO 45001:2018 | `...-iso-45001-2018` | `...-ISO-45001` |
+| ISO 27001:2022 | `...-iso-27001-2022` | `...-ISO-27001` |
+| ISO 37001:2017 | `...-iso-37001-2017` | `...-ISO-37001` |
+| **ISO 9001:2015** | **`...-iso-90012015`** | **`...-ISO`** ← genérica |
+
+**2. A planilha de conversões de origem** confirma o nome exato do curso
+("Interpretação dos Requisitos ISO 9001:2015") e mostra suas conversões
+conhecidas: `REQUISITOS-ISO-9001-RD`, `REQUISITOS-ISO-9001-RD-META`,
+`GESTAO-QUALIDADE-METODOLOGIA-RD`.
+
+**3. Correlação temporal mês a mês** com `REQUISITOS-ISO-9001-RD-META`, já
+vinculada ao curso 33. O órfão nunca aparece num mês em que a conversão
+confirmada não capta:
+
+| Mês | ISO 9001 confirmado | Órfão |
+|---|---|---|
+| jan | 79 | 3 |
+| mar | 126 | 8 |
+| abr | 138 | 2 |
+| mai | 43 | 3 |
+| jun | 78 | 6 |
+| jul | 103 | 4 |
+| ago | 155 | 1 |
+
+Proporção estável de 2% a 6%, típica de formulário de página contra o
+formulário do anúncio.
+
+**Aplicado:** 24 pessoas (33 linhas) devolvidas ao curso 33.
+
+## Risco residual registrado
+
+A chave gravada é a genérica `INTERPRETACAO-DOS-REQUISITOS-ISO`. Hoje nenhum
+outro valor cai nela (conferido), mas a página da **ISO 7101** tem slug do mesmo
+formato (`/cursos/interpretacao-dos-requisitos-iso-7101/`) e colidiria se passar
+a gerar conversão — os leads dela iriam para o 9001.
+
+**Correção de fundo:** a normalização remove `-\d+$`, mas a intenção original era
+remover só sufixos de variante como `-2` e `-3`. Trocar por `-\d{1,2}$` resolve a
+classe inteira do problema. Não foi feito nesta sessão porque muda a chave de
+todas as 360 conversões já vinculadas e precisa de conferência dedicada.
