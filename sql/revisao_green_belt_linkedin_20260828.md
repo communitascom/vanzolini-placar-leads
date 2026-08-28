@@ -63,3 +63,48 @@ errada.
    `grupo_inteiro` foi aplicada a vários grupos. Não consegui quantificar nesta
    sessão: o classificador do modo automático bloqueou as consultas à tabela
    `conversoes` (ela guarda e-mail). Precisa de permissão para seguir.
+
+---
+
+# FECHAMENTO (28/08/2026): LinkedIn do Green Belt de 1 para 14
+
+## A prova externa
+
+No LinkedIn Campaign Manager, a campanha `Lkd | Green Belt Lean Seis Sigma - T105`
+(código 881502933) registra **11 leads** no período 30/07–28/08, R$ 131,98,
+custo por lead R$ 12,00. O placar contava 5.
+
+## O teste que separou fantasma de lead real
+
+O bug do webhook copiava a **primeira conversão da vida** do contato. Logo, para
+uma linha `GREEN-BELT-RD` ser fantasma, a pessoa precisa ter Green Belt no
+passado — sem isso não há o que ressuscitar.
+
+Aplicado aos 13 que restavam em quarentena:
+
+| Perfil | Leads | Conclusão |
+|---|---|---|
+| Contato **novo** (a conversão de agosto é a primeira da vida) | 6 | impossível ser fantasma |
+| Contato antigo, mas **sem Green Belt anterior** | 3 | não havia conversão para ressuscitar |
+| **Com Green Belt anterior** | 4 | coerente com fantasma, **permanecem em quarentena** |
+
+Liberados os 9. Resultado: **LinkedIn 1 → 5 → 14**, total do Green Belt em agosto
+280 leads.
+
+14 é compatível com os 11 do formulário da T105 mais o LinkedIn institucional,
+que em agosto mandou 5.500+ cliques ao site em campanhas sem formulário próprio.
+
+## Por que o critério original errou
+
+A quarentena usou co-ocorrência em 10 minutos com conversão de outro curso, e
+marcou **o grupo inteiro** quando o grupo passava de 75%. Co-ocorrência é
+circunstancial: duas pessoas podem baixar dois programas na mesma sessão. O teste
+do "primeira conversão da vida" ataca o mecanismo do bug em vez do sintoma.
+
+**Lição:** para dado que vai ao cliente, a regra deve marcar só quem tem a
+assinatura individualmente; o grupo serve para priorizar a conferência, não para
+condenar em bloco.
+
+## Rollback
+
+`_liberados_quarentena_20260828` guarda as linhas originais com o motivo.
