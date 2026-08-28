@@ -72,7 +72,7 @@ function render(){
           <span class="ico material-symbols-outlined">${a.tipo_alerta==='verba'?'payments':'trending_down'}</span>
           <div><b>${a.curso}</b><br><span class="txt">${a.detalhe}</span></div>
         </div>`).join('')
-      : '<div class="alerta" style="border-left-color:var(--verde);background:var(--verde-bg)"><span class="ico material-symbols-outlined">check_circle</span><div><b>Nenhuma campanha fora do padrão</b><br><span class="txt">captação e ritmo de verba dentro do esperado</span></div></div>';
+      : '<div class="alerta full" style="border-left-color:var(--verde);background:var(--verde-bg)"><span class="ico material-symbols-outlined">check_circle</span><div><b>Nenhuma campanha fora do padrão</b><br><span class="txt">captação e ritmo de verba dentro do esperado</span></div></div>';
   }
 
   // tabela principal
