@@ -1,65 +1,62 @@
-# Reconciliacao da semana 24 a 30/08/2026 (placar x RD Station CRM)
+# Reconciliacao 24 a 30/08/2026 (placar x RD Station CRM), nominal por e-mail
 
-## Metodo
+## Como foi feito (reprodutivel pela API, sem export manual)
 
-Duas tentativas, e a licao e sobre o metodo.
+1. `deals_list`, filtro `created_at`, 11 paginas de 200: **1.967 negociacoes**,
+   1.921 criadas dentro de 24 a 30/08 em horario local.
+2. `contacts_list` por `created_at` (9 paginas) **mais** por `updated_at`
+   (11 paginas): 2.166 contatos. **A chave e o `updated_at`**: contato antigo que
+   ganha negociacao na semana e atualizado na semana, e so assim ele aparece.
+   Com `created_at` sozinho a cobertura era 60,6%; com os dois, 92,3%.
+3. Cruzamento por md5 do e-mail (6 chars) contra os leads do placar na mesma
+   regra da `placar()` (anti-refire 90d + quarentena de fantasma).
 
-**1. Por tag de curso (`tag-d2bb`): NAO SERVE.** So 863 das 1.921 negociacoes
-da semana (44,9%) tem tag. As outras 1.058 entram sem tag, 963 delas com origem
-"Desconhecido" e 1.036 como "ongoing". A tag e preenchida adiante no funil, nao
-na criacao: entre as ja ganhas ou perdidas quase todas tem tag (30 won e 87 lost
-com tag contra 22 lost sem). Comparar por tag faz o placar parecer inflado
-quando o lead existe no CRM sem etiqueta.
+Tabelas de apoio no banco: `_crm_semana_hash` (1.737 e-mails com negociacao) e
+`_crm_contato_sem_deal` (409 e-mails que sao contato e nao abriram negociacao).
 
-**2. Por e-mail (nominal): e o metodo certo**, mesmo usado em 25/08 (ver
-`fantasma_conversao_20260824.md`, secao "Reconciliacao final dos 3 cursos"),
-quando Green Belt bateu 224 x 225, IA na Gestao de Projetos 179 x 177 e
-Auditor Lider 200 x 189 decomposto.
+**Nao usar a tag de curso (`tag-d2bb`) para conciliar.** So 44,9% das
+negociacoes tem tag; ela e preenchida adiante no funil, nao na criacao. Por tag
+o ONA aparecia com 7 negociacoes; por e-mail tem 190.
 
-## Limite da API (importante para a proxima rodada)
+## Resultado
 
-`deals_list` traz `contact_ids`, nao e-mail. Para converter em e-mail e preciso
-`contacts_list`, que **nao aceita filtro por id** (`Invalid filter 'id'`). Puxei
-os contatos criados de 23 a 30/08 (9 paginas, 1.418 contatos), mas 714 deals da
-semana apontam para contato criado antes disso. Resultado: tenho e-mail de 1.164
-das 1.921 negociacoes (60,6%), 1.142 e-mails distintos.
+| | leads | % |
+|---|---|---|
+| Placar, 24 a 30/08 | 1.986 | 100 |
+| Com negociacao no CRM | 1.675 | **84,3** |
+| Viraram contato e nao abriram negociacao | 138 | 6,9 |
+| Sem rastro no CRM | 173 | 8,7 |
 
-**Todo numero de "com deal no CRM" abaixo e, portanto, PISO.**
+CRM no mesmo periodo: 1.921 negociacoes criadas (diferenca de volume: 3,4%).
 
-## Resultado (piso, cobertura de 60,6% do CRM)
+Os 173 "sem rastro" sao **teto**, nao numero fechado: 148 negociacoes (7,7%)
+ficaram sem e-mail resolvido porque o contato nao foi criado nem atualizado na
+janela consultada.
 
-Total: 1.986 leads no placar (1.810 em campanha ativa, identico ao painel),
-1.921 negociacoes criadas no CRM, diferenca de 3,4% no volume.
+## Onde esta o vazamento (contato que nao virou negociacao)
 
-| Curso | Leads placar | Com deal (piso) | % |
-|---|---|---|---|
-| ONA Avaliador interno | 203 | 155 | 76,4 |
-| MBA Lideranca, IA e Execucao | 193 | 101 | 52,3 |
-| SGI Formacao auditor interno | 127 | 84 | 66,1 |
-| Interpretacao ISO 14001 | 124 | 76 | 61,3 |
-| Customer Experience | 114 | 45 | 39,5 |
-| Inteligencia Emocional | 89 | 52 | 58,4 |
-| Basico em Gestao de Projetos | 79 | 47 | 59,5 |
-| Green Belt | 69 | 36 | 52,2 |
-| Gestao por Resultados | 69 | 32 | 46,4 |
-| MBA Engenharia da Qualidade | 67 | 44 | 65,7 |
-| IQNET ISO 9001 Auditor Lider | 37 | 30 | 81,1 |
-| IQNET ISO 45001 Auditor Interno | 54 | 15 | 27,8 |
+Base normal por curso fica entre 0% e 5%. Dois cursos fogem:
 
-Hashes do CRM preservados em `_crm_semana_hash` (md5 de 6 chars) para reproduzir.
+| Curso | Leads | Com deal | Contato sem deal | % |
+|---|---|---|---|---|
+| **IQNET: ISO 45001 - Auditor Interno** | 54 | 26 | **26** | **48,1** |
+| **Customer Experience e Gestao da Qualidade** | 114 | 71 | **34** | **29,8** |
+| MBA em Lideranca, IA e Execucao | 193 | 158 | 21 | 10,9 |
+| Interpretacao ISO 14001 | 124 | 101 | 13 | 10,5 |
+| Green Belt (referencia, ja corrigido) | 69 | 63 | 3 | 4,3 |
 
-## Achados que independem da cobertura
+O Green Belt, que em julho tinha 51 de 161 leads parados em contato
+(ver `vanzolini-vazamento-midia-crm` na memoria), hoje esta em 3 de 69. O
+problema migrou de curso, nao sumiu.
 
-1. **55,1% das negociacoes entram sem curso.** E achado de processo do CRM, nao
-   do placar, e e o que impede conferencia rapida.
-2. **15 siglas faltam no `de_para_curso_sigla`**, cobrindo ~330 negociacoes da
-   semana: SGIFAI (87, confirma o SGI como curso pelo dado do cliente),
-   AIR14001ON (72), SGPON (37), IR45001ON (28), IR14001ON (26), MBA-LIEE (21),
-   HGPON (16), LACPON (13), AMFMEA (7).
-3. Continuam entrando negociacoes de teste no CRM.
+## Conclusao
 
-## Para fechar de verdade
+O placar nao esta inflado. Em 27 dos 29 cursos com volume, 76% a 94% dos leads
+viram negociacao no CRM na mesma semana. As duas excecoes sao problema de
+passagem para o comercial, nao de contagem.
 
-Precisa do e-mail de todas as negociacoes. Duas saidas: export de deals do CRM
-com coluna de e-mail (foi assim em 25/08) ou sincronizar contatos do CRM para o
-Supabase e passar a cruzar por la, o que tornaria o teste semanal automatico.
+## Proximo passo natural
+
+Sincronizar contatos e deals do CRM para o Supabase (por `updated_at`, janela
+movel) transforma esta reconciliacao numa query e ela passa a rodar sozinha toda
+semana, sem as 20 chamadas de API desta rodada.
