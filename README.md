@@ -96,6 +96,22 @@ que falta cadastrar o padrão em `de_para_campanha`.
 - `turmas.investimento_midia`, parado em 20/05/2026. Vem da planilha
   GESTÃO VANZOLINI e alimenta o Investimento/CPL do placar e do histórico.
 
+## Uma lógica só por página (placar e campanhas)
+
+O placar tem duas versões, a interna (`index.html`) e a do cliente
+(`cliente.html`, com PIN e só campanhas ativas). Desde 30/08/2026 as duas são
+cascas sobre `placar.css` + `placar.js`, como `campanhas.html` e
+`cliente-campanhas.html` já eram sobre `campanhas.css` + `campanhas.js`.
+
+Não duplicar esses arquivos. O que muda entre interno e cliente vem do DOM:
+
+| Diferença | Como é expressa |
+|---|---|
+| Colunas da tabela | `data-col` em cada `<th>`. Canal sem coluna própria é somado em "outros" (é assim que o cliente vê Popup e WhatsApp juntos) |
+| Só campanhas ativas | a página do cliente não tem o botão `#fAtivas`, e sem ele o filtro fica fixo |
+| Trava de PIN | `window.AGUARDA_PIN = true` segura o `carregar()` |
+| Alertas operacionais | a página do cliente não tem `#sec-alertas` |
+
 ## Histórico
 
 Só existe uma página de histórico: `historico-dinamico.html`, lida ao vivo.
