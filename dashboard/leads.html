@@ -13,15 +13,11 @@
 <body class="dash pg-leads" data-pagina="leads" data-titulo="Placar de leads">
 <main>
   <div class="cab">
-    <div class="tit">
-      <h2>Placar de leads</h2>
-      <span class="per"><span class="ms">calendar_month</span><span id="perTexto">período selecionado</span></span>
-    </div>
+    <div class="tit"></div>
     <div class="acoes">
       <button class="chip" onclick="window.print()" title="Gera um PDF do placar pelo diálogo de impressão"><span class="ms">picture_as_pdf</span>Salvar PDF</button>
     </div>
   </div>
-  <p class="leitura" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura do período…</span></p>
 
   <div class="barra">
     <div class="filtros">
@@ -35,14 +31,15 @@
 
   <div id="erro"></div>
   <div class="cards" id="cards"></div>
+  <p class="leitura leitura-box" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura do período…</span></p>
 
   <div class="tabela">
     <table>
       <thead><tr>
         <th class="curso" data-col="curso">Curso</th>
-        <th data-col="campanha">Campanha</th><th data-col="meta_ads">Meta</th><th data-col="linkedin">LinkedIn</th><th data-col="form_prog">Form Prog.</th>
-        <th data-col="form_pagina">Form Pág.</th><th data-col="outros">Outros</th>
-        <th data-col="leads">Leads</th><th data-col="delta">Δ%</th><th data-col="media">Média/dia</th><th data-col="mediana">Mediana/dia</th>
+        <th data-col="campanha">Campanha</th><th data-col="meta_ads">Meta</th><th data-col="linkedin">LinkedIn</th><th data-col="form_prog">Forma.</th>
+        <th data-col="popup">Popup</th><th data-col="outros">Outros</th>
+        <th data-col="leads">Leads</th><th data-col="delta">Δ%</th><th data-col="media">Média<br>/dia</th><th data-col="mediana">Mediana<br>/dia</th>
         <th data-col="situacao">Situação</th>
       </tr></thead>
       <tbody id="corpo"><tr><td colspan="12" class="loading">Carregando…</td></tr></tbody>
@@ -74,9 +71,6 @@
 // Leitura do período escrita a partir dos números que o placar.js acabou de renderizar.
 window.iniciarPainel = async function(){
   await carregar();
-  const ini = document.getElementById('fIni').value, fim = document.getElementById('fFim').value;
-  const br = iso => iso ? iso.split('-').reverse().join('/') : '';
-  document.getElementById('perTexto').textContent = br(ini) + ' a ' + br(fim);
   document.getElementById('horaRodape').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   const dados = (typeof ultimoData !== 'undefined' && ultimoData) ? ultimoData : [];
   const ativas = dados.filter(r => r.campanha_ativa);

@@ -13,12 +13,17 @@
 <body class="dash pg-inicio" data-pagina="inicio" data-titulo="Dashboard de marketing">
 <main>
   <div class="cab">
-    <div class="tit">
-      <h2>Início</h2>
-      <span class="per"><span class="ms">calendar_month</span><span id="perTexto">mês atual</span></span>
+    <div class="tit"></div>
+  </div>
+
+  <div class="linha-topo">
+    <div class="nav" id="presets"></div>
+    <div class="filtros">
+      <div class="campo"><label>De</label><input type="date" id="fIni"></div>
+      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
+      <button class="btn" id="btnAplicar">Aplicar</button>
     </div>
   </div>
-  <p class="leitura" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura do mês…</span></p>
 
   <div class="kpis" id="kpis">
     <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
@@ -26,31 +31,39 @@
     <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
     <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
   </div>
+  <p class="leitura leitura-box" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura do período…</span></p>
 
-  <div class="home-grid">
-    <div class="card">
-      <div class="card-head"><div><h4>Campanhas de captação no ar <a href="campanhas.html">ver relatório</a></h4><div class="sub">leads captados até hoje e ritmo contra o histórico do curso</div></div></div>
-      <div class="lista" id="listaCamp"><div class="skel"><i></i><i></i><i></i><i></i></div></div>
+  <div class="secao">
+    <h3><span class="ms">campaign</span>Comercial <small>captação de leads</small></h3>
+    <div class="home-grid">
+      <div class="card">
+        <div class="card-head"><div><h4>Campanhas de captação no ar <a href="campanhas.html">ver relatório</a></h4><div class="sub">leads captados até hoje e ritmo contra o histórico do curso</div></div></div>
+        <div class="lista" id="listaCamp"><div class="skel"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h4>Leads por curso no período <a href="leads.html" class="btn-detalhe">ver placar completo<span class="ms">arrow_forward</span></a></h4><div class="sub">campanhas ativas, situação contra a mediana histórica por dia</div></div></div>
+        <div class="hbars" id="hbCursos"><div class="skel"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="secao">
+    <h3><span class="ms">verified</span>Institucional <small>Google + Meta + LinkedIn</small></h3>
+    <div class="kpis cinco" id="kpisInst">
+      <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
+      <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
+      <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
+      <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
+      <div class="kpi"><div class="skel"><i style="width:40%"></i><i style="width:70%"></i><i style="width:55%"></i></div></div>
     </div>
     <div class="card">
-      <div class="card-head"><div><h4>Campanha institucional no mês <a href="institucional.html">ver relatório</a></h4><div class="sub">investimento por eixo, Google + Meta + LinkedIn</div></div></div>
+      <div class="card-head"><div><h4>Investimento por eixo <a href="institucional.html" class="btn-detalhe">ver relatório completo<span class="ms">arrow_forward</span></a></h4></div></div>
       <div class="share-bar" id="instEixos"><div class="skel"><i></i><i></i><i></i></div></div>
     </div>
   </div>
 
-  <div class="home-grid">
-    <div class="card">
-      <div class="card-head"><div><h4>Leads por curso no mês <a href="leads.html">ver placar</a></h4><div class="sub">campanhas ativas, situação contra a mediana histórica por dia</div></div></div>
-      <div class="hbars" id="hbCursos"><div class="skel"><i></i><i></i><i></i><i></i></div></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><h4>Fontes e atualização</h4><div class="sub">de onde vem cada número deste dashboard</div></div></div>
-      <div class="lista" id="fontes"><div class="skel"><i></i><i></i><i></i></div></div>
-    </div>
-  </div>
-
   <div class="rodape">
-    <div>Dados ao vivo, leitura apenas. Números do mês corrente, do dia 1 até hoje. Consultado às <span id="horaRodape"></span>.</div>
+    <div>Dados ao vivo, leitura apenas. Consultado às <span id="horaRodape"></span>.</div>
     <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
   </div>
 </main>

@@ -16,11 +16,6 @@
     {id:"historico",     href:"historico.html",     ico:"history",  rot:"Histórico e investimento"},
     {id:"institucional", href:"institucional.html", ico:"verified", rot:"Campanha institucional"}
   ];
-  var FUTURAS = [
-    {ico:"share",   rot:"Social orgânico"},
-    {ico:"search",  rot:"Busca orgânica"},
-    {ico:"mail",    rot:"E-mail"}
-  ];
   var ANEL = '<svg><use href="#anel"/></svg>';
   var pagina = document.body.dataset.pagina || "inicio";
   var titulo = document.body.dataset.titulo || "Dashboard";
@@ -52,10 +47,6 @@
   var h = '<div class="titulo">Relatórios</div>';
   PAGINAS.forEach(function(p){
     h += '<a href="' + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
-  });
-  h += '<div class="sep"></div>';
-  FUTURAS.forEach(function(p){
-    h += '<a class="breve" href="#"><span class="ms">' + p.ico + '</span>' + p.rot + '<small>em breve</small></a>';
   });
   h += '<div class="rodape-menu">Dados ao vivo, leitura apenas.<br><span class="credito">' + ANEL + 'por Communitas</span></div>';
   menu.innerHTML = h;

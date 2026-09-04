@@ -101,6 +101,7 @@ function renderizar(data){
     .sort((a,b)=>{
       if(tipoOrder[a.tipo]!==tipoOrder[b.tipo]) return tipoOrder[a.tipo]-tipoOrder[b.tipo];
       if(a.campanha_ativa!==b.campanha_ativa) return a.campanha_ativa?-1:1;
+      if(a.campanha_ativa && b.campanha_ativa) return String(a.curso).localeCompare(String(b.curso),'pt-BR');
       return b.leads-a.leads;
     });
 

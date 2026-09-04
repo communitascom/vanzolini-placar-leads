@@ -83,7 +83,6 @@ async function aplicar(ini, fim, k) {
   document.getElementById('fIni').value = ini;
   document.getElementById('fFim').value = fim;
   document.querySelectorAll('#presets .chip').forEach(b => b.classList.toggle('on', b.dataset.k === k));
-  document.getElementById('perTexto').textContent = br(ini) + ' a ' + br(fim);
   await carregarPeriodo();
   render();
 }
@@ -121,10 +120,6 @@ function fotos() {
   let nota = '';
   if (chaves.length > 1) nota = 'Alcance somado entre ' + chaves.length + ' fotos mensais: a mesma pessoa pode contar mais de uma vez.';
   if (!cobreIni || !cobreFim) nota += (nota ? ' ' : '') + 'A foto do Reportei não cobre todo o período.';
-  if (ini.slice(8) !== '01' || fim !== fimDoMes(fim)) {
-    const ultima = meses.reduce((a, r) => r.periodo_fim > a ? r.periodo_fim : a, '');
-    if (chaves.length === 1 && fim > ultima) nota += (nota ? ' ' : '') + 'Foto mensal até ' + br(ultima) + '.';
-  }
   return { linhas: meses, modo: 'meses', meses: chaves.length, nota };
 }
 function addDias(iso, n) { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
@@ -216,8 +211,14 @@ function render() {
 }
 
 function kpi(ico, cor, rot, val, nota, pend) {
-  return `<div class="kpi compacto${pend ? ' pend' : ''}"><div class="topo"><span class="tile ${cor}"><span class="ms">${ico}</span></span><span class="rot">${rot}</span></div>
-    <div class="valor"><span class="n">${val === null || val === undefined ? 'sem dado' : val}</span></div><div class="nota${pend ? ' aviso' : ''}">${nota}</div></div>`;
+  const semDado = val === null || val === undefined;
+  let valorHtml = 'sem dado';
+  if (!semDado) {
+    const m = String(val).match(/^(R\$)\s*(.+)$/);
+    valorHtml = m ? `<span class="cifrao">${m[1]}</span> <span class="n">${m[2]}</span>` : `<span class="n">${val}</span>`;
+  }
+  return `<div class="kpi compacto${pend ? ' pend' : ''}"><div class="topo"><span class="rot">${rot}</span><span class="tile ${cor}"><span class="ms">${ico}</span></span></div>
+    <div class="valor">${valorHtml}</div><div class="nota${pend ? ' aviso' : ''}">${nota}</div></div>`;
 }
 
 function stack(partes, total) {
@@ -226,6 +227,11 @@ function stack(partes, total) {
     <div class="stack-leg">${partes.map(p => `<span><i style="background:${p.cor}"></i>${p.rot}<b>${tot && p.v ? Math.round(100 * p.v / tot) + '%' : '0%'}</b></span>`).join('')}</div>`;
 }
 
+const ICONE_PLAT = {
+  Meta: '<svg viewBox="0 0 36 36" width="20" height="20"><path fill="#0866FF" d="M18 3C9.7 3 3 9.4 3 17.3c0 4.5 2.2 8.5 5.6 11.1v5.4l5.1-2.8c1.4.4 2.8.6 4.3.6 8.3 0 15-6.4 15-14.3S26.3 3 18 3z"/><path fill="#fff" d="M9.7 22.6l4.1-6.5 4.1 3.1 4-4.4-4.3 6.7-4.1-3.1-3.8 4.2z"/></svg>',
+  Google: '<svg viewBox="0 0 36 36" width="20" height="20"><path fill="#4285F4" d="M33.1 18.4c0-1.2-.1-2.1-.3-3H18v5.9h8.5c-.2 1.5-1.2 3.7-3.3 5.1l-.03.2 4.9 3.7.3.03c3.1-2.8 4.9-7 4.9-11.9z"/><path fill="#34A853" d="M18 34c4.4 0 8.1-1.4 10.9-3.9l-5.2-4c-1.4.9-3.3 1.6-5.7 1.6-4.4 0-8.1-2.9-9.4-6.9l-.19.02-5.1 3.9-.07.18C6.1 30.1 11.6 34 18 34z"/><path fill="#FBBC05" d="M8.6 20.8c-.3-1-.5-2-.5-3.1s.2-2.1.5-3.1l-.01-.2-5.2-4-.17.08C2.2 12.6 1.5 15.2 1.5 17.7s.7 5.1 1.9 7.3l5.2-4.2z"/><path fill="#EA4335" d="M18 8.6c3.1 0 5.2 1.3 6.4 2.4l4.6-4.5C26.1 3.9 22.4 2 18 2 11.6 2 6.1 5.9 3.4 11.5l5.2 4.1C9.9 11.6 13.6 8.6 18 8.6z"/></svg>',
+  LinkedIn: '<svg viewBox="0 0 36 36" width="20" height="20"><rect width="36" height="36" rx="6" fill="#0A66C2"/><path fill="#fff" d="M11.5 14.6h4v11.6h-4zM13.5 9.4a2.3 2.3 0 1 1 0 4.6 2.3 2.3 0 0 1 0-4.6zM18.5 14.6h3.8v1.6h.05c.53-.98 1.8-2 3.7-2 3.96 0 4.7 2.5 4.7 5.8v6.2h-4v-5.5c0-1.3 0-3-1.85-3s-2.13 1.4-2.13 2.9v5.6h-4z"/></svg>'
+};
 function renderPlataformas(porPlat, t, f) {
   const host = document.getElementById('plataformas');
   host.innerHTML = PLATS.map(p => {
@@ -235,7 +241,9 @@ function renderPlataformas(porPlat, t, f) {
     const extra = p === 'Google'
       ? `<div><span class="r">Alcance</span><span class="v pend">só impressões</span></div><div><span class="r">Frequência</span><span class="v pend">não informada</span></div>`
       : `<div><span class="r">Alcance</span><span class="v">${a ? N(a.alcance) : (semVeiculacao ? '<span class="z">sem veiculação</span>' : PEND)}</span></div><div><span class="r">Frequência</span><span class="v">${a ? N1(a.freq) + '×' : (semVeiculacao ? '<span class="z">sem veiculação</span>' : PEND)}</span></div>`;
-    return `<div class="card"><div class="cab-plat"><i style="background:${COR[p]}"></i><h4>${p} Ads</h4><span class="share">${n} campanha${n === 1 ? '' : 's'}</span></div>
+    const notaLinkedin = p === 'LinkedIn' && semVeiculacao
+      ? `<div class="pend-nota"><span class="ms">info</span>LinkedIn ainda requer conexão: sem campanha registrada no período.</div>` : '';
+    return `<div class="card"><div class="cab-plat">${ICONE_PLAT[p]}<h4>${p} Ads</h4><span class="share">${n} campanha${n === 1 ? '' : 's'}</span></div>
       <div class="mini">
         <div><span class="r">Investimento</span><span class="v">${BRL(d.inv)}<small>${t.inv ? Math.round(100 * d.inv / t.inv) + '% da verba' : ''}</small></span></div>
         <div><span class="r">Impressões</span><span class="v">${MI(d.impr)}<small>${t.impr ? Math.round(100 * d.impr / t.impr) + '%' : ''}</small></span></div>
@@ -244,7 +252,7 @@ function renderPlataformas(porPlat, t, f) {
         <div><span class="r">CTR</span><span class="v">${PCT(d.ctr)}</span></div>
         <div><span class="r">CPM</span><span class="v">${BRL2(d.cpm)}</span></div>
         <div><span class="r">CPC</span><span class="v">${BRL2(d.cpc)}</span></div>
-      </div></div>`;
+      </div>${notaLinkedin}</div>`;
   }).join('');
   document.getElementById('shareInv').innerHTML = stack(PLATS.map(p => ({ rot: p, v: porPlat[p].inv, cor: COR[p] })), t.inv);
   document.getElementById('shareImpr').innerHTML = stack(PLATS.map(p => ({ rot: p, v: porPlat[p].impr, cor: COR[p] })), t.impr);
@@ -315,17 +323,15 @@ function ritmo(inv, plano) {
 
 function renderEixos(porEixo, f) {
   const host = document.getElementById('eixos');
-  let avisoPlano = false;
   host.innerHTML = EIXOS.map(e => {
     const d = porEixo[e], rows = CAMP.filter(c => c.eixo === e);
     const pl = planoEixo(e), rt = ritmo(d.inv, pl.verba);
-    if (pl.temPlano) avisoPlano = true;
     const metaImpr = totais(rows.filter(r => r.plataforma === 'Meta')).impr;
     const aM = metaImpr ? alcancePlat(f, 'Meta', e) : null;
     const semMeta = !metaImpr;
     const porPlat = PLATS.map(p => ({ rot: p, v: totais(rows.filter(r => r.plataforma === p)).inv, cor: COR[p] }));
     const porPlatImpr = PLATS.map(p => ({ rot: p, v: totais(rows.filter(r => r.plataforma === p)).impr, cor: COR[p] }));
-    const ads = anunciosPorEixo(f, e).slice(0, 6);
+    const ads = anunciosPorEixo(f, e);
     return `<div class="card eixo">
       <div class="cab-eixo"><div><h4>${e}</h4><div class="obj">${OBJ[e]}</div></div><span class="badge ${rt.cls}">${rt.rot}</span></div>
       <div class="mini">
@@ -345,21 +351,22 @@ function renderEixos(porEixo, f) {
       </div>
       <div class="share-bar"><div class="rot"><span>Investimento por canal</span></div>${stack(porPlat, d.inv)}</div>
       <div class="share-bar"><div class="rot"><span>Impressões por canal</span></div>${stack(porPlatImpr, d.impr)}</div>
-      <div style="overflow:auto"><table><thead><tr><th>Campanha</th><th>Invest.</th><th>Impr.</th><th>CTR</th></tr></thead><tbody>
-        ${rows.length ? rows.map(r => `<tr><td><span class="n1">${r.campanha}</span><span class="n2" style="font-size:11.5px;color:var(--mute);display:block">${r.plataforma}</span></td><td>${BRL(r.investimento)}</td><td>${N(r.impressoes)}</td><td>${PCT(r.impressoes ? 100 * r.cliques / r.impressoes : 0)}</td></tr>`).join('')
-          : '<tr><td colspan="4" class="z">Sem campanha no período</td></tr>'}
+      <div style="overflow:auto"><table><thead><tr><th>Campanha</th><th>Invest.</th><th>Impr.</th><th>CTR</th><th>CPM</th><th>Freq.</th></tr></thead><tbody>
+        ${rows.length ? rows.map(r => {
+          const rCpm = r.impressoes ? 1000 * r.investimento / r.impressoes : 0;
+          const aR = r.plataforma === 'Meta' ? alcancePlat(f, 'Meta', e) : (r.plataforma === 'LinkedIn' ? alcancePlat(f, 'LinkedIn') : null);
+          return `<tr><td><span class="n1">${r.campanha}</span><span class="n2" style="font-size:11.5px;color:var(--mute);display:block">${r.plataforma}</span></td><td>${BRL(r.investimento)}</td><td>${N(r.impressoes)}</td><td>${PCT(r.impressoes ? 100 * r.cliques / r.impressoes : 0)}</td><td>${BRL2(rCpm)}</td><td>${aR ? N1(aR.freq) + '×' : '<span class="z">n/d</span>'}</td></tr>`;
+        }).join('')
+          : '<tr><td colspan="6" class="z">Sem campanha no período</td></tr>'}
       </tbody></table></div>
-      <div>
-        <div class="rot" style="font-size:13px;color:var(--ink-2);margin-bottom:6px">Anúncios com mais impressões <small style="color:var(--mute)">Google por campanha; Meta pela conta (Certificação = Organizações)</small></div>
-        ${ads.length ? `<div style="overflow:auto"><table class="tab-anuncios"><thead><tr><th class="nome">Anúncio</th><th>Impr.</th><th>Alcance</th><th>CTR</th></tr></thead><tbody>
-          ${ads.map(a => `<tr><td class="nome"><span class="n1">${a.nome}</span><span class="n2">${a.plat}</span></td><td>${N(a.impr)}</td><td>${a.alc ? N(a.alc) : '<span class="z">n/d</span>'}</td><td>${PCT(a.ctr)}</td></tr>`).join('')}
+      <details class="anuncios-rec">
+        <summary><span class="rot">Anúncios com mais impressões <small style="color:var(--mute)">Google por campanha; Meta pela conta (Certificação = Organizações)</small></span></summary>
+        ${ads.length ? `<div style="overflow:auto;max-height:340px"><table class="tab-anuncios"><thead><tr><th class="nome">Anúncio</th><th>Impr.</th><th>Alcance</th><th>CTR</th><th>CPM</th><th>Freq.</th></tr></thead><tbody>
+          ${ads.map(a => `<tr><td class="nome"><span class="n1">${a.nome}</span><span class="n2">${a.plat}</span></td><td>${N(a.impr)}</td><td>${a.alc ? N(a.alc) : '<span class="z">n/d</span>'}</td><td>${PCT(a.ctr)}</td><td>${BRL2(a.cpm)}</td><td>${a.alc && a.impr ? N1(a.impr / a.alc) + '×' : '<span class="z">n/d</span>'}</td></tr>`).join('')}
         </tbody></table></div>` : `<div class="pend-nota"><span class="ms">info</span>Aguardando a foto de anúncios do Reportei para este período.</div>`}
-      </div>
+      </details>
     </div>`;
   }).join('');
-  document.getElementById('avisoPlano').innerHTML = avisoPlano
-    ? '<b>Verba prevista:</b> leitura Communitas do planejamento v4 (28/08), por bloco e mês, pró-rata pelos dias do período. Ajustável na tabela institucional_plano.'
-    : '';
 }
 
 function renderVideos(f) {
@@ -417,13 +424,12 @@ function renderTrafego(f) {
   const site = props.filter(r => /site|org\.br/i.test(r.nome)), lps = props.filter(r => /lp/i.test(r.nome));
   const sc = f.linhas.filter(r => r.plataforma === 'SearchConsole');
   const marca = sc.filter(r => r.nivel === 'consulta' && r.m.marca);
-  const li = f.linhas.filter(r => r.plataforma === 'LinkedIn' && r.nivel === 'conta');
-  const seg = somaM(li, 'seguidores_ganhos');
+  const eng = somaM(site, 'engajamentos') || somaM(site, 'sessoes_engajadas');
   const k = [];
   k.push(kpi('language', 'roxo', 'Sessões pagas no site', site.length ? N(somaM(site, 'sessoes_pagas')) : null, site.length ? 'vanzolini.org.br, tráfego pago (GA4)' : 'aguardando foto do GA4', !site.length));
   k.push(kpi('language', 'azul', 'Sessões pagas nas LPs', lps.length ? N(somaM(lps, 'sessoes_pagas')) : null, lps.length ? 'LPs de conteúdo, tráfego pago (GA4)' : 'aguardando foto do GA4', !lps.length));
   k.push(kpi('search', 'laranja', 'Busca pela marca', marca.length ? N(somaM(marca, 'cliques')) : null, marca.length ? 'cliques em buscas com "vanzolini" (Search Console)' : 'aguardando foto do Search Console', !marca.length));
-  k.push(kpi('group', 'verde', 'Seguidores via anúncio', seg ? N(seg) : null, seg ? 'novos seguidores da página no LinkedIn' : 'LinkedIn não informou no período', !seg));
+  k.push(kpi('trending_up', 'verde', 'Engajamento no site', eng ? N(eng) : null, eng ? 'sessões engajadas, tráfego pago (GA4)' : 'aguardando foto do GA4', !eng));
   document.getElementById('kpisTrafego').innerHTML = k.join('');
 }
 
