@@ -176,8 +176,8 @@ function renderizar(data){
       <div class="delta muted">no período</div></div>
     <div class="kpi"><div class="lbl">Canal líder</div><div class="val">Meta</div>
       <div class="delta muted">${soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos ativos`:'—'}</div></div>
-    <div class="kpi"><div class="lbl">Investimento / CPL médio</div><div class="val" style="font-size:20px">${investTotal?fmtR(investTotal):'<span class="z">sem dado</span>'}</div>
-      <div class="delta muted">${leadsComInvest?`CPL R$ ${(investTotal/leadsComInvest).toFixed(2)} · ${fmt(leadsComInvest)} leads`:'sem turma com investimento no período'}</div></div>`;
+    <div class="kpi"><div class="lbl">CPL médio</div><div class="val">${leadsComInvest?'R$ '+(investTotal/leadsComInvest).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span class="z">sem dado</span>'}</div>
+      <div class="delta muted">${leadsComInvest?`${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads`:'sem turma com investimento no período'}</div></div>`;
 
   const alertaBox = document.getElementById('alerta');
   alertaBox.style.display = 'flex';

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Placar de Leads · Dashboard Vanzolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&icon_names=account_balance_wallet,ads_click,arrow_downward,arrow_forward,arrow_upward,calendar_month,campaign,check_circle,group,history,home,insights,language,leaderboard,mail,payments,picture_as_pdf,play_circle,print,school,search,sell,share,timeline,trending_up,verified,visibility,warning&display=block">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="dash pg-leads" data-pagina="leads" data-titulo="Placar de leads">
+<main>
+  <div class="cab">
+    <div class="tit">
+      <h2>Placar de leads</h2>
+      <span class="per"><span class="ms">calendar_month</span><span id="perTexto">período selecionado</span></span>
+    </div>
+    <div class="acoes">
+      <button class="chip" onclick="window.print()" title="Gera um PDF do placar pelo diálogo de impressão"><span class="ms">picture_as_pdf</span>Salvar PDF</button>
+    </div>
+  </div>
+  <p class="leitura" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura do período…</span></p>
+
+  <div class="barra">
+    <div class="filtros">
+      <div class="campo"><label>De</label><input type="date" id="fIni"></div>
+      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
+      <button class="btn" onclick="iniciarPainel()">Aplicar</button>
+    </div>
+    <div class="tag" id="atualizado"></div>
+  </div>
+  <div class="so-print" id="printInfo"></div>
+
+  <div id="erro"></div>
+  <div class="cards" id="cards"></div>
+
+  <div class="tabela">
+    <table>
+      <thead><tr>
+        <th class="curso" data-col="curso">Curso</th>
+        <th data-col="campanha">Campanha</th><th data-col="meta_ads">Meta</th><th data-col="linkedin">LinkedIn</th><th data-col="form_prog">Form Prog.</th>
+        <th data-col="form_pagina">Form Pág.</th><th data-col="outros">Outros</th>
+        <th data-col="leads">Leads</th><th data-col="delta">Δ%</th><th data-col="media">Média/dia</th><th data-col="mediana">Mediana/dia</th>
+        <th data-col="situacao">Situação</th>
+      </tr></thead>
+      <tbody id="corpo"><tr><td colspan="12" class="loading">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="alerta ok" id="alerta" style="display:none">
+    <span class="sino">✓</span>
+    <span id="alertaTxt"></span>
+  </div>
+
+  <div class="rodape">
+    <div><b>Situação</b> compara a média por dia do período com a mediana histórica por dia do curso:
+      <span class="badge b-verde">Acima</span>
+      <span class="badge b-amar">Estável</span>
+      <span class="badge b-verm">Abaixo</span>
+      <span class="badge b-cinza">sem histórico</span>.
+      O selo <b>ATIVA</b> marca campanha em andamento no período escolhido.</div>
+    <div>Dados ao vivo, leitura apenas. 1 lead = 1 e-mail por curso no período. CPL médio cobre só as turmas com mídia registrada. Exibindo somente campanhas ativas.</div>
+    <div>Fonte: Supabase Communitas (leads do RD Station, mídia da planilha consolidada). Atualizado às <span id="horaRodape"></span>.</div>
+    <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
+  </div>
+</main>
+
+<script>window.AGUARDA_PIN = true;</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../placar.js"></script>
+<script>
+// Leitura do período escrita a partir dos números que o placar.js acabou de renderizar.
+window.iniciarPainel = async function(){
+  await carregar();
+  const ini = document.getElementById('fIni').value, fim = document.getElementById('fFim').value;
+  const br = iso => iso ? iso.split('-').reverse().join('/') : '';
+  document.getElementById('perTexto').textContent = br(ini) + ' a ' + br(fim);
+  document.getElementById('horaRodape').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const dados = (typeof ultimoData !== 'undefined' && ultimoData) ? ultimoData : [];
+  const ativas = dados.filter(r => r.campanha_ativa);
+  const leads = ativas.reduce((a,r)=>a+(Number(r.leads)||0),0);
+  const meta = ativas.reduce((a,r)=>a+(Number(r.meta_ads)||0),0);
+  const acima = ativas.filter(r=>Number(r.mediana_dia)&&Number(r.media_dia)>=Number(r.mediana_dia)).length;
+  const abaixo = ativas.filter(r=>Number(r.mediana_dia)&&Number(r.media_dia)<Number(r.mediana_dia)*0.7).length;
+  const semLead = ativas.filter(r=>!Number(r.leads)).length;
+  let t;
+  if(!ativas.length) t = 'Nenhuma campanha ativa no período selecionado.';
+  else {
+    t = `No período, <b>${leads.toLocaleString('pt-BR')} leads</b> em ${ativas.length} campanhas ativas`;
+    if(leads) t += `, com o Meta respondendo por <b>${Math.round(100*meta/leads)}%</b> dos leads`;
+    t += `. ${acima} campanha${acima===1?'':'s'} acima da mediana histórica`;
+    if(abaixo) t += `, ${abaixo} abaixo`;
+    if(semLead) t += ` e ${semLead} ainda sem lead`;
+    t += '.';
+  }
+  document.getElementById('leituraTxt').innerHTML = t;
+};
+</script>
+<script src="shell.js"></script>
+</body>
+</html>

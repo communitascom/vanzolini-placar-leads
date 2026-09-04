@@ -17,7 +17,7 @@ const N = v => Number(v||0).toLocaleString('pt-BR');
 const BRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
 const BRL2 = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const PCT = v => (v===null||v===undefined) ? '<span class="z">—</span>' : Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
-const NAVY='#060653', AZUL='#4848B5', CINZA='#c9c9ee', VERDE='#2e9e5b';
+const NAVY='#E56B39', AZUL='#1F6FD0', CINZA='#C5CAD3', VERDE='#0E9E76'; // paleta Painéis Communitas
 let CAMP=[], RITMO=[], CURVA=[], MIDIA=[], ALERTAS=[], MIDIA_ATE=null, charts={};
 Chart.register(ChartDataLabels);
 Chart.defaults.plugins.datalabels.display = false;
@@ -176,11 +176,11 @@ function desenhaCurva(curso){
   mkChart('c-curva','line',{
     labels: labels.concat(labelsFut),
     datasets:[
-      {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(72,72,181,.10)', fill:true, tension:.25, borderWidth:3, pointRadius:0},
+      {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.25, borderWidth:3, pointRadius:0},
       {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.25, borderWidth:2, pointRadius:0},
       {label:'Projeção', data:vazio.concat([real[nR-1]]).concat(projFut), borderColor:VERDE, borderDash:[3,3], tension:.25, borderWidth:2, pointRadius:0},
-      {label:'Faixa otimista', data:vazio.concat([real[nR-1]]).concat(projMax), borderColor:'rgba(46,158,91,.35)', tension:.25, borderWidth:1, pointRadius:0},
-      {label:'Faixa conservadora', data:vazio.concat([real[nR-1]]).concat(projMin), borderColor:'rgba(46,158,91,.35)', tension:.25, borderWidth:1, pointRadius:0}
+      {label:'Faixa otimista', data:vazio.concat([real[nR-1]]).concat(projMax), borderColor:'rgba(14,158,118,.35)', tension:.25, borderWidth:1, pointRadius:0},
+      {label:'Faixa conservadora', data:vazio.concat([real[nR-1]]).concat(projMin), borderColor:'rgba(14,158,118,.35)', tension:.25, borderWidth:1, pointRadius:0}
     ]},
     {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14}}},
      scales:{y:{beginAtZero:true,title:{display:true,text:'leads acumulados'}},

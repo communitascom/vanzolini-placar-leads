@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Histórico e investimento · Dashboard Vanzolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&icon_names=account_balance_wallet,ads_click,arrow_downward,arrow_forward,arrow_upward,calendar_month,campaign,check_circle,group,history,home,insights,language,leaderboard,mail,payments,picture_as_pdf,play_circle,print,school,search,sell,share,timeline,trending_up,verified,visibility,warning&display=block">
+<link rel="stylesheet" href="dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body class="dash pg-historico" data-pagina="historico" data-titulo="Histórico e investimento">
+<main>
+  <div class="cab">
+    <div class="tit">
+      <h2>Histórico e investimento</h2>
+      <span class="per"><span class="ms">calendar_month</span>visão de marketing e vendas, leitura ao vivo, regra anti-refire de 90 dias</span>
+    </div>
+    <div class="acoes">
+      <button id="imprimir" class="chip" title="Gera um PDF pelo diálogo de impressão"><span class="ms">picture_as_pdf</span>Salvar PDF</button>
+    </div>
+  </div>
+  <p class="leitura" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando o histórico…</span></p>
+
+  <div class="filterbar">
+    <div class="fgrp"><label>Tema</label><select id="f-tema"></select></div>
+    <div class="fgrp"><label>Curso</label><select id="f-curso"></select></div>
+    <div class="fgrp"><label>De</label><select id="f-ini"></select></div>
+    <div class="fgrp"><label>até</label><select id="f-fim"></select></div>
+    <button id="limpar">Limpar filtros</button>
+    <span class="activeflt" id="activeflt"></span>
+  </div>
+
+  <div class="printhead" id="printhead"><h2 id="ph-titulo"></h2><div id="ph-sub"></div></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="sec">
+    <h2><span class="tag">Marketing</span> <span id="tit-mensal">Evolução mensal de leads</span></h2>
+    <div class="hint" id="hint-mensal">Volume de leads por mês no período selecionado.</div>
+    <div class="card"><div class="chartbox" id="bx-mensal"><canvas id="c-mensal"></canvas></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Marketing</span> Desempenho por curso</h2>
+    <div class="card"><h3>Top cursos por leads no período</h3><div class="chartbox tall"><canvas id="c-topcursos"></canvas></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Marketing</span> Concentração de leads (Pareto)</h2>
+    <div class="hint">Quantos cursos respondem pela maior parte dos leads. Barras = leads, linha = % acumulado.</div>
+    <div class="card"><div class="chartbox tall"><canvas id="c-pareto"></canvas></div><div id="pareto-nota" class="note"></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Marketing</span> Cursos em alta e em queda</h2>
+    <div class="hint">Variação de leads de janeiro a junho: 2026 contra 2025, mesmos meses. Verde é crescimento, vermelho é queda.</div>
+    <div class="card"><div class="chartbox tall"><canvas id="c-altaqueda"></canvas></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Marketing</span> Cursos mais perenes</h2>
+    <div class="hint">Cursos recorrentes: várias turmas no período, presença em muitos meses e investimento contínuo. Índice = recorrência (turmas) + continuidade (meses ativos). Bolha = leads.</div>
+    <div class="card"><div class="chartbox tall"><canvas id="c-perene"></canvas></div></div>
+    <div class="card"><div class="scrollt" id="t-perene"></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Marketing</span> Eficiência de investimento</h2>
+    <div class="hint">Cada ponto é uma turma. X = investimento (escala log), Y = leads. Bolha maior = CPL mais alto (lead mais caro).</div>
+    <div class="card"><div class="chartbox tall" id="bx-disp"><canvas id="c-disp"></canvas></div></div>
+    <div class="grid2">
+      <div class="card"><h3>Melhores CPL (mais barato)</h3><div class="scrollt" id="t-best"></div></div>
+      <div class="card"><h3>Piores CPL (mais caro)</h3><div class="scrollt" id="t-worst"></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Vendas</span> Conversão e CAC por curso</h2>
+    <div class="hint">Matrícula e custo real (mídia + imposto do Meta + assessoria) cruzados com a planilha comercial, por curso, só turmas com matrícula carregada no período filtrado. CAC = custo total ÷ pagantes.</div>
+    <div class="card"><div class="scrollt" id="t-vendas"></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Vendas</span> Pipeline por turma</h2>
+    <div class="hint">Base para dimensionar o pipeline antes de cada turma. Clique no cabeçalho para ordenar. "Pagantes" e "CAC" só aparecem nas turmas com matrícula carregada. "Mediana curso" e "vs mediana" comparam o CPL desta turma contra a mediana das outras turmas do mesmo curso, histórico completo: verde é mais barato que o normal do curso, vermelho é mais caro.</div>
+    <input type="text" class="tsearch" id="busca" placeholder="Buscar curso na tabela…">
+    <div class="card"><div class="scrollt" id="t-camp"></div></div>
+  </div>
+
+  <div class="note"><b>Conversão e CAC</b> (seção Vendas acima) cruzam a planilha comercial da Vanzolini por turma, carga inicial de 03/08/2026 cobrindo 92 turmas de 2025 e 2026. Turma sem matrícula carregada aparece em branco nas colunas de CAC e conversão, não é erro.</div>
+
+  <div class="foot">Leitura ao vivo, regra anti-refire de 90 dias (1 lead = 1 e-mail por curso, sem refire nos 90 dias anteriores). Fonte: Supabase Communitas.</div>
+  <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
+</main>
+
+<script>window.AGUARDA_PIN = true;</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../historico-dinamico.js"></script>
+<script>
+window.iniciarPainel = async function(){
+  await carregarDados();
+  const d = (typeof DATA !== 'undefined') ? DATA : null;
+  if(!d || !d.months.length){ document.getElementById('leituraTxt').textContent = 'Sem dados no histórico.'; return; }
+  const N = v => Number(v||0).toLocaleString('pt-BR');
+  const n = d.months.length;
+  const tot = i => d.hist.reduce((a,h)=>a+(h.vals[i]||0),0);
+  const ultimo = tot(n-1), anterior = tot(n-2);
+  const mesNome = i => { const p=d.months[i].split('-'); return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][+p[1]-1]+'/'+p[0].slice(2); };
+  const totalTudo = d.months.reduce((a,_,i)=>a+tot(i),0);
+  const inv = d.camp.reduce((a,c)=>a+(c.inv||0),0);
+  let t = `Histórico de <b>${N(totalTudo)} leads</b> de ${mesNome(0)} a ${mesNome(n-1)}, com ${N(Math.round(inv))} reais de mídia em ${d.camp.length} turmas. `;
+  if(anterior) t += `${mesNome(n-1)} (mês corrente) tem ${N(ultimo)} leads até agora, contra ${N(anterior)} em ${mesNome(n-2)} fechado.`;
+  document.getElementById('leituraTxt').innerHTML = t;
+  if(window.Dash) Dash.tag('<b>online</b> · ' + d.hist.length + ' cursos');
+};
+</script>
+<script src="shell.js"></script>
+</body>
+</html>

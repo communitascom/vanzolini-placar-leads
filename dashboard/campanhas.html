@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campanhas em andamento · Dashboard Vanzolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&icon_names=account_balance_wallet,ads_click,arrow_downward,arrow_forward,arrow_upward,calendar_month,campaign,check_circle,group,history,home,insights,language,leaderboard,mail,payments,picture_as_pdf,play_circle,print,school,search,sell,share,timeline,trending_up,verified,visibility,warning&display=block">
+<link rel="stylesheet" href="dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+<body class="dash pg-campanhas" data-pagina="campanhas" data-titulo="Campanhas em andamento">
+<main>
+  <div class="cab">
+    <div class="tit">
+      <h2>Campanhas em andamento</h2>
+      <span class="per"><span class="ms">calendar_month</span>ritmo de captação, projeção de fechamento e ritmo de verba, ao vivo</span>
+    </div>
+    <div class="acoes">
+      <button id="imprimir" class="chip" title="Gera um PDF pelo diálogo de impressão"><span class="ms">picture_as_pdf</span>Salvar PDF</button>
+    </div>
+  </div>
+  <p class="leitura" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura das campanhas no ar…</span></p>
+
+  <div class="printhead" id="printhead"><h2 id="ph-titulo"></h2><div id="ph-sub"></div></div>
+
+  <div class="kpis" id="kpis"><div class="kpi"><div class="v">…</div><div class="l">carregando</div></div></div>
+
+  <div id="aviso-midia"></div>
+
+  <div class="sec">
+    <h2><span class="tag">Ritmo</span> Campanhas no ar</h2>
+    <div class="hint">A projeção usa a curva histórica de 140 turmas: quanto do total de leads já costuma estar captado quando X% do tempo passou. Só aparece a partir de 15% do tempo decorrido, antes disso o número é instável demais para servir.</div>
+    <div class="card"><div id="t-camp"><div class="loading">Carregando…</div></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Ritmo</span> Curva de captação</h2>
+    <div class="hint" id="hint-curva">Leads acumulados até hoje contra o caminho esperado, e a projeção até o fim da campanha.</div>
+    <div class="filterbar"><div class="fgrp"><label>Campanha</label><select id="f-camp"></select></div></div>
+    <div class="card"><div class="chartbox"><canvas id="c-curva"></canvas></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Verba</span> Tempo decorrido x verba investida</h2>
+    <div class="hint">Barra clara = percentual do tempo que já passou. Barra laranja = percentual da verba já gasta. Quando a verba fica muito atrás do tempo, sobra dinheiro para queimar em poucos dias no fim.</div>
+    <div class="card"><div class="chartbox"><canvas id="c-verba"></canvas></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="tag">Mídia</span> CTR por plataforma</h2>
+    <div class="hint">CTR sempre calculado como cliques divididos por impressões. Cada plataforma tem régua própria: LinkedIn opera numa faixa naturalmente muito abaixo de Meta e Google, então comparar entre plataformas não faz sentido, só contra o histórico da mesma.</div>
+    <div class="card"><div id="t-ctr"><div class="loading">Carregando…</div></div></div>
+  </div>
+
+  <div class="foot" id="rodape"></div>
+  <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
+</main>
+
+<script>window.AGUARDA_PIN = true;</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../campanhas.js"></script>
+<script>
+window.iniciarPainel = async function(){
+  await carregar();
+  const c = (typeof CAMP !== 'undefined') ? CAMP : [];
+  const leads = c.reduce((a,x)=>a+Number(x.leads||0),0);
+  const proj = c.reduce((a,x)=>a+Number(x.proj_leads||0),0);
+  const gasto = c.reduce((a,x)=>a+Number(x.gasto||0),0);
+  const verba = c.reduce((a,x)=>a+Number(x.verba||0),0);
+  const acima = c.filter(x=>Number(x.vs_historico)>=10).length;
+  const abaixo = c.filter(x=>Number(x.vs_historico)<=-15).length;
+  const atras = c.filter(x=>x.verba && Number(x.pct_gasto) < Number(x.pct_tempo) - 20).length;
+  const N = v => Number(v||0).toLocaleString('pt-BR');
+  let t = c.length
+    ? `<b>${c.length} campanhas no ar</b> somam ${N(leads)} leads` + (proj ? `, com projeção de <b>${N(proj)}</b> no fechamento` : '') + '. '
+    : 'Nenhuma campanha no ar hoje. ';
+  if(c.length){
+    if(acima || abaixo) t += `${acima} acima do histórico do curso e ${abaixo} abaixo. `;
+    if(verba) t += `Verba: ${N(Math.round(gasto))} de ${N(Math.round(verba))} reais investidos (${Math.round(100*gasto/verba)}%)` + (atras ? `, ${atras} campanha${atras===1?'':'s'} com a verba atrasada em relação ao tempo.` : '.');
+  }
+  document.getElementById('leituraTxt').innerHTML = t;
+  if(window.Dash) Dash.tag('<b>online</b> · ' + c.length + ' campanhas');
+};
+</script>
+<script src="shell.js"></script>
+</body>
+</html>

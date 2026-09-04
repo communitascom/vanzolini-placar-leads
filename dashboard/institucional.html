@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campanha institucional · Dashboard Vanzolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&icon_names=account_balance_wallet,ads_click,arrow_downward,arrow_forward,arrow_upward,calendar_month,campaign,check_circle,group,history,home,info,insights,language,leaderboard,mail,payments,picture_as_pdf,play_circle,print,repeat,school,search,sell,share,timeline,trending_up,verified,visibility,warning&display=block">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="dash pg-institucional" data-pagina="institucional" data-titulo="Campanha institucional">
+<main>
+  <div class="cab">
+    <div class="tit">
+      <h2>Campanha institucional 2026</h2>
+      <span class="per"><span class="ms">calendar_month</span><span id="perTexto">período</span></span>
+    </div>
+    <div class="acoes">
+      <button class="chip" onclick="window.print()" title="Gera um PDF pelo diálogo de impressão"><span class="ms">picture_as_pdf</span>Salvar PDF</button>
+    </div>
+  </div>
+  <p class="leitura" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando a leitura do período…</span></p>
+
+  <div class="linha-topo">
+    <div class="nav" id="presets"></div>
+    <div class="filtros">
+      <div class="campo"><label>De</label><input type="date" id="fIni" min="2026-04-01"></div>
+      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
+      <button class="btn" id="btnAplicar">Aplicar</button>
+    </div>
+  </div>
+
+  <div class="secao">
+    <h3>Consolidado <small>Google Ads + Meta Ads + LinkedIn Ads</small></h3>
+    <div class="kpis seis" id="kpis"></div>
+    <div class="pend-nota" id="notaFotos"></div>
+  </div>
+
+  <div class="secao">
+    <h3>Por plataforma</h3>
+    <div class="graf2">
+      <div class="card"><div class="card-head"><div><h4>Participação no investimento</h4><div class="sub">quanto da verba do período foi para cada canal</div></div></div><div class="share-bar" id="shareInv"></div></div>
+      <div class="card"><div class="card-head"><div><h4>Participação nas impressões</h4><div class="sub">quanto do volume entregue veio de cada canal</div></div></div><div class="share-bar" id="shareImpr"></div></div>
+    </div>
+    <div class="plat" id="plataformas"></div>
+  </div>
+
+  <div class="secao">
+    <h3>Evolução do investimento</h3>
+    <div class="card">
+      <div class="card-head"><div><h4>Investimento ao longo do período</h4><div class="sub" id="subEvolucao">por semana, em reais, por eixo</div></div><div class="legenda" id="legEvolucao"></div></div>
+      <div class="plot" id="pEvolucao"></div>
+    </div>
+  </div>
+
+  <div class="secao">
+    <h3>Por eixo <small>objetivo, entrega, verba prevista e consumida</small></h3>
+    <div class="eixos" id="eixos"></div>
+    <div class="pend-nota" id="avisoPlano"></div>
+  </div>
+
+  <div class="secao">
+    <h3>Vídeos <small>o formato de construção de marca</small></h3>
+    <div class="sub">Vídeo institucional entrega atenção e alcance, não clique: a régua aqui é conclusão e alcance, o CTR fica como referência.</div>
+    <div class="card"><div id="videos"></div></div>
+    <div class="card"><div class="card-head"><div><h4>Criativos de vídeo</h4><div class="sub">anúncios do Meta e vídeos do YouTube com mais impressões no período</div></div></div><div id="criativos"></div></div>
+  </div>
+
+  <div class="secao">
+    <h3>Impacto no site e na marca</h3>
+    <div class="kpis" id="kpisTrafego"></div>
+  </div>
+
+  <div class="rodape">
+    <div id="rodapeTxt"></div>
+    <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
+  </div>
+</main>
+
+<script>window.AGUARDA_PIN = true;</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="graficos.js"></script>
+<script src="institucional.js"></script>
+<script src="shell.js"></script>
+</body>
+</html>
