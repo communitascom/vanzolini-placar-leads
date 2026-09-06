@@ -134,6 +134,7 @@ function renderVendas(){
    roi:o.custo?o.receita/o.custo:null
  })).sort((a,b)=>b.pagantes-a.pagantes);
  const box=document.getElementById('t-vendas');
+ avisarComercialParado();
  if(!arr.length){box.innerHTML='<div class="empty">Sem matrícula carregada para este filtro ainda. A carga de comercial cobre 92 turmas de 2025-2026, ver Metodologia Leitura Estratégica de Mídia.</div>';return;}
  box.innerHTML='<table><thead><tr><th>Curso</th><th>Turmas c/ dado</th><th>Inscritos</th><th>Pagantes</th><th>Conversão</th><th>CAC</th><th>Receita</th><th>ROI</th></tr></thead><tbody>'+
    arr.map(o=>'<tr><td>'+(o.curso.length>38?o.curso.slice(0,38)+'…':o.curso)+'</td><td>'+o.turmas+'</td><td>'+N(o.inscritos)+'</td><td>'+N(o.pagantes)+'</td><td>'+(o.conv!=null?o.conv.toFixed(0)+'%':'—')+'</td><td>'+(o.cac!=null?'R$ '+o.cac.toFixed(2):'—')+'</td><td>'+BRL(o.receita)+'</td><td>'+(o.roi!=null?o.roi.toFixed(1)+'x':'—')+'</td></tr>').join('')+'</tbody></table>';
@@ -188,15 +189,62 @@ function renderPareto(){
  const top5=arr.slice(0,5).reduce((a,b)=>a+b.leads,0)/total*100;
  document.getElementById('pareto-nota').innerHTML='<b>'+n80+'</b> de '+arr.length+' cursos concentram <b>80%</b> dos leads. Top 5 cursos = <b>'+top5.toFixed(0)+'%</b> do total.';
 }
+// A planilha comercial (matricula, receita, CAC) e carregada a mao e ja ficou
+// meses parada sem ninguem notar - a tela so mostrava zero. Aqui o corte da
+// fonte e calculado do proprio dado e avisado na tela.
+function avisarComercialParado(){
+ const el=document.getElementById('aviso-comercial');
+ if(!el) return;
+ const meses=(DATA.camp||[]).filter(c=>c.pagantes!=null&&c.mes).map(c=>c.mes.slice(0,7)).sort();
+ if(!meses.length){el.style.display='none';return;}
+ const ultimo=meses[meses.length-1], hoje=new Date().toISOString().slice(0,7);
+ const atraso=(Number(hoje.slice(0,4))-Number(ultimo.slice(0,4)))*12
+             +(Number(hoje.slice(5,7))-Number(ultimo.slice(5,7)));
+ if(atraso<2){el.style.display='none';return;}
+ el.style.display='block';
+ el.innerHTML='<b>Atenção:</b> os dados comerciais (matrícula, receita, CAC, ROI) estão parados desde '
+   +mesCurto(ultimo)+', há '+atraso+' meses. Os meses seguintes aparecem zerados por falta de carga, não por resultado ruim.';
+}
+
+// Janela movel: ate 6 meses fechados mais recentes contra os mesmos meses do ano
+// anterior. Antes eram indices fixos (0-5 vs 12-17), que travavam a secao em
+// jan-jun/2026 vs 2025 para sempre, envelhecendo sozinha.
+function janelaAltaQueda(){
+ const M=DATA.months, hoje=new Date().toISOString().slice(0,7);
+ const fechados=M.filter(m=>m<hoje);                       // fora o mes corrente, incompleto
+ const atual=fechados.slice(-6);
+ if(!atual.length) return null;
+ const anterior=atual.map(m=>String(Number(m.slice(0,4))-1)+m.slice(4));
+ if(!anterior.every(m=>M.includes(m))) return null;        // sem 12 meses de base ainda
+ return {
+   idxAtual:atual.map(m=>M.indexOf(m)),
+   idxAnterior:anterior.map(m=>M.indexOf(m)),
+   rotulo:mesCurto(atual[0])+' a '+mesCurto(atual[atual.length-1])+': '
+          +atual[0].slice(0,4)+' contra '+anterior[0].slice(0,4)
+ };
+}
+function mesCurto(m){
+ const nomes=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+ return nomes[Number(m.slice(5,7))-1]+'/'+m.slice(2,4);
+}
 function renderAltaQueda(){
+ const j=janelaAltaQueda();
+ const hint=document.getElementById('hint-altaqueda');
+ if(!j){
+   if(hint) hint.textContent='Sem 12 meses de histórico para comparar ano contra ano ainda.';
+   mkChart('c-altaqueda','bar',{labels:[],datasets:[{label:'Δ leads',data:[]}]},{});
+   return;
+ }
+ if(hint) hint.textContent='Variação de leads, '+j.rotulo+', mesmos meses. Verde é crescimento, vermelho é queda. O mês corrente fica de fora por estar incompleto.';
+ const soma=(vals,idx)=>idx.reduce((a,i)=>a+(vals[i]||0),0);
  const base=DATA.hist.filter(h=> (state.curso? h.curso===state.curso : (!state.tema||theme(h.curso)===state.tema)) );
- const arr=base.map(h=>{const a=h.vals.slice(0,6).reduce((x,y)=>x+(y||0),0);const b=h.vals.slice(12,18).reduce((x,y)=>x+(y||0),0);return{curso:h.curso,d:b-a};}).filter(x=>Math.abs(x.d)>0);
+ const arr=base.map(h=>({curso:h.curso,d:soma(h.vals,j.idxAtual)-soma(h.vals,j.idxAnterior)})).filter(x=>Math.abs(x.d)>0);
  const up=[...arr].filter(x=>x.d>0).sort((a,b)=>b.d-a.d).slice(0,8);
  const down=[...arr].filter(x=>x.d<0).sort((a,b)=>a.d-b.d).slice(0,8);
  const comb=[...up,...down.reverse()];
  mkChart('c-altaqueda','bar',{labels:comb.map(t=>t.curso.length>30?t.curso.slice(0,30)+'…':t.curso),
    datasets:[{label:'Δ leads',data:comb.map(t=>t.d),backgroundColor:comb.map(t=>t.d>=0?'#157A4E':'#C43E3E')}]},
-  {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>comb[items[0].dataIndex].curso,label:p=>(p.raw>=0?'+':'')+N(p.raw)+' leads (jan a jun 26 vs 25)'}}},scales:{x:{title:{display:true,text:'variação de leads'}},y:{ticks:{font:{size:9}}}}});
+  {indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>comb[items[0].dataIndex].curso,label:p=>(p.raw>=0?'+':'')+N(p.raw)+' leads ('+j.rotulo+')'}}},scales:{x:{title:{display:true,text:'variação de leads'}},y:{ticks:{font:{size:9}}}}});
 }
 function mkChart(id,type,data,opts){
  if(charts[id])charts[id].destroy();

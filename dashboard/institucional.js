@@ -182,10 +182,12 @@ function render() {
 
   // leitura automática
   const lider = PLATS.slice().sort((a, b) => porPlat[b].impr - porPlat[a].impr)[0];
-  const melhorCtr = PLATS.filter(p => porPlat[p].impr).sort((a, b) => porPlat[b].ctr - porPlat[a].ctr)[0];
+  // Sem eleger "melhor CTR" entre plataformas: display, video e feed tem reguas
+  // diferentes, entao o ranking entre elas nao diz nada - e contradizia o proprio
+  // aviso do painel de que as faixas nao sao comparaveis.
   let leitura = CAMP.length
     ? `No período, <b>${BRL(t.inv)}</b> investidos em ${CAMP.length} campanhas geraram <b>${MI(t.impr)} impressões</b> e ${N(t.cli)} cliques (CTR ${PCT(t.ctr)}, CPM ${BRL2(t.cpm)}). `
-      + `${lider} concentra ${Math.round(100 * porPlat[lider].impr / (t.impr || 1))}% das impressões` + (melhorCtr ? ` e ${melhorCtr} tem o melhor CTR (${PCT(porPlat[melhorCtr].ctr)}).` : '.')
+      + `${lider} concentra ${Math.round(100 * porPlat[lider].impr / (t.impr || 1))}% das impressões.`
     : 'Sem campanha institucional com mídia registrada no período.';
   if (alc) leitura += ` Alcance de <b>${N(alc)} pessoas</b> em ${quem}, frequência média de ${N1(freq)}` + (aM && aL ? '.' : ` (só ${quem} informa alcance no período).`);
   document.getElementById('leituraTxt').innerHTML = leitura;

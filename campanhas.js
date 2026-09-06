@@ -83,7 +83,12 @@ function render(){
   </tr></thead><tbody>`;
   CAMP.forEach(c=>{
     const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
-    const barra = `<div class="barra"><span class="t" style="width:${Math.min(100,pctT)}%"></span><span class="g" style="width:${Math.min(100,pctG)}%;opacity:.85"></span></div>`;
+    // A barra so vai ate 100% por limite visual, entao o estouro precisa aparecer
+    // pela cor e pelo rotulo, senao some da tela.
+    const estourou = pctG > 100;
+    const barra = `<div class="barra"><span class="t" style="width:${Math.min(100,pctT)}%"></span>`
+      + `<span class="g" style="width:${Math.min(100,pctG)}%;opacity:.85${estourou?';background:#D64545':''}"></span></div>`
+      + (estourou ? `<div style="font-size:10px;color:#D64545;font-weight:600;margin-top:2px">verba estourada · ${pctG.toFixed(0)}%</div>` : '');
     const nome = c.monday_item_id
       ? `<a href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${c.monday_item_id}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600;text-decoration:none">${c.curso}</a>`
       : `<b>${c.curso}</b>`;
@@ -113,11 +118,16 @@ function render(){
     datasets:[
       {label:'% do tempo decorrido', data:ord.map(c=>Number(c.pct_tempo||0)), backgroundColor:CINZA,
         datalabels:{display:true,color:'#5F5E76',anchor:'end',align:'end',font:{size:9,weight:600},formatter:v=>v.toFixed(0)+'%'}},
-      {label:'% da verba gasta', data:ord.map(c=>Number(c.pct_gasto||0)), backgroundColor:AZUL,
+      {label:'% da verba gasta', data:ord.map(c=>Number(c.pct_gasto||0)),
+        // Vermelho quando estourou. O eixo ia so ate 100%, o que escondia
+        // justamente o caso que mais importa acompanhar.
+        backgroundColor:ord.map(c=>Number(c.pct_gasto||0)>100?'#D64545':AZUL),
         datalabels:{display:true,color:'#fff',anchor:'end',align:'start',font:{size:9,weight:600},formatter:v=>v.toFixed(0)+'%'}}
     ]},
     {indexAxis:'y', plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}}},
-     scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}});
+     scales:{x:{beginAtZero:true,
+       max: Math.max(100, Math.ceil(Math.max(0, ...ord.map(c=>Number(c.pct_gasto||0)))/10)*10),
+       ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}});
 
   // CTR por plataforma
   const porPlat = {};
