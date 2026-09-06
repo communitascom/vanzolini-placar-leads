@@ -88,11 +88,21 @@
     if (typeof window.iniciarPainel === "function") window.iniciarPainel();
     else if (typeof window.carregar === "function") window.carregar();
   }
+  function injetarNita(){
+    if (document.getElementById("nitaEmbed")) return;
+    var s = document.createElement("script");
+    s.id = "nitaEmbed";
+    s.src = "https://embed.tess.im/assets/js/embed/chat-widget-v1.0.0-min.js";
+    s.setAttribute("data-agent-url", "https://embed.tess.im/pt-BR/agents/nita-GPRCY1/public");
+    s.setAttribute("data-embed-type", "popup");
+    document.body.appendChild(s);
+  }
   function liberar(){
     gate.classList.add("oculto");
     layout.classList.remove("oculto");
     barra.classList.remove("oculto");
     iniciar();
+    injetarNita();
   }
   function verificar(){
     var inp = document.getElementById("pinInput");
