@@ -43,12 +43,13 @@ const botaoAtivas = document.getElementById('fAtivas');
 // Sem o botao, a pagina e a versao do cliente: so campanhas ativas, fixo.
 let soAtivas = !botaoAtivas;
 let ultimoData = null;
+let ultimaMidia = null;
 
 function alternarAtivas(){
   if(!botaoAtivas) return;
   soAtivas = !soAtivas;
   botaoAtivas.classList.toggle('on', soAtivas);
-  if(ultimoData) renderizar(ultimoData);
+  if(ultimoData) renderizar(ultimoData, ultimaMidia);
 }
 
 (function setDefaultDates(){
@@ -75,7 +76,13 @@ async function carregar(){
   corpo.innerHTML = `<tr><td colspan="${NCOLS}" class="loading">Carregando…</td></tr>`;
   erroBox.innerHTML = '';
 
-  const { data, error } = await sb.rpc('placar', { p_inicio: ini, p_fim: fim });
+  // O investimento vem de midia_por_curso (planilha de midia, carregada 2x ao dia).
+  // placar.investimento sai de turmas.investimento_midia, que esta parado desde 05/2026.
+  const [{ data, error }, resMidia] = await Promise.all([
+    sb.rpc('placar', { p_inicio: ini, p_fim: fim }),
+    sb.rpc('midia_por_curso', { p_inicio: ini, p_fim: fim })
+  ]);
+  ultimaMidia = resMidia.error ? null : resMidia.data;
   if(error){
     erroBox.innerHTML = `<div class="erro">Erro ao carregar: ${error.message}</div>`;
     corpo.innerHTML = '';
@@ -91,10 +98,10 @@ async function carregar(){
     `<b>Placar de Leads · Fundação Vanzolini</b><br>` +
     `Período: ${br(ini)} a ${br(fim)}<br>` +
     `Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
-  renderizar(data);
+  renderizar(data, ultimaMidia);
 }
 
-function renderizar(data){
+function renderizar(data, midia){
   const corpo = document.getElementById('corpo');
   const rows = data
     .filter(r => soAtivas ? r.campanha_ativa : (r.leads > 0 || r.campanha_ativa))
@@ -109,13 +116,23 @@ function renderizar(data){
   let tipoAtual='';
   const soma={}; CANAIS.forEach(c=>soma[c]=0); soma.leads=0;
   let ativos=0, leadsAtivos=0, semLeadAtiva=0;
+  // CPL medio: so os cursos que estao na tabela (mesmo recorte da tela) e que
+  // tiveram midia no periodo. Institucional e "SEM CURSO IDENTIFICADO" ficam de
+  // fora porque nao aparecem no placar.
   let investTotal=0, leadsComInvest=0;
-  data.forEach(r=>{
-    if(Number(r.investimento) > 0){
-      investTotal += Number(r.investimento);
-      leadsComInvest += Number(r.leads)||0;
-    }
-  });
+  if(midia && midia.length){
+    const invPorCurso = {};
+    midia.forEach(m => {
+      invPorCurso[m.curso] = (invPorCurso[m.curso]||0) + (Number(m.investimento)||0);
+    });
+    rows.forEach(r => {
+      const inv = invPorCurso[r.curso] || 0;
+      if(inv > 0){
+        investTotal += inv;
+        leadsComInvest += Number(r.leads)||0;
+      }
+    });
+  }
 
   const cel = v => v ? fmt(v) : '<span class="z">0</span>';
 
@@ -178,7 +195,7 @@ function renderizar(data){
     <div class="kpi"><div class="lbl">Canal líder</div><div class="val">Meta</div>
       <div class="delta muted">${soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos ativos`:'—'}</div></div>
     <div class="kpi"><div class="lbl">CPL médio</div><div class="val">${leadsComInvest?'R$ '+(investTotal/leadsComInvest).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span class="z">sem dado</span>'}</div>
-      <div class="delta muted">${leadsComInvest?`${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads`:'sem turma com investimento no período'}</div></div>`;
+      <div class="delta muted">${leadsComInvest?`${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads`:'sem curso com mídia no período'}</div></div>`;
 
   const alertaBox = document.getElementById('alerta');
   alertaBox.style.display = 'flex';
