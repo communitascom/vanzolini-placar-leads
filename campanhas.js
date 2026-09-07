@@ -117,7 +117,7 @@ function render(){
       <td class="nome"><span class="n1">${nome}</span><span class="n2">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · ${c.dias_restantes} dias restantes</span></td>
       <td>${PCT(c.pct_tempo)}<span class="leg">${c.dias_decorridos}/${c.dias_total} dias</span></td>
       <td class="destaque">${N(c.leads)}</td>
-      <td>${(()=>{const r=projetaPeloRitmo(c); return r?'<b>'+N(r.total)+'</b><span class="leg">no ritmo</span>':'<span class="z">—</span>';})()}</td>
+      <td>${(()=>{const r=projeta(c); return r?'<b>'+N(r.trabalho)+'</b><span class="leg">pela '+r.limite+'</span>':'<span class="z">—</span>';})()}</td>
       <td>${selo(c.vs_historico)}</td>
       <td>${c.verba?BRL(c.verba):'<span class="z">—</span>'}</td>
       <td>${BRL(c.gasto)}${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
@@ -232,16 +232,43 @@ function renderVerba(){
     </div>`).join('') : '<div class="empty">Nenhuma campanha neste recorte.</div>';
 }
 
-// Extrapolacao do ritmo recente da propria campanha. E o numero que a gente
-// defende numa reuniao: sai da serie diaria desta campanha, nao de um modelo.
-function projetaPeloRitmo(c){
+// Projecao a partir do que ESTA campanha esta fazendo, nao do que outras turmas
+// fizeram. Duas contas simples, as duas verificaveis na propria tela:
+//
+//   pela verba  = leads + (verba que falta / CPL observado ate agora)
+//   pelo ritmo  = leads + (leads por dia das ultimas 2 semanas x dias restantes)
+//
+// A de trabalho e a MENOR das duas. A da verba sozinha supoe que a verba inteira
+// sera gasta e ao mesmo custo; a do ritmo sozinha ignora que a verba pode acabar
+// antes. Uma segura a outra.
+//
+// A curva historica saiu do destaque: ela e construida sobre a tabela `turmas`,
+// que esta congelada em 20/05/2026, e supoe que esta campanha vai se comportar
+// como a media das anteriores — ignorando sazonalidade, excesso de oferta do
+// curso e tudo que so existe nesta campanha. Fica como referencia, no rodape.
+function projeta(c){
+  const leads = Number(c.leads||0), rest = Number(c.dias_restantes||0);
+  const gasto = Number(c.gasto||0), verba = Number(c.verba||0);
+  if(!rest) return null;
+
+  const cpl = leads > 0 && gasto > 0 ? gasto/leads : null;
+  const falta = verba > 0 ? Math.max(0, verba - gasto) : null;
+  const porVerba = (cpl && falta !== null) ? leads + Math.floor(falta/cpl) : null;
+
   const serie = RITMO.filter(r=>r.curso===c.curso);
-  const rest = Number(c.dias_restantes);
-  if(serie.length < 2 || !rest) return null;
-  const acum = serie.map(r=>Number(r.leads_acum));
-  const n = acum.length, janela = Math.min(14, n-1);
-  const ritmo = (acum[n-1] - acum[n-1-janela]) / janela;
-  return { ritmo, total: Math.round(acum[n-1] + ritmo*rest), janela };
+  let ritmo = null, porRitmo = null, janela = 0;
+  if(serie.length > 1){
+    const acum = serie.map(r=>Number(r.leads_acum));
+    const n = acum.length; janela = Math.min(14, n-1);
+    ritmo = (acum[n-1] - acum[n-1-janela]) / janela;
+    porRitmo = Math.round(leads + ritmo*rest);
+  }
+
+  const candidatos = [porVerba, porRitmo].filter(v=>v!==null && isFinite(v));
+  if(!candidatos.length) return null;
+  const trabalho = Math.min.apply(null, candidatos);
+  return { cpl, falta, verba, porVerba, porRitmo, ritmo, janela, trabalho,
+           limite: (porVerba !== null && trabalho === porVerba) ? 'verba' : 'ritmo' };
 }
 
 function desenhaCurva(curso){
@@ -254,93 +281,61 @@ function desenhaCurva(curso){
   const real = serie.map(r=>Number(r.leads_acum));
   const esperado = serie.map(r=>r.esperado_acum===null?null:Number(r.esperado_acum));
   const nR = real.length, ultimo = real[nR-1];
+  const total = Number(c.dias_total), corridos = Number(c.dias_decorridos), restantes = Number(c.dias_restantes);
+  const pj = projeta(c);
 
-  // Projecao dia a dia, no mesmo eixo do real.
-  //
-  // Antes a projecao usava os bins da curva historica como rotulos ("+90% tempo",
-  // "+95% tempo"): tres ou quatro posicoes para comprimir duas semanas. No fim do
-  // grafico as linhas subiam quase na vertical e pareciam um pico, quando na
-  // verdade era o eixo mudando de escala no meio do caminho. Agora cada dia que
-  // falta e um ponto, na mesma regua dos dias ja corridos.
-  const curva = CURVA.slice().sort((a,b)=>Number(a.pct_tempo)-Number(b.pct_tempo));
-  function pctLeadsEm(pctTempo){
-    if(!curva.length) return pctTempo;
-    if(pctTempo <= Number(curva[0].pct_tempo)) return Number(curva[0].pct_leads_mediana);
-    for(let i=1;i<curva.length;i++){
-      const a = curva[i-1], b = curva[i];
-      const pa = Number(a.pct_tempo), pb = Number(b.pct_tempo);
-      if(pctTempo <= pb){
-        const t = pb===pa ? 0 : (pctTempo-pa)/(pb-pa);
-        return Number(a.pct_leads_mediana) + t*(Number(b.pct_leads_mediana)-Number(a.pct_leads_mediana));
-      }
-    }
-    return 100;
-  }
+  document.getElementById('hint-curva').textContent =
+    'Leads acumulados até hoje e a projeção do que falta, pelo custo por lead e pela verba desta campanha.';
 
-  const total = Number(c.dias_total), corridos = Number(c.dias_decorridos);
-  const restantes = Number(c.dias_restantes);
-  const pctHoje = pctLeadsEm(Number(c.pct_tempo));
-  const sobra = Math.max(0.001, 100 - pctHoje);
-
-  // Ritmo da propria campanha nas ultimas duas semanas.
-  //
-  // A projecao pela curva historica (leads / % esperado) assume que ESTA campanha
-  // vai seguir a forma media de 140 turmas anteriores. Quando ela ja desacelerou,
-  // isso promete leads que o ritmo observado nao sustenta — e quem le o numero
-  // grande cobra por ele. O ritmo recente e verificavel: sai da serie diaria desta
-  // campanha, e qualquer um confere.
-  const janela = Math.min(14, nR - 1);
-  const ritmoDia = janela > 0 ? (ultimo - real[nR-1-janela]) / janela : 0;
-  const noRitmo = Math.round(ultimo + ritmoDia * restantes);
+  // dias que faltam, na mesma regua dos dias corridos
   const dias = [];
   for(let k=corridos+1;k<=total;k++) dias.push(k);
   const labelsFut = dias.map(k=>{
     const d = new Date(c.data_inicio+'T00:00:00'); d.setDate(d.getDate()+k-1);
     return dd(d.getDate())+'/'+dd(d.getMonth()+1);
   });
-  // Ancorada no ultimo ponto real e fechando no alvo: continua a linha em vez de
-  // recomecar de outro lugar, e nunca da salto na emenda.
-  const ate = alvo => dias.map(k=>{
-    if(!alvo) return null;
-    const frac = Math.max(0, Math.min(1, (pctLeadsEm(100*k/total) - pctHoje)/sobra));
-    return Math.round(ultimo + (Number(alvo)-ultimo)*frac);
-  });
   const vazio = new Array(nR-1).fill(null);
   const emenda = a => vazio.concat([ultimo]).concat(a);
+  // reta do ultimo ponto ate o alvo: ninguem sabe a forma do que ainda nao
+  // aconteceu, e fingir uma curva ai e enfeite que vira promessa
+  const reta = alvo => dias.map((_,i)=> alvo===null ? null : Math.round(ultimo + (alvo-ultimo)*(i+1)/dias.length));
 
-  document.getElementById('hint-curva').textContent =
-    'Leads acumulados até hoje contra o caminho esperado, e a faixa provável até o fim da campanha.';
-
-  // Caixa de leitura abaixo do grafico.
-  //
-  // Ordem do mais certo para o menos certo, e o numero em destaque nunca e um
-  // modelo: e a extrapolacao do ritmo observado. A curva historica fica em
-  // ultimo, rotulada como cenario.
+  // Caixa de leitura: do mais certo para o menos certo, e nada de modelo em destaque.
   const box = document.getElementById('box-curva');
   if(box){
-    const rd = ritmoDia.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
-    box.innerHTML = restantes > 0
-      ? `<div class="pj">
-           <div class="pj-item"><span class="pj-r">Captados até hoje</span><span class="pj-v">${N(c.leads)}</span><span class="pj-n">${c.dias_decorridos} de ${c.dias_total} dias · ${PCT(c.pct_tempo)} do tempo. Se a campanha parasse agora, é o número final.</span></div>
-           <div class="pj-item destaque"><span class="pj-r">Mantido o ritmo atual</span><span class="pj-v">${N(noRitmo)}</span><span class="pj-n">${rd} leads/dia nas últimas ${janela === 14 ? 'duas semanas' : janela + ' dias'} × ${restantes} dias restantes, sem supor aceleração</span></div>
-           ${c.proj_leads ? `<div class="pj-item"><span class="pj-r">Cenário da curva histórica</span><span class="pj-v pj-faixa">${N(c.proj_leads)}</span><span class="pj-n">o que 140 turmas anteriores costumam somar da metade do caminho em diante. É referência de comparação, <b>não meta</b>.</span></div>` : ''}
+    if(!restantes){
+      box.innerHTML = `<p class="pj-aviso">Campanha encerrada em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} com <b>${N(c.leads)} leads</b>. Não há mais o que projetar.</p>`;
+    } else if(!pj){
+      box.innerHTML = `<p class="pj-aviso">Sem base para projetar: a campanha ainda não tem verba registrada nem dias suficientes de captação. Por enquanto valem os <b>${N(c.leads)} leads</b> já captados.</p>`;
+    } else {
+      const rd = pj.ritmo !== null ? pj.ritmo.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) : null;
+      const cardVerba = pj.porVerba !== null
+        ? `<div class="pj-item${pj.limite==='verba'?' destaque':''}"><span class="pj-r">Pela verba que falta</span><span class="pj-v">${N(pj.porVerba)}</span><span class="pj-n">${BRL(pj.falta)} a investir ÷ CPL de ${BRL2(pj.cpl)} = ${N(pj.porVerba - c.leads)} leads a mais</span></div>`
+        : `<div class="pj-item"><span class="pj-r">Pela verba que falta</span><span class="pj-v pj-faixa">sem base</span><span class="pj-n">campanha sem verba registrada ou sem custo por lead ainda</span></div>`;
+      const cardRitmo = pj.porRitmo !== null
+        ? `<div class="pj-item${pj.limite==='ritmo'?' destaque':''}"><span class="pj-r">Pelo ritmo atual</span><span class="pj-v">${N(pj.porRitmo)}</span><span class="pj-n">${rd} leads/dia nos últimos ${pj.janela} dias × ${restantes} dias restantes</span></div>`
+        : '';
+      box.innerHTML = `<div class="pj">
+           <div class="pj-item"><span class="pj-r">Captados até hoje</span><span class="pj-v">${N(c.leads)}</span><span class="pj-n">${corridos} de ${total} dias · ${PCT(c.pct_tempo)} do tempo. Se parar agora, é o número final.</span></div>
+           ${cardVerba}${cardRitmo}
          </div>
-         <p class="pj-aviso"><b>Nenhum destes números é promessa.</b> O ritmo muda com verba, concorrência, sazonalidade e com o que acontece fora da campanha. Para combinar meta com o cliente, use os ${N(c.leads)} já captados e o ritmo atual — nunca o cenário da curva.</p>`
-      : `<p class="pj-aviso">Campanha encerrada em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} com <b>${N(c.leads)} leads</b>. Não há mais o que projetar.</p>`;
+         <p class="pj-aviso"><b>Trabalhe com ${N(pj.trabalho)}</b>, a menor das duas: a conta da verba supõe que ela será gasta inteira e ao mesmo custo; a do ritmo ignora que a verba pode acabar antes. <b>Nenhum dos dois é promessa</b> — o custo por lead sobe quando o público satura, e verba, concorrência e sazonalidade mudam o jogo em dias.</p>
+         ${c.proj_leads ? `<p class="pj-ref">Só como referência: turmas anteriores do mesmo curso, com base congelada em mai/26, fecharam num padrão que daria <b>${N(c.proj_leads)}</b>. Não é meta nem previsão desta campanha.</p>` : ''}`;
+    }
   }
 
-  mkChart('c-curva','line',{
-    labels: labels.concat(labelsFut),
-    datasets:[
-      {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.2, borderWidth:3, pointRadius:0},
-      {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.2, borderWidth:2, pointRadius:0},
-      // A faixa vai do pior caso real (a campanha para hoje, linha reta) ate o
-      // cenario da curva. Antes o piso da faixa ja era uma projecao para cima, e
-      // faixa que nao pode cair nao e faixa, e promessa.
-      {label:'Se parar hoje', data:emenda(dias.map(()=>ultimo)), borderColor:'rgba(138,145,158,.5)', borderDash:[2,3], tension:0, borderWidth:1, pointRadius:0},
-      {label:'_teto_cenario', data:emenda(ate(c.proj_leads)), borderColor:'rgba(14,158,118,.22)', backgroundColor:'rgba(14,158,118,.09)', fill:'-1', tension:.2, borderWidth:1, pointRadius:0},
-      {label:'No ritmo atual', data:emenda(dias.map((k,i)=>Math.round(ultimo + ritmoDia*(i+1)))), borderColor:VERDE, borderDash:[4,3], tension:0, borderWidth:2.5, pointRadius:0}
-    ]},
+  const datasets = [
+    {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.2, borderWidth:3, pointRadius:0},
+    {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.2, borderWidth:2, pointRadius:0}
+  ];
+  if(pj){
+    const teto = Math.max(pj.porVerba ?? 0, pj.porRitmo ?? 0);
+    datasets.push({label:'Se parar hoje', data:emenda(dias.map(()=>ultimo)), borderColor:'rgba(138,145,158,.5)', borderDash:[2,3], tension:0, borderWidth:1, pointRadius:0});
+    datasets.push({label:'_teto', data:emenda(reta(teto)), borderColor:'rgba(14,158,118,.2)', backgroundColor:'rgba(14,158,118,.09)', fill:'-1', tension:0, borderWidth:1, pointRadius:0});
+    datasets.push({label:'Projeção de trabalho', data:emenda(reta(pj.trabalho)), borderColor:VERDE, borderDash:[4,3], tension:0, borderWidth:2.5, pointRadius:0});
+  }
+
+  mkChart('c-curva','line',{labels: labels.concat(labelsFut), datasets},
     {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14,
         filter:it=>!String(it.text).startsWith('_')}}},
      scales:{y:{beginAtZero:true,title:{display:true,text:'leads acumulados'}},

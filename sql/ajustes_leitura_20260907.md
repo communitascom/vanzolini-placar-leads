@@ -217,3 +217,65 @@ traz só `sessoes` e `sessoes_pagas`. Para preencher, a carga precisa passar a
 gravar `sessoes_engajadas` (ou `engajamentos`) e, idealmente, `taxa_engajamento`
 e `duracao_media`. É a mesma frente de enriquecer a carga do Reportei que
 destrava thumb e link de criativo.
+
+---
+
+# Quarta rodada (07/09/2026): projeção com o pé na campanha
+
+A projeção pelo ritmo ainda tinha um pé no modelo (a curva decidia a faixa) e o
+Junior cortou certo: **projetar pelo comportamento de outras turmas ignora
+sazonalidade, excesso de oferta do curso e tudo que só existe nesta campanha.**
+
+Agora são duas contas simples, as duas verificáveis na própria tela:
+
+```
+pela verba = leads + (verba que falta ÷ CPL observado)
+pelo ritmo = leads + (leads/dia das últimas 2 semanas × dias restantes)
+projeção   = a MENOR das duas
+```
+
+A da verba sozinha supõe que a verba será gasta inteira e ao mesmo custo; a do
+ritmo sozinha ignora que a verba pode acabar antes. Uma segura a outra. Medido
+nas 17 campanhas no ar, hoje **o ritmo é sempre o limite** — há muita verba não
+gasta, e sem o mínimo a conta da verba prometeria absurdos (Hard Skills tem CPL
+de R$ 1,40 e R$ 4.464 a investir: sozinha, a conta daria +3.188 leads).
+
+A curva histórica saiu do destaque e virou uma linha de referência no rodapé da
+caixa, com a ressalva de que a base está congelada.
+
+## Por que a curva não serve como âncora: a tabela `turmas` parou
+
+Investigado a fundo em 07/09/2026:
+
+| tabela | linhas | último `data_fim` | última inserção |
+|---|---|---|---|
+| `turmas` | 149 | **20/05/2026** | **13/07/2026 21:07** |
+| `campanhas` | 42 | 17/10/2026 | 31/08/2026 (sync Monday) |
+
+`turmas` **nunca foi realimentada** depois da carga inicial de 13/07. Não é só o
+dado comercial que parou: parou a tabela inteira. E dela dependem:
+
+- `inscritos`, `pagantes`, `receita` → conversão, CAC e ROI do histórico;
+- `investimento_midia` → a coluna Investimento por turma;
+- `cursos.mediana_dia` → a régua de "Acima/Estável/Abaixo" do placar;
+- `curva_ritmo()` → a curva histórica e o `vs hist.` das campanhas.
+
+Ou seja, **quatro leituras do painel estão ancoradas em dados que terminam em
+maio**, e só o aviso do histórico dizia isso. A fonte é a planilha GESTÃO
+VANZOLINI, carregada à mão; não existe carga automática. O único pipeline
+automático é `midia_diaria` (planilha Campanhas_Vanzolini_Consolidado, 6h e 18h)
+e os leads (RD Station → `conversoes`).
+
+## Widget da Nita: o que dá e o que não dá pela nossa página
+
+O `chat-widget-v1.0.0-min.js` tem 4.305 bytes e faz uma coisa só: cria um
+`<iframe>` apontando para `data-agent-url`. Aceita apenas `data-agent-url`,
+`data-container-id` e `data-embed-type`. A página do agente ignora query string
+(mesmo byte count com e sem parâmetros).
+
+Então **o seletor de modelo e os cards de saída de ferramenta ("Apresentação
+pronta · Http Request") são renderizados pela Tess dentro do iframe** e não há
+nada no embed que os esconda. Só há dois caminhos: configurar o agente na Tess
+(remover a ferramenta que gera PPTX do agente do cliente, e travar o modelo se a
+plataforma permitir) ou trocar o embed público por uma UI própria chamando a API
+da Tess com modelo fixo.
