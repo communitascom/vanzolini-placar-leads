@@ -4,70 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Campanhas em andamento · Fundação Vanzolini</title>
+<meta http-equiv="refresh" content="3;url=interno/campanhas.html">
+<link rel="canonical" href="interno/campanhas.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="campanhas.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+:root{--ground:#F8F9FB;--card:#fff;--hair:#EEF0F3;--ink:#171A1F;--mute:#8A919E;--laranja:#E56B39}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Hanken Grotesk",system-ui,sans-serif;background:var(--ground);color:var(--ink);
+  line-height:1.55;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.caixa{background:var(--card);border:1px solid var(--hair);border-radius:20px;padding:32px 36px;max-width:560px}
+h1{font-size:20px;font-weight:600;letter-spacing:-.015em;margin-bottom:12px}
+p{font-size:14px;color:#4B5563;margin-bottom:10px}
+code{background:var(--ground);border-radius:5px;padding:1px 5px;font-size:12.5px}
+a.btn{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:#fff;background:var(--ink);
+  text-decoration:none;border-radius:999px;padding:10px 20px}
+small{display:block;margin-top:14px;font-size:12px;color:var(--mute)}
+</style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
-    <div class="divisor"></div>
-    <div><h1>Campanhas em andamento <span class="pill">ao vivo</span></h1>
-      <small>ritmo de captação, projeção de fechamento e ritmo de verba</small></div>
-  </div>
-  <nav style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-    <button id="imprimir" class="chip chip-action" title="Gera um PDF pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar</button>
-    <a class="chip" href="historico-dinamico.html"><span class="material-symbols-outlined">history</span>Histórico &amp; investimento</a>
-    <a class="chip" href="index.html"><span class="material-symbols-outlined">arrow_back</span>Voltar ao placar</a>
-  </nav>
-</header>
-<div class="wrap">
-
-<div class="printhead" id="printhead"><h2 id="ph-titulo"></h2><div id="ph-sub"></div></div>
-
-<div class="kpis" id="kpis"><div class="kpi"><div class="v">…</div><div class="l">carregando</div></div></div>
-
-<div id="aviso-midia"></div>
-
-<div class="sec" id="sec-alertas" style="display:none">
-<h2><span class="tag">Alertas</span> O que pede atenção</h2>
-<div class="hint">A captação é comparada com a mediana do <b>mesmo dia da semana</b> no histórico do curso, porque zero lead num domingo é normal e zero numa terça não é. Só aparece aqui o que está fora do padrão.</div>
-<div id="alertas"></div>
+<div class="caixa">
+  <h1>Esta página mudou de endereço</h1>
+  <p>As campanhas em andamento, com os alertas operacionais, agora ficam no <b>painel interno</b>, sob o mesmo menu do placar e do histórico. Mesmo <code>campanhas.js</code>, mesma leitura.</p>
+  <a class="btn" href="interno/campanhas.html">Ir para campanhas</a>
+  <small>Redirecionando em 3 segundos.</small>
 </div>
-
-<div class="sec">
-<h2><span class="tag">Ritmo</span> Campanhas no ar</h2>
-<div class="hint">A projeção usa a curva histórica de 140 turmas: quanto do total de leads já costuma estar captado quando X% do tempo passou. Só aparece a partir de 15% do tempo decorrido, antes disso o número é instável demais para servir.</div>
-<div class="card"><div id="t-camp"><div class="loading">Carregando…</div></div></div>
-</div>
-
-<div class="sec">
-<h2><span class="tag">Ritmo</span> Curva de captação</h2>
-<div class="hint" id="hint-curva">Leads acumulados até hoje contra o caminho esperado, e a projeção até o fim da campanha.</div>
-<div class="fgrp" style="margin-bottom:12px"><select id="f-camp"></select></div>
-<div class="card"><div class="chartbox"><canvas id="c-curva"></canvas></div></div>
-</div>
-
-<div class="sec">
-<h2><span class="tag">Verba</span> Tempo decorrido x verba investida</h2>
-<div class="hint">Barra clara = percentual do tempo que já passou. Barra escura = percentual da verba já gasta. Quando a verba fica muito atrás do tempo, sobra dinheiro para queimar em poucos dias no fim.</div>
-<div class="card"><div class="chartbox"><canvas id="c-verba"></canvas></div></div>
-</div>
-
-<div class="sec">
-<h2><span class="tag">Mídia</span> CTR por plataforma</h2>
-<div class="hint">CTR sempre calculado como cliques divididos por impressões. Cada plataforma tem régua própria: LinkedIn opera numa faixa naturalmente muito abaixo de Meta e Google, então comparar entre plataformas não faz sentido, só contra o histórico da mesma.</div>
-<div class="card"><div id="t-ctr"><div class="loading">Carregando…</div></div></div>
-</div>
-
-<div class="foot" id="rodape"></div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="campanhas.js"></script>
 </body>
 </html>

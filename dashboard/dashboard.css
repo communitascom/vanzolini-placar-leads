@@ -348,18 +348,18 @@ body.dash{min-height:100vh}
 .pg-campanhas table th:first-child,.pg-campanhas table td:first-child,.pg-historico table th:first-child,.pg-historico table td:first-child{text-align:left;white-space:normal;min-width:200px}
 .pg-campanhas .card table,.pg-historico .card table{font-size:12.5px}
 .pg-campanhas .card th,.pg-historico .card th{position:static}
-.avisodef{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--atencao);background:var(--atencao-bg);border-radius:14px;padding:10px 14px}
+.avisodef{display:block;font-size:13px;color:var(--atencao);background:var(--atencao-bg);border-radius:14px;padding:10px 14px}
 .avisodef b{color:inherit}
-.avisodef .material-symbols-outlined,.avisodef .ms{font-family:"Material Symbols Rounded";font-size:18px!important;flex:none;margin-top:1px}
+.avisodef .material-symbols-outlined,.avisodef .ms{font-family:"Material Symbols Rounded";font-size:18px!important;margin-right:4px;vertical-align:-3px}
 .material-symbols-outlined{font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;display:inline-block;line-height:1;vertical-align:middle;font-size:18px;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24}
 .chip.chip-action .material-symbols-outlined{font-size:18px;color:var(--mute)}
 /* alertas operacionais (só na versão interna; aqui ficam neutros caso apareçam) */
-#alertas{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-#alertas .alerta{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:12px 14px;font-size:13px}
+#alertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;min-width:0}
+#alertas .alerta{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:12px 14px;font-size:13px;min-width:0}
+#alertas .alerta>div{min-width:0;overflow-wrap:anywhere}
+#alertas .alerta .txt{color:var(--ink-2)}
 #alertas .alerta.full{grid-column:1/-1}
 #alertas .alerta .ico{color:var(--atencao)} #alertas .alerta.alta .ico{color:var(--desce)}
-@media(max-width:1180px){#alertas{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:720px){#alertas{grid-template-columns:1fr}}
 
 /* =====================================================================
    CAMPANHA INSTITUCIONAL e INÍCIO (novos)
@@ -443,7 +443,6 @@ body.dash{min-height:100vh}
 #t-camp,#t-ctr,#t-perene,#t-best,#t-worst,#t-vendas,.scrollt,.tabela,.plot{overflow-x:auto;max-width:100%}
 .pg-historico .kpi .v{font-size:30px}
 .pg-campanhas .kpi .v{font-size:32px}
-.avisodef{flex-wrap:wrap}
 
 /* ajustes de 04/09: leitura em box, KPI compacto (texto x ícone), vídeo destacado, eixo sem quebra, anúncios recolhíveis */
 .leitura-box{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-card);padding:16px 20px;max-width:none;width:100%}
@@ -472,3 +471,33 @@ body.dash{min-height:100vh}
 /* início: botão "ver detalhes" nos cards de resumo */
 .btn-detalhe{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--s2);text-decoration:none;margin-left:10px}
 .btn-detalhe .ms{font-size:15px}
+
+/* =====================================================================
+   MODO INTERNO (pasta interno/): mesma casca, sem PIN, com ferramentas
+   ===================================================================== */
+.barra-topo .selo-interno{margin-left:12px;background:var(--laranja);color:#fff;border-radius:var(--r-pill);
+  padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.menu a.ferramenta{font-weight:500;color:var(--mute)}
+.menu a.ferramenta:hover{color:var(--ink)}
+.menu a.ferramenta .ms{font-size:19px}
+/* alertas operacionais: no interno eles aparecem de fato, e a cor volta a valer */
+.pg-campanhas #alertas .alerta{border-left:3px solid var(--atencao)}
+.pg-campanhas #alertas .alerta.alta{border-left-color:var(--desce)}
+.pg-campanhas #alertas .alerta b{color:var(--ink);font-weight:600}
+/* placar interno: o botão de campanhas ativas e a linha da campanha ativa */
+.pg-leads .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--zero);display:inline-block}
+.pg-leads .chip.on .dot{background:var(--azul)}
+.pg-leads tbody tr.ativa td.curso{box-shadow:inset 3px 0 0 var(--s2)}
+
+/* barra do cliente no celular: sem ela a página inteira ganhava rolagem lateral */
+@media(max-width:760px){
+  .barra-topo .in{height:auto;min-height:64px;padding:10px 16px;flex-wrap:wrap;gap:8px}
+  .marca{gap:10px;min-width:0}
+  .marca img{height:38px}
+  .marca .sep{height:24px}
+  .barra-topo .marca h1{font-size:14px;white-space:normal;min-width:0}
+  .barra-topo .selo-interno{margin-left:8px;padding:3px 8px;font-size:9px}
+  .barra-topo .dir{gap:6px}
+  .assina{display:none}
+  .tag{padding:5px 10px;font-size:11px}
+}

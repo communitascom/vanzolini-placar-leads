@@ -29,8 +29,8 @@ Consequências a ter em mente:
 - **Semana não soma mês.** Contagem de pessoas distintas não é aditiva. Quem
   converteu em duas semanas conta 1 em cada semana e 1 no mês.
 - **Semana não soma mês** (repetido de propósito, é o engano mais provável).
-- **`historico.html` também está na régua antiga** (dados estáticos embutidos),
-  então diverge do `index.html` até ser regerado.
+- **`historico.html` também estava na régua antiga** (dados estáticos
+  embutidos) e por isso virou redirecionamento em 24/08/2026.
 - **`admin.html` mostra linhas cruas de propósito**, por ser o painel de
   edição registro a registro. Não deve seguir a regra do placar.
 
@@ -96,27 +96,92 @@ que falta cadastrar o padrão em `de_para_campanha`.
 - `turmas.investimento_midia`, parado em 20/05/2026. Vem da planilha
   GESTÃO VANZOLINI e alimenta o Investimento/CPL do placar e do histórico.
 
-## Uma lógica só por página (placar e campanhas)
+## Dois painéis, uma casca só (desde 07/09/2026)
 
-O placar tem duas versões, a interna (`index.html`) e a do cliente
-(`cliente.html`, com PIN e só campanhas ativas). Desde 30/08/2026 as duas são
-cascas sobre `placar.css` + `placar.js`, como `campanhas.html` e
-`cliente-campanhas.html` já eram sobre `campanhas.css` + `campanhas.js`.
+Tudo o que se lê está em duas pastas, e as duas rodam o mesmo CSS, a mesma
+casca e o mesmo JS de dados:
 
-Não duplicar esses arquivos. O que muda entre interno e cliente vem do DOM:
+| Pasta | Para quem | Trava | Nita | Endereço |
+|---|---|---|---|---|
+| `dashboard/` | cliente | PIN 2665 | sim | `dashboard/index.html` |
+| `interno/` | Communitas | nenhuma | não | `interno/index.html` |
+
+Cada página é uma casca: HTML com o DOM que o JS espera, mais
+`dashboard/dashboard.css` e `dashboard/shell.js`. **Não existe cópia de CSS
+nem de lógica entre as pastas** — `interno/` aponta para os arquivos de
+`dashboard/` com `../`. Foi cópia congelada que fez o histórico divergir do
+banco por dois meses, e é a mesma armadilha aqui.
+
+| Página | Lógica que ela usa |
+|---|---|
+| `*/leads.html` | `../placar.js` |
+| `*/campanhas.html` | `../campanhas.js` |
+| `*/historico.html` | `../historico-dinamico.js` |
+| `*/institucional.html` | `dashboard/institucional.js` |
+| `*/index.html` | `dashboard/inicio.js` |
+
+`shell.js` monta barra, menu lateral, assinatura, a trava de PIN e o widget da
+Nita, e chama `window.iniciarPainel()` — ou `carregar()`, se a página não
+definir. O modo sai de `data-modo` no `<body>`:
+
+| | `data-modo` ausente (cliente) | `data-modo="interno"` |
+|---|---|---|
+| PIN | trava por PIN, sessão compartilhada entre as páginas | sem trava |
+| Nita | injetada depois do PIN | **não injetada** |
+| Barra | título só | título + selo laranja **INTERNO** |
+| Menu | só os relatórios | relatórios + Ferramentas (conversões, gestão, réguas) |
+
+A Nita fica fora do interno de propósito: o agente da Tess é o do cliente, com
+as travas de "consulta, não consultoria", e consome crédito do mesmo workspace.
+A versão interna dela, discutida em 06/09, é outro agente e ainda não existe.
+
+O caminho dos arquivos da casca sai do `src` do próprio `shell.js`, então a
+mesma casca serve as duas pastas sem parametrizar nada.
+
+O que muda entre interno e cliente **dentro dos relatórios** continua vindo do
+DOM, sem flag espalhada:
 
 | Diferença | Como é expressa |
 |---|---|
-| Colunas da tabela | `data-col` em cada `<th>`. Canal sem coluna própria é somado em "outros" (é assim que o cliente vê Popup e WhatsApp juntos) |
+| Colunas da tabela | `data-col` em cada `<th>`. Canal sem coluna própria é somado em "outros" (é assim que o cliente vê Form Pág., Popup e WhatsApp juntos) |
 | Só campanhas ativas | a página do cliente não tem o botão `#fAtivas`, e sem ele o filtro fica fixo |
 | Trava de PIN | `window.AGUARDA_PIN = true` segura o `carregar()` |
 | Alertas operacionais | a página do cliente não tem `#sec-alertas` |
 
+### Endereços antigos
+
+As cinco páginas soltas viraram redirecionamento, com uma tela explicando para
+onde foram: `index.html`, `campanhas.html` e `historico-dinamico.html` apontam
+para `interno/`; `cliente.html` e `cliente-campanhas.html` apontam para
+`dashboard/`. `historico.html` (redirecionamento desde 24/08) agora aponta para
+`interno/historico.html`.
+
+`placar.css` e `campanhas.css` foram removidos: com as páginas antigas viradas
+redirecionamento, ninguém mais os carregava. O visual inteiro está em
+`dashboard/dashboard.css`, no padrão Painéis Communitas.
+
+### Ferramentas ainda com a cara antiga
+
+`conversoes.html`, `admin.html` e `reguas.html` não são relatórios, são
+ferramentas de operação (formulário, CRUD com login, e a de réguas é esboço de
+julho/2026). Seguem com CSS próprio embutido e entram no menu do painel interno
+como **Ferramentas**. Repelá-las é frente própria, com risco em formulário e
+autenticação.
+
+### Antes de mexer: `git fetch`
+
+Em 06/09/2026 uma sessão trabalhou sobre um clone parado em `c1e479d` e refez
+um painel inteiro sobre uma base quatro commits atrasada, porque `git log`
+local não mostra o que está no `origin`. **Rodar `git fetch` antes de ler o
+repositório** custa dois segundos e evita refazer horas de trabalho.
+
 ## Histórico
 
-Só existe uma página de histórico: `historico-dinamico.html`, lida ao vivo.
-A `historico.html` virou redirecionamento — era uma cópia estática congelada em
-jun/2026 e na régua antiga de contagem. Ver `sql/historico_ao_vivo_20260824.md`.
+Só existe uma leitura de histórico, ao vivo, em `interno/historico.html` (e a
+mesma para o cliente em `dashboard/historico.html`), ambas sobre
+`historico-dinamico.js`. A `historico.html` e a `historico-dinamico.html` são
+redirecionamentos: a primeira era cópia estática congelada em jun/2026 e na
+régua antiga de contagem. Ver `sql/historico_ao_vivo_20260824.md`.
 
 ## Ponto de restauração
 

@@ -3,74 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Placar de Leads · Vanzolini</title>
+<title>Placar de Leads · Fundação Vanzolini</title>
+<meta http-equiv="refresh" content="3;url=interno/index.html">
+<link rel="canonical" href="interno/index.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="placar.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+:root{--ground:#F8F9FB;--card:#fff;--hair:#EEF0F3;--ink:#171A1F;--mute:#8A919E;--laranja:#E56B39}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Hanken Grotesk",system-ui,sans-serif;background:var(--ground);color:var(--ink);
+  line-height:1.55;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.caixa{background:var(--card);border:1px solid var(--hair);border-radius:20px;padding:32px 36px;max-width:560px}
+h1{font-size:20px;font-weight:600;letter-spacing:-.015em;margin-bottom:12px}
+p{font-size:14px;color:#4B5563;margin-bottom:10px}
+code{background:var(--ground);border-radius:5px;padding:1px 5px;font-size:12.5px}
+a.btn{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:#fff;background:var(--ink);
+  text-decoration:none;border-radius:999px;padding:10px 20px}
+small{display:block;margin-top:14px;font-size:12px;color:var(--mute)}
+</style>
 </head>
 <body>
-<div class="wrap">
-
-  <header>
-    <div class="brand">
-      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
-      <div class="divisor"></div>
-      <h1>Placar de Leads</h1>
-    </div>
-    <nav class="navchips">
-      <a class="chip" href="campanhas.html"><span class="material-symbols-outlined">campaign</span>Campanhas em andamento</a>
-      <a class="chip" href="historico-dinamico.html"><span class="material-symbols-outlined">history</span>Histórico &amp; investimento</a>
-      <a class="chip" href="conversoes.html"><span class="material-symbols-outlined">link</span>Conversões por curso</a>
-      <button class="chip chip-action" onclick="window.print()" title="Gera um PDF do placar pelo diálogo de impressão"><span class="material-symbols-outlined">picture_as_pdf</span>Salvar</button>
-      <span class="tag" id="tagTopo">conectando…</span>
-    </nav>
-    <div class="so-print" id="printInfo"></div>
-  </header>
-
-  <div class="barra">
-    <div class="filtros">
-      <div class="campo"><label>Período, de</label><input type="date" id="fIni"></div>
-      <div class="campo"><label>até</label><input type="date" id="fFim"></div>
-      <button class="chip" id="fAtivas" onclick="alternarAtivas()"><span class="dot"></span>Só campanhas ativas</button>
-      <button class="btn" onclick="carregar()">Aplicar</button>
-    </div>
-    <div class="tag" id="atualizado"></div>
-  </div>
-
-  <div id="erro"></div>
-  <div class="cards" id="cards"></div>
-
-  <div class="tabela">
-    <table>
-      <thead><tr>
-        <th class="curso" data-col="curso">Curso</th>
-        <th data-col="campanha">Campanha</th><th data-col="meta_ads">Meta</th><th data-col="linkedin">LinkedIn</th><th data-col="form_prog">Form Prog.</th>
-        <th data-col="form_pagina">Form Pág.</th><th data-col="popup">Popup</th><th data-col="whatsapp">WhatsApp</th><th data-col="outros">Outros</th>
-        <th data-col="leads">Leads</th><th data-col="delta">Δ%</th><th data-col="media">Média/dia</th><th data-col="mediana">Mediana/dia</th>
-        <th data-col="situacao">Situação</th>
-      </tr></thead>
-      <tbody id="corpo"><tr><td colspan="14" class="loading">Carregando…</td></tr></tbody>
-    </table>
-  </div>
-
-  <div class="alerta ok" id="alerta" style="display:none">
-    <span class="sino">✓</span>
-    <span id="alertaTxt"></span>
-  </div>
-
-  <div class="rodape">
-    <div><b>Situação</b> compara média/dia do período com a mediana histórica/dia:
-      <span class="badge b-verde">Acima</span> ·
-      <span class="badge b-amar">Estável</span> ·
-      <span class="badge b-verm">Abaixo</span> ·
-      <span class="badge" style="background:var(--claro);color:var(--sub)">— sem histórico ainda</span>.
-      Linhas com barra azul e selo <b>ATIVA</b> (clicável, abre a campanha no Monday) têm campanha em andamento no período escolhido.</div>
-    <div style="margin-top:4px">Dados ao vivo, leitura apenas. Investimento/CPL vem da planilha de mídia, no mesmo recorte da tabela; histórico completo em <a href="historico-dinamico.html" style="color:var(--azul2)">Histórico &amp; investimento</a>.</div>
-  </div>
+<div class="caixa">
+  <h1>O placar mudou de endereço</h1>
+  <p>O placar interno agora vive dentro do <b>painel interno</b>, na aba <i>Placar de leads</i>, junto com campanhas, histórico, campanha institucional e as ferramentas de operação, sob um menu só e no padrão visual dos Painéis Communitas. A leitura dos números é exatamente a mesma: o <code>placar.js</code> não mudou.</p>
+  <a class="btn" href="interno/index.html">Ir para o painel interno</a>
+  <small>Redirecionando em 3 segundos.</small>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="placar.js"></script>
 </body>
 </html>

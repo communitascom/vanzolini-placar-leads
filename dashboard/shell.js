@@ -1,7 +1,16 @@
-// Casca do Dashboard Vanzolini: barra do cliente, menu lateral, trava de PIN e
-// assinatura. Cada página é uma casca sobre o mesmo CSS/JS de dados das páginas
-// antigas (placar.js, campanhas.js, historico-dinamico.js), como o README exige:
-// o que muda vem do DOM, não de cópia de lógica.
+// Casca do Dashboard Vanzolini: barra, menu lateral, trava de PIN, widget da
+// Nita e assinatura. Cada página é uma casca sobre o mesmo CSS/JS de dados das
+// páginas antigas (placar.js, campanhas.js, historico-dinamico.js), como o
+// README exige: o que muda vem do DOM, não de cópia de lógica.
+//
+// Dois modos, um arquivo só, pela mesma razão de não duplicar placar.css:
+//   data-modo="cliente" (padrão, pasta dashboard/) trava por PIN e injeta a Nita.
+//   data-modo="interno" (pasta interno/) não tem PIN, marca a barra com o selo
+//     INTERNO, acrescenta as ferramentas de operação ao menu e NÃO injeta a
+//     Nita — o agente da Tess é o do cliente, com as travas de "consulta, não
+//     consultoria", e consome crédito do mesmo workspace.
+// O caminho dos arquivos da casca (logo) sai do src deste script, então a mesma
+// casca serve as duas pastas.
 //
 // Ordem no HTML: <main>...</main>, scripts de dados (com window.AGUARDA_PIN = true),
 // e por último este arquivo. Depois do PIN, ele chama window.iniciarPainel() se
@@ -16,9 +25,19 @@
     {id:"historico",     href:"historico.html",     ico:"history",  rot:"Histórico e investimento"},
     {id:"institucional", href:"institucional.html", ico:"verified", rot:"Campanha institucional"}
   ];
+  // Só no modo interno: as ferramentas de operação, que nunca tiveram versão de
+  // cliente e seguem com a cara antiga por enquanto.
+  var FERRAMENTAS = [
+    {href:"../conversoes.html", ico:"link",             rot:"Conversões por curso"},
+    {href:"../admin.html",      ico:"tune",             rot:"Gestão de conversões"},
+    {href:"../reguas.html",     ico:"forward_to_inbox", rot:"Réguas e e-mails"}
+  ];
   var ANEL = '<svg><use href="#anel"/></svg>';
   var pagina = document.body.dataset.pagina || "inicio";
   var titulo = document.body.dataset.titulo || "Dashboard";
+  var interno = document.body.dataset.modo === "interno";
+  // pasta desta casca, para a logo servir as duas pastas sem cópia
+  var BASE = (document.currentScript && document.currentScript.src || "").replace(/[^\/]*$/, "");
 
   // símbolo do anel (assinatura Communitas), uma vez por página
   var simb = document.createElement("div");
@@ -31,7 +50,8 @@
   barra.className = "barra-topo";
   barra.innerHTML =
     '<div class="in">' +
-      '<div class="marca"><img src="logo-branco.png" alt="Fundação Vanzolini"><span class="sep"></span><h1>' + titulo + '</h1></div>' +
+      '<div class="marca"><img src="' + BASE + 'logo-branco.png" alt="Fundação Vanzolini"><span class="sep"></span><h1>' + titulo + '</h1>' +
+      (interno ? '<span class="selo-interno">interno</span>' : '') + '</div>' +
       '<div class="dir"><span class="tag" id="tagTopo"><b>conectando</b></span>' +
       '<span class="assina">' + ANEL + 'Communitas</span></div>' +
     '</div>';
@@ -48,19 +68,26 @@
   PAGINAS.forEach(function(p){
     h += '<a href="' + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
   });
-  h += '<div class="rodape-menu">Dados ao vivo, leitura apenas.<br><span class="credito">' + ANEL + 'por Communitas</span></div>';
+  if (interno){
+    h += '<div class="sep"></div><div class="titulo">Ferramentas</div>';
+    FERRAMENTAS.forEach(function(p){
+      h += '<a href="' + p.href + '" class="ferramenta"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
+    });
+  }
+  h += '<div class="rodape-menu">' + (interno ? 'Versão interna: leitura completa, sem PIN e sem Nita.' : 'Dados ao vivo, leitura apenas.') +
+       '<br><span class="credito">' + ANEL + 'por Communitas</span></div>';
   menu.innerHTML = h;
   main.parentNode.insertBefore(layout, main);
   layout.appendChild(menu);
   layout.appendChild(main);
   main.classList.add("wrap");
 
-  // trava de PIN
+  // trava de PIN (só no modo cliente)
   var gate = document.createElement("div");
   gate.id = "pinGate";
   gate.innerHTML =
     '<div class="caixa">' +
-      '<img class="logo-pin" src="logo-branco.png" alt="Fundação Vanzolini">' +
+      '<img class="logo-pin" src="' + BASE + 'logo-branco.png" alt="Fundação Vanzolini">' +
       '<h2>Dashboard de marketing</h2>' +
       '<p>Digite o código de acesso para ver os dados.</p>' +
       '<input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••">' +
@@ -68,9 +95,11 @@
       '<div class="erroPin" id="erroPin"></div>' +
       '<span class="credito">' + ANEL + 'por Communitas</span>' +
     '</div>';
-  document.body.appendChild(gate);
-  layout.classList.add("oculto");
-  barra.classList.add("oculto");
+  if (!interno){
+    document.body.appendChild(gate);
+    layout.classList.add("oculto");
+    barra.classList.add("oculto");
+  }
 
   // utilidades compartilhadas pelas páginas novas
   window.Dash = {
@@ -114,6 +143,11 @@
       inp.value = ""; inp.focus();
     }
   }
+  if (interno){
+    iniciar();
+    return;
+  }
+
   document.getElementById("pinBtn").addEventListener("click", verificar);
   document.getElementById("pinInput").addEventListener("keydown", function(e){ if (e.key === "Enter") verificar(); });
 
