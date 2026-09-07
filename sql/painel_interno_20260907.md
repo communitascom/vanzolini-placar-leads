@@ -77,3 +77,19 @@ Não são relatórios: têm formulário, CRUD com login (Supabase Auth) e, no ca
 das réguas, é esboço de julho/2026 com dados congelados. Repelá-las mexe em
 campo de formulário e em fluxo de autenticação, e isso não se mistura com troca
 de pele.
+
+## Um quarto defeito, achado só depois de publicar
+
+Na verificação no ar, `interno/index.html` abriu **como se fosse a página do
+cliente**: pediu PIN, injetou a Nita, não mostrou o selo nem as ferramentas, e
+deu 404 em `interno/logo-branco.png`. O arquivo publicado estava correto — o
+navegador é que servia o `dashboard/shell.js` antigo, guardado em cache de uma
+visita anterior ao painel do cliente. A casca antiga não conhece `data-modo`,
+então caía no padrão, que é o modo cliente.
+
+O mesmo cache já tinha me enganado duas vezes no servidor local, e ali era só
+ruído de teste. No ar é outra coisa: a falha é silenciosa e entrega a página
+errada para quem já usou o dashboard antes.
+
+Correção: os cinco arquivos da casca passaram a ser carregados com
+`?v=AAAAMMDD` nas dez páginas. Ao mudar qualquer um deles, subir a data.

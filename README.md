@@ -168,6 +168,18 @@ julho/2026). Seguem com CSS próprio embutido e entram no menu do painel interno
 como **Ferramentas**. Repelá-las é frente própria, com risco em formulário e
 autenticação.
 
+### Versão nos arquivos da casca (`?v=`)
+
+`dashboard.css`, `shell.js`, `graficos.js`, `institucional.js` e `inicio.js` são
+carregados com `?v=AAAAMMDD` em todas as páginas. **Quando mudar qualquer um
+deles, subir a data em todas as dez páginas**, senão o navegador serve a versão
+velha do cache.
+
+Não é preciosismo: sem isso, quem já tinha o `shell.js` antigo em cache abria
+`interno/` e recebia o comportamento de cliente — trava de PIN, Nita injetada e
+logo quebrada, porque a casca antiga não conhece `data-modo`. Falha silenciosa,
+e a pior espécie: a página abre, só que é a página errada.
+
 ### Antes de mexer: `git fetch`
 
 Em 06/09/2026 uma sessão trabalhou sobre um clone parado em `c1e479d` e refez
