@@ -93,8 +93,13 @@ que falta cadastrar o padrão em `de_para_campanha`.
 
 - `campanhas.verba`, que vem do campo MKT do Monday. O `sync_campanhas_monday`
   só sincroniza datas, então campanha nova nasce sem verba.
-- `turmas.investimento_midia`, parado em 20/05/2026. Vem da planilha
-  GESTÃO VANZOLINI e alimenta o Investimento/CPL do placar e do histórico.
+- `turmas`, parada em 20/05/2026 (carga manual da planilha GESTÃO VANZOLINI,
+  feita uma vez em 13/07/2026). **A fonte de data e verba é o Monday**, e o sync
+  dele alimenta `campanhas`, que começa em 11/05/2026: as duas se encaixam.
+  Desde 07/09/2026 o `historico_turmas()` une as duas por janela, então o
+  histórico vai até outubro/2026. O que continua só em `turmas`, e portanto
+  parado em maio, é `inscritos/pagantes/receita` (CAC, ROI e conversão) e a base
+  de `cursos.mediana_dia` e `curva_ritmo()`. Ver `sql/historico_ate_hoje_20260907.md`.
 
 ## Dois painéis, uma casca só (desde 07/09/2026)
 
