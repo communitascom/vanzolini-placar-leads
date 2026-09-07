@@ -242,8 +242,8 @@ function renderVerba(){
 // sera gasta e ao mesmo custo; a do ritmo sozinha ignora que a verba pode acabar
 // antes. Uma segura a outra.
 //
-// A curva historica saiu do destaque: ela e construida sobre a tabela `turmas`,
-// que esta congelada em 20/05/2026, e supoe que esta campanha vai se comportar
+// A curva historica saiu do destaque: mesmo atualizada (desde 07/09 ela le
+// turmas + campanhas encerradas), ela supoe que esta campanha vai se comportar
 // como a media das anteriores — ignorando sazonalidade, excesso de oferta do
 // curso e tudo que so existe nesta campanha. Fica como referencia, no rodape.
 function projeta(c){
@@ -320,7 +320,7 @@ function desenhaCurva(curso){
            ${cardVerba}${cardRitmo}
          </div>
          <p class="pj-aviso"><b>Trabalhe com ${N(pj.trabalho)}</b>, a menor das duas: a conta da verba supõe que ela será gasta inteira e ao mesmo custo; a do ritmo ignora que a verba pode acabar antes. <b>Nenhum dos dois é promessa</b> — o custo por lead sobe quando o público satura, e verba, concorrência e sazonalidade mudam o jogo em dias.</p>
-         ${c.proj_leads ? `<p class="pj-ref">Só como referência: turmas anteriores do mesmo curso, com base congelada em mai/26, fecharam num padrão que daria <b>${N(c.proj_leads)}</b>. Não é meta nem previsão desta campanha.</p>` : ''}`;
+         ${c.proj_leads ? `<p class="pj-ref">Só como referência: no padrão das turmas e campanhas já encerradas deste curso, o fechamento daria <b>${N(c.proj_leads)}</b>. Não é meta nem previsão desta campanha.</p>` : ''}`;
     }
   }
 

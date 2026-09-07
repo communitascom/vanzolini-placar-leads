@@ -63,3 +63,58 @@ acrescentando 25 campanhas de jun a set/2026 em 21 cursos.
 Não apliquei porque isso muda a régua **Acima/Estável/Abaixo** que o cliente já
 viu no placar, e a curva de referência das campanhas. É decisão de produto, não
 correção de defeito.
+
+---
+
+## Aplicado também: a régua e a curva (07/09/2026, aprovado)
+
+Nasceu a view **`janelas_referencia`** — uma definição só de "janela de
+referência", usada pela curva e pela mediana. Antes a regra vivia em dois
+lugares, que é exatamente o que fez o histórico divergir do banco em julho.
+
+```sql
+turmas (data_fim > data_inicio)
+união
+campanhas do Monday já encerradas (data_fim < hoje) que não se sobrepõem
+a nenhuma turma do mesmo curso
+```
+
+### `curva_ritmo()`
+Base foi de 140 para **172 turmas** com ao menos 30 leads. Passa a incluir
+jun–set/2026.
+
+### `cursos.mediana_dia`
+Recalculada sobre a mesma view. **43 dos 56 cursos mudaram**: 30 sobem, 7 descem,
+5 ganham régua que não tinham (estavam com `0.00`, que a tela lia como "sem
+histórico"). Nenhum perdeu.
+
+Duas correções vieram de brinde em relação ao script de julho:
+
+1. lê `leads_validos` em vez de `conversoes` cru — já com a quarentena dos
+   fantasmas (25/08) e o fuso America/Sao_Paulo (31/08);
+2. sem o corte `data_fim < 2026-07-01`, que existia para fugir do julho anômalo,
+   anomalia que a quarentena resolveu na origem.
+
+Sinal de que ficou certo: **Gerenciamento da Rotina e Ferramentas da Qualidade
+foi de 2,0 para 9,0** — e 9,0 é justamente o valor que
+`sql/recalcula_mediana.sql` documenta como o correto, dizendo que a base errada
+dava 2,0.
+
+Maiores mudanças:
+
+| curso | antes | depois |
+|---|---|---|
+| Sistema de Gestão Integrado (auditor interno) | 0,0 | 17,0 |
+| Interpretação dos Requisitos ISO 14001 | 0,0 | 10,0 |
+| Gerenciamento da Rotina e Ferramentas da Qualidade | 2,0 | 9,0 |
+| IQNET: ISO 9001 - Auditor Interno | 1,0 | 8,0 |
+| Storytelling com Dados e Comunicação Eficaz | 0,0 | 8,0 |
+| ONA - Avaliador interno (2026/2029) | 33,5 | 27,0 |
+| Liderança Assertiva | 5,0 | 1,0 |
+
+Para reverter: `_backup_mediana_20260907` guarda os valores anteriores.
+
+```sql
+update cursos c set mediana_dia = nullif(b.mediana_antiga,0)
+from _backup_mediana_20260907 b where b.id = c.id;
+```
