@@ -22,9 +22,8 @@ function situacao(media, mediana) {
   if (media >= mediana * 0.7) return ['Estável', 'b-amar'];
   return ['Abaixo', 'b-verm'];
 }
-function kpi(ico, cor, rot, val, nota) {
-  return `<div class="kpi compacto"><div class="topo"><span class="rot">${rot}</span><span class="tile ${cor}"><span class="ms">${ico}</span></span></div><div class="valor"><span class="n">${val}</span></div><div class="nota">${nota}</div></div>`;
-}
+// o card do indicador vive em Dash.kpi (shell.js), um só para as cinco páginas
+const kpi = (ico, cor, rot, val, nota, pend) => Dash.kpi(ico, cor, rot, val, nota, pend);
 
 // ---------- período ----------
 function presetsPeriodo() {

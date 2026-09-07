@@ -74,16 +74,17 @@ function render(){
  const convGlobal=totInsc?totPag/totInsc*100:null;
  const cacGlobal=totPag?totCustoV/totPag:null;
  const kpis=[
-  {v:N(totLeads),l:'Leads no período',s:(l25+l26>0)?('2025: '+N(l25)+' · 2026: '+N(l26)):'',c:''},
-  {v:N(Math.round(medDay)),l:'Mediana diária',s:'leads/dia em mês típico',c:''},
-  {v:N(turmas),l:'Turmas no período',s:zero+' sem captação',c:zero>0?'down':''},
-  {v:BRL(inv),l:'Investimento (mkt)',s:'no período',c:''},
-  {v:cplMed?'R$ '+cplMed.toFixed(0):'—',l:'CPL mediano/turma',s:'custo por lead',c:''},
-  {v:turmas?N(Math.round(totLeads/Math.max(1,turmas))):'—',l:'Leads médios/turma',s:'',c:''},
-  {v:convGlobal!=null?convGlobal.toFixed(0)+'%':'—',l:'Conversão insc.→pagante',s:totPag?N(totPag)+' matrículas':'sem dado comercial',c:''},
-  {v:cacGlobal!=null?'R$ '+cacGlobal.toFixed(0):'—',l:'CAC médio',s:'custo total ÷ matrícula',c:''},
+  {i:'group',                  c:'laranja', l:'Leads no período',        v:N(totLeads),                                      s:(l25+l26>0)?('2025: '+N(l25)+' · 2026: '+N(l26)):''},
+  {i:'timeline',               c:'azul',    l:'Mediana diária',          v:N(Math.round(medDay)),                            s:'leads/dia em mês típico'},
+  {i:'school',                 c:'verde',   l:'Turmas no período',       v:N(turmas),                                        s:zero+' sem captação'},
+  {i:'payments',               c:'roxo',    l:'Investimento (mkt)',      v:BRL(inv),                                         s:'no período'},
+  {i:'sell',                   c:'amarelo', l:'CPL mediano/turma',       v:cplMed?'R$ '+cplMed.toFixed(0):null,              s:'custo por lead'},
+  {i:'leaderboard',            c:'laranja', l:'Leads médios/turma',      v:turmas?N(Math.round(totLeads/Math.max(1,turmas))):null, s:'por turma no período'},
+  {i:'trending_up',            c:'verde',   l:'Conversão',               v:convGlobal!=null?convGlobal.toFixed(0)+'%':null,  s:totPag?'inscrito → pagante · '+N(totPag)+' matrículas':'inscrito → pagante · sem dado comercial'},
+  {i:'account_balance_wallet', c:'azul',    l:'CAC médio',               v:cacGlobal!=null?'R$ '+cacGlobal.toFixed(0):null,  s:'custo total ÷ matrícula'},
  ];
- document.getElementById('kpis').innerHTML=kpis.map(k=>'<div class="kpi"><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div><div class="s '+k.c+'">'+k.s+'</div></div>').join('');
+ const K = window.Dash && Dash.kpi;
+ document.getElementById('kpis').innerHTML = K ? kpis.map(k=>K(k.i,k.c,k.l,k.v,k.s)).join('') : '';
 
  const af=[];if(state.tema)af.push(state.tema);if(state.curso)af.push('curso selecionado');
  document.getElementById('activeflt').textContent=af.length?('Filtro: '+af.join(' · ')):'Visão geral';

@@ -171,7 +171,7 @@ autenticação.
 ### Versão nos arquivos da casca (`?v=`)
 
 `dashboard.css`, `shell.js`, `graficos.js`, `institucional.js` e `inicio.js` são
-carregados com `?v=AAAAMMDD` em todas as páginas. **Quando mudar qualquer um
+carregados com `?v=AAAAMMDD` (com sufixo de letra quando muda mais de uma vez no mesmo dia) em todas as páginas. **Quando mudar qualquer um
 deles, subir a data em todas as dez páginas**, senão o navegador serve a versão
 velha do cache.
 

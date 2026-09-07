@@ -187,15 +187,15 @@ function renderizar(data, midia){
   corpo.insertAdjacentHTML('beforeend',
     `<tr class="total">${COLS.map(c=>totais[c]||'<td></td>').join('')}</tr>`);
 
-  document.getElementById('cards').innerHTML = `
-    <div class="kpi"><div class="lbl">Leads · ativas</div><div class="val">${fmt(leadsAtivos)}</div>
-      <div class="delta muted">${ativos} cursos</div></div>
-    <div class="kpi"><div class="lbl">Campanhas ativas</div><div class="val">${ativos}</div>
-      <div class="delta muted">no período</div></div>
-    <div class="kpi"><div class="lbl">Canal líder</div><div class="val">Meta</div>
-      <div class="delta muted">${soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos ativos`:'—'}</div></div>
-    <div class="kpi"><div class="lbl">CPL médio</div><div class="val">${leadsComInvest?'R$ '+(investTotal/leadsComInvest).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span class="z">sem dado</span>'}</div>
-      <div class="delta muted">${leadsComInvest?`${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads`:'sem curso com mídia no período'}</div></div>`;
+  const K = window.Dash && Dash.kpi;
+  document.getElementById('cards').innerHTML = K
+    ? K('group','laranja','Leads · ativas', fmt(leadsAtivos), ativos+' cursos') +
+      K('campaign','azul','Campanhas ativas', ativos, 'no período') +
+      K('leaderboard','verde','Canal líder', 'Meta', soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos leads ativos`:'—') +
+      K('payments','roxo','CPL médio',
+        leadsComInvest ? 'R$ '+(investTotal/leadsComInvest).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : null,
+        leadsComInvest ? `${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads` : 'sem curso com mídia no período')
+    : '';
 
   const alertaBox = document.getElementById('alerta');
   alertaBox.style.display = 'flex';

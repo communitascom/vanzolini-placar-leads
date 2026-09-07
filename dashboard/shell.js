@@ -6,9 +6,10 @@
 // Dois modos, um arquivo só, pela mesma razão de não duplicar placar.css:
 //   data-modo="cliente" (padrão, pasta dashboard/) trava por PIN e injeta a Nita.
 //   data-modo="interno" (pasta interno/) não tem PIN, marca a barra com o selo
-//     INTERNO, acrescenta as ferramentas de operação ao menu e NÃO injeta a
-//     Nita — o agente da Tess é o do cliente, com as travas de "consulta, não
-//     consultoria", e consome crédito do mesmo workspace.
+//     INTERNO e acrescenta as ferramentas de operação ao menu. A Nita é a mesma
+//     das duas: por enquanto é o agente do cliente (travas de "consulta, não
+//     consultoria"), e consome crédito do mesmo workspace da Tess. Quando
+//     existir a versão interna dela, é aqui que o data-agent-url muda.
 // O caminho dos arquivos da casca (logo) sai do src deste script, então a mesma
 // casca serve as duas pastas.
 //
@@ -74,7 +75,7 @@
       h += '<a href="' + p.href + '" class="ferramenta"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
     });
   }
-  h += '<div class="rodape-menu">' + (interno ? 'Versão interna: leitura completa, sem PIN e sem Nita.' : 'Dados ao vivo, leitura apenas.') +
+  h += '<div class="rodape-menu">' + (interno ? 'Versão interna: leitura completa, sem PIN.' : 'Dados ao vivo, leitura apenas.') +
        '<br><span class="credito">' + ANEL + 'por Communitas</span></div>';
   menu.innerHTML = h;
   main.parentNode.insertBefore(layout, main);
@@ -103,6 +104,23 @@
 
   // utilidades compartilhadas pelas páginas novas
   window.Dash = {
+    // Indicador no padrão de 04/09: rótulo à esquerda, ícone menor à direita,
+    // valor grande e nota embaixo. Vive aqui porque as cinco páginas usam o
+    // mesmo card e três delas rodam JS que é anterior ao padrão.
+    kpi: function(ico, cor, rot, val, nota, pend){
+      var semDado = val === null || val === undefined || val === '';
+      var html = 'sem dado';
+      if (!semDado){
+        var m = String(val).match(/^(R\$)\s*(.+)$/);
+        html = m ? '<span class="cifrao">' + m[1] + '</span> <span class="n">' + m[2] + '</span>'
+                 : '<span class="n">' + val + '</span>';
+      }
+      return '<div class="kpi compacto' + (pend || semDado ? ' pend' : '') + '">' +
+        '<div class="topo"><span class="rot">' + rot + '</span>' +
+        '<span class="tile ' + cor + '"><span class="ms">' + ico + '</span></span></div>' +
+        '<div class="valor">' + html + '</div>' +
+        '<div class="nota">' + (nota || '') + '</div></div>';
+    },
     tag: function(html, estado){
       var t = document.getElementById("tagTopo");
       if (!t) return;
@@ -145,6 +163,7 @@
   }
   if (interno){
     iniciar();
+    injetarNita();
     return;
   }
 

@@ -212,16 +212,8 @@ function render() {
   if (window.Dash) Dash.tag('<b>online</b> · ' + CAMP.length + ' campanhas');
 }
 
-function kpi(ico, cor, rot, val, nota, pend) {
-  const semDado = val === null || val === undefined;
-  let valorHtml = 'sem dado';
-  if (!semDado) {
-    const m = String(val).match(/^(R\$)\s*(.+)$/);
-    valorHtml = m ? `<span class="cifrao">${m[1]}</span> <span class="n">${m[2]}</span>` : `<span class="n">${val}</span>`;
-  }
-  return `<div class="kpi compacto${pend ? ' pend' : ''}"><div class="topo"><span class="rot">${rot}</span><span class="tile ${cor}"><span class="ms">${ico}</span></span></div>
-    <div class="valor">${valorHtml}</div><div class="nota${pend ? ' aviso' : ''}">${nota}</div></div>`;
-}
+// o card do indicador vive em Dash.kpi (shell.js), um só para as cinco páginas
+const kpi = (ico, cor, rot, val, nota, pend) => Dash.kpi(ico, cor, rot, val, nota, pend);
 
 function stack(partes, total) {
   const tot = total || partes.reduce((a, p) => a + p.v, 0) || 1;

@@ -44,20 +44,29 @@ function render(){
   const cplMedio = totLeads ? totGasto/totLeads : 0;
   const pctGasto = totVerba ? 100*totGasto/totVerba : 0;
 
-  document.getElementById('kpis').innerHTML = `
-    <div class="kpi"><div class="v">${CAMP.length}</div><div class="l">Campanhas no ar</div><div class="s">${CAMP.filter(c=>c.proj_leads).length} com projeção</div></div>
-    <div class="kpi"><div class="v">${N(totLeads)}</div><div class="l">Leads captados</div><div class="s">projeção de ${N(totProj)} no fechamento</div></div>
-    <div class="kpi"><div class="v">${BRL(totGasto)}</div><div class="l">Verba investida</div><div class="s">${pctGasto.toFixed(1)}% de ${BRL(totVerba)}</div></div>
-    <div class="kpi"><div class="v">${BRL(totVerba-totGasto)}</div><div class="l">Verba a investir</div><div class="s">saldo das campanhas no ar</div></div>
-    <div class="kpi"><div class="v">${BRL2(cplMedio)}</div><div class="l">CPL médio</div><div class="s">custo por lead no período</div></div>`;
+  const K = window.Dash && Dash.kpi;
+  document.getElementById('kpis').innerHTML = K
+    ? K('campaign','azul','Campanhas no ar', CAMP.length, CAMP.filter(c=>c.proj_leads).length+' com projeção') +
+      K('group','laranja','Leads captados', N(totLeads), 'projeção de '+N(totProj)+' no fechamento') +
+      K('payments','roxo','Verba investida', BRL(totGasto), pctGasto.toFixed(1)+'% de '+BRL(totVerba)) +
+      K('account_balance_wallet','verde','Verba a investir', BRL(totVerba-totGasto), 'saldo das campanhas no ar') +
+      K('sell','amarelo','CPL médio', BRL2(cplMedio), 'custo por lead no período')
+    : '';
 
-  // Aviso de defasagem da midia. Aparece nas duas versoes: nao e um alerta
-  // operacional, e a honestidade sobre ate quando o numero de verba vale.
-  // Sem ele, verba atrasada na planilha parece subinvestimento.
+  // Aviso de defasagem da midia. Nao e alerta operacional, e a honestidade sobre
+  // ate quando o numero de verba vale. Sem ele, verba atrasada parece
+  // subinvestimento.
+  //
+  // A regua nao e "mais de um dia". Medido em 07/09/2026 sobre 20 dias de carga:
+  // o dado do dia D entra sempre na carga das 18h do dia D+1 (a das 6h nunca
+  // traz dia novo, so corrige o que ja esta la). Entao, antes das 18h, estar
+  // dois dias atras e o normal do desenho, nao defeito. Avisar ali era alarme
+  // falso metade de todo dia, e alarme falso ensina a ignorar o aviso.
   let aviso = '';
   if(MIDIA_ATE){
     const diasAtras = Math.round((new Date().setHours(0,0,0,0) - new Date(MIDIA_ATE+'T00:00:00').getTime())/86400000);
-    if(diasAtras > 1) aviso = `<div class="avisodef"><span class="material-symbols-outlined" style="font-size:15px">warning</span> Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ou seja, ${diasAtras} dias atrás. A carga roda sozinha às 6h e às 18h, então esse atraso vem da própria planilha, não do placar: parte do gasto pode ser lançamento que ainda não chegou lá, não subinvestimento real. Os leads estão ao vivo.</div>`;
+    const normal = new Date().getHours() >= 18 ? 1 : 2;
+    if(diasAtras > normal) aviso = `<div class="avisodef"><span class="material-symbols-outlined" style="font-size:15px">warning</span> Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ${diasAtras} dias atrás — acima do normal, que é ${normal}. A carga roda sozinha às 6h e às 18h e o atraso vem da própria planilha, não do placar: parte do gasto pode ser lançamento que ainda não chegou lá, não subinvestimento real. Os leads estão ao vivo.</div>`;
   }
   const boxAviso = document.getElementById('aviso-midia');
   if(boxAviso) boxAviso.innerHTML = aviso;
@@ -111,23 +120,15 @@ function render(){
   h += '</tbody></table>';
   document.getElementById('t-camp').innerHTML = h;
 
-  // grafico de verba: tempo x gasto
-  const ord = [...CAMP].sort((a,b)=>Number(b.verba||0)-Number(a.verba||0));
-  mkChart('c-verba','bar',{
-    labels: ord.map(c=>c.curso.length>34?c.curso.slice(0,34)+'…':c.curso),
-    datasets:[
-      {label:'% do tempo decorrido', data:ord.map(c=>Number(c.pct_tempo||0)), backgroundColor:CINZA,
-        datalabels:{display:true,color:'#5F5E76',anchor:'end',align:'end',font:{size:9,weight:600},formatter:v=>v.toFixed(0)+'%'}},
-      {label:'% da verba gasta', data:ord.map(c=>Number(c.pct_gasto||0)),
-        // Vermelho quando estourou. O eixo ia so ate 100%, o que escondia
-        // justamente o caso que mais importa acompanhar.
-        backgroundColor:ord.map(c=>Number(c.pct_gasto||0)>100?'#D64545':AZUL),
-        datalabels:{display:true,color:'#fff',anchor:'end',align:'start',font:{size:9,weight:600},formatter:v=>v.toFixed(0)+'%'}}
-    ]},
-    {indexAxis:'y', plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}}},
-     scales:{x:{beginAtZero:true,
-       max: Math.max(100, Math.ceil(Math.max(0, ...ord.map(c=>Number(c.pct_gasto||0)))/10)*10),
-       ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}});
+  // Tempo decorrido x verba investida.
+  //
+  // Era um grafico de barras agrupadas, duas barras por campanha, e ninguem
+  // conseguia ler: a pergunta e "a verba esta acompanhando o tempo?", que e uma
+  // comparacao dentro da campanha, e barras lado a lado empurram o olho a
+  // comparar campanhas entre si. Virou uma lista: um trilho por campanha, a
+  // barra e a verba, o risco vertical e o tempo, e a distancia entre os dois e
+  // a resposta. Ordenado pelo maior descompasso, que e o que pede acao.
+  renderVerba();
 
   // CTR por plataforma
   const porPlat = {};
@@ -157,44 +158,122 @@ function render(){
   if(CAMP.length) desenhaCurva(CAMP[0].curso);
 }
 
+let filtroVerba = 'todas';
+function classeVerba(gap, pctG){
+  if(pctG > 100) return {cls:'estourou', rot:'verba estourada'};
+  if(gap <= -15) return {cls:'atrasada', rot:'verba atrás do tempo'};
+  if(gap >= 15)  return {cls:'adiantada', rot:'verba à frente do tempo'};
+  return {cls:'noritmo', rot:'no ritmo'};
+}
+function renderVerba(){
+  const host = document.getElementById('v-verba');
+  if(!host) return;
+  const comVerba = CAMP.filter(c=>Number(c.verba||0) > 0).map(c=>{
+    const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
+    return Object.assign({}, c, {pctT, pctG, gap: pctG - pctT, est: classeVerba(pctG-pctT, pctG)});
+  });
+  const contagem = {todas:comVerba.length, atrasada:0, noritmo:0, adiantada:0, estourou:0};
+  comVerba.forEach(c=>contagem[c.est.cls]++);
+  const filtros = [
+    {id:'todas',     rot:'Todas'},
+    {id:'atrasada',  rot:'Verba atrás'},
+    {id:'noritmo',   rot:'No ritmo'},
+    {id:'adiantada', rot:'Verba à frente'},
+    {id:'estourou',  rot:'Estourada'}
+  ].filter(f=>f.id==='todas' || contagem[f.id]);
+  const barra = document.getElementById('f-verba');
+  if(barra) barra.innerHTML = filtros.map(f=>
+    `<button class="chip${filtroVerba===f.id?' on':''}" data-f="${f.id}">${f.rot} <b>${contagem[f.id]}</b></button>`).join('');
+  if(barra) barra.querySelectorAll('button').forEach(b=>b.onclick=()=>{ filtroVerba=b.dataset.f; renderVerba(); });
+
+  const lista = comVerba
+    .filter(c=>filtroVerba==='todas' || c.est.cls===filtroVerba)
+    .sort((a,b)=>Math.abs(b.gap)-Math.abs(a.gap));
+  const teto = Math.max(100, ...lista.map(c=>c.pctG));
+  host.innerHTML = lista.length ? lista.map(c=>`
+    <div class="tv ${c.est.cls}">
+      <div class="tv-nome">${c.curso}</div>
+      <div class="tv-num">${c.pctG.toFixed(0)}% <span class="mu">da verba</span></div>
+      <div class="tv-trilho"><i style="width:${100*c.pctG/teto}%"></i><span class="tv-tempo" style="left:${100*c.pctT/teto}%"></span></div>
+      <div class="tv-pe">
+        <span>${BRL(c.gasto)} de ${BRL(c.verba)} · ${c.pctT.toFixed(0)}% do tempo · faltam ${c.dias_restantes} dias</span>
+        <span class="tv-selo">${c.gap>0?'+':''}${c.gap.toFixed(0)} pts · ${c.est.rot}</span>
+      </div>
+    </div>`).join('') : '<div class="empty">Nenhuma campanha neste recorte.</div>';
+}
+
 function desenhaCurva(curso){
   const c = CAMP.find(x=>x.curso===curso);
   const serie = RITMO.filter(r=>r.curso===curso);
   if(!c || !serie.length) return;
 
+  const dd = n => String(n).padStart(2,'0');
   const labels = serie.map(r=>r.dia.slice(8,10)+'/'+r.dia.slice(5,7));
   const real = serie.map(r=>Number(r.leads_acum));
   const esperado = serie.map(r=>r.esperado_acum===null?null:Number(r.esperado_acum));
+  const nR = real.length, ultimo = real[nR-1];
 
-  // projecao para frente: da curva historica, dos bins ainda nao alcancados
-  const pctAtual = Number(c.pct_tempo);
-  const futuros = CURVA.filter(x=>Number(x.pct_tempo) > pctAtual);
-  const labelsFut = futuros.map(x=>'+'+x.pct_tempo+'% tempo');
-  const projFut = futuros.map(x=> c.proj_leads ? Math.round(c.proj_leads*Number(x.pct_leads_mediana)/100) : null);
-  const projMin = futuros.map(x=> c.proj_min ? Math.round(c.proj_min*Number(x.pct_leads_mediana)/100) : null);
-  const projMax = futuros.map(x=> c.proj_max ? Math.round(c.proj_max*Number(x.pct_leads_mediana)/100) : null);
-  const nR = real.length;
+  // Projecao dia a dia, no mesmo eixo do real.
+  //
+  // Antes a projecao usava os bins da curva historica como rotulos ("+90% tempo",
+  // "+95% tempo"): tres ou quatro posicoes para comprimir duas semanas. No fim do
+  // grafico as linhas subiam quase na vertical e pareciam um pico, quando na
+  // verdade era o eixo mudando de escala no meio do caminho. Agora cada dia que
+  // falta e um ponto, na mesma regua dos dias ja corridos.
+  const curva = CURVA.slice().sort((a,b)=>Number(a.pct_tempo)-Number(b.pct_tempo));
+  function pctLeadsEm(pctTempo){
+    if(!curva.length) return pctTempo;
+    if(pctTempo <= Number(curva[0].pct_tempo)) return Number(curva[0].pct_leads_mediana);
+    for(let i=1;i<curva.length;i++){
+      const a = curva[i-1], b = curva[i];
+      const pa = Number(a.pct_tempo), pb = Number(b.pct_tempo);
+      if(pctTempo <= pb){
+        const t = pb===pa ? 0 : (pctTempo-pa)/(pb-pa);
+        return Number(a.pct_leads_mediana) + t*(Number(b.pct_leads_mediana)-Number(a.pct_leads_mediana));
+      }
+    }
+    return 100;
+  }
+
+  const total = Number(c.dias_total), corridos = Number(c.dias_decorridos);
+  const pctHoje = pctLeadsEm(Number(c.pct_tempo));
+  const sobra = Math.max(0.001, 100 - pctHoje);
+  const dias = [];
+  for(let k=corridos+1;k<=total;k++) dias.push(k);
+  const labelsFut = dias.map(k=>{
+    const d = new Date(c.data_inicio+'T00:00:00'); d.setDate(d.getDate()+k-1);
+    return dd(d.getDate())+'/'+dd(d.getMonth()+1);
+  });
+  // Ancorada no ultimo ponto real e fechando no alvo: continua a linha em vez de
+  // recomecar de outro lugar, e nunca da salto na emenda.
+  const ate = alvo => dias.map(k=>{
+    if(!alvo) return null;
+    const frac = Math.max(0, Math.min(1, (pctLeadsEm(100*k/total) - pctHoje)/sobra));
+    return Math.round(ultimo + (Number(alvo)-ultimo)*frac);
+  });
   const vazio = new Array(nR-1).fill(null);
+  const emenda = a => vazio.concat([ultimo]).concat(a);
 
   document.getElementById('hint-curva').innerHTML =
     `<b>${c.curso}</b>: ${N(c.leads)} leads em ${c.dias_decorridos} de ${c.dias_total} dias (${PCT(c.pct_tempo)} do tempo). ` +
     (c.proj_leads
-      ? `Projeção de <b>${N(c.proj_leads)}</b> no fechamento, faixa provável de ${N(c.proj_min)} a ${N(c.proj_max)}. `
+      ? `Projeção de <b>${N(c.proj_leads)}</b> no fechamento em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)}, faixa provável de ${N(c.proj_min)} a ${N(c.proj_max)}. `
       : 'Ainda cedo para projetar. ') +
     `A linha esperada é ancorada no ponto de hoje, então ela sempre encosta no real agora: o que informa é o caminho antes e a projeção depois.`;
 
   mkChart('c-curva','line',{
     labels: labels.concat(labelsFut),
     datasets:[
-      {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.25, borderWidth:3, pointRadius:0},
-      {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.25, borderWidth:2, pointRadius:0},
-      {label:'Projeção', data:vazio.concat([real[nR-1]]).concat(projFut), borderColor:VERDE, borderDash:[3,3], tension:.25, borderWidth:2, pointRadius:0},
-      {label:'Faixa otimista', data:vazio.concat([real[nR-1]]).concat(projMax), borderColor:'rgba(14,158,118,.35)', tension:.25, borderWidth:1, pointRadius:0},
-      {label:'Faixa conservadora', data:vazio.concat([real[nR-1]]).concat(projMin), borderColor:'rgba(14,158,118,.35)', tension:.25, borderWidth:1, pointRadius:0}
+      {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.2, borderWidth:3, pointRadius:0},
+      {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.2, borderWidth:2, pointRadius:0},
+      {label:'Faixa provável', data:emenda(ate(c.proj_min)), borderColor:'rgba(14,158,118,.25)', tension:.2, borderWidth:1, pointRadius:0},
+      {label:'_faixa_topo', data:emenda(ate(c.proj_max)), borderColor:'rgba(14,158,118,.25)', backgroundColor:'rgba(14,158,118,.10)', fill:'-1', tension:.2, borderWidth:1, pointRadius:0},
+      {label:'Projeção', data:emenda(ate(c.proj_leads)), borderColor:VERDE, borderDash:[4,3], tension:.2, borderWidth:2, pointRadius:0}
     ]},
-    {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14}}},
+    {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14,
+        filter:it=>!String(it.text).startsWith('_')}}},
      scales:{y:{beginAtZero:true,title:{display:true,text:'leads acumulados'}},
-             x:{ticks:{font:{size:9},maxRotation:60,minRotation:0,autoSkip:true,maxTicksLimit:20}}}});
+             x:{ticks:{font:{size:9},maxRotation:60,minRotation:0,autoSkip:true,maxTicksLimit:18}}}});
 }
 
 const btnImprimir = document.getElementById('imprimir');
@@ -232,7 +311,7 @@ async function carregar(){
   CAMP=a.data; RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
   MIDIA_ATE = f.data || null;
   document.getElementById('rodape').innerHTML =
-    `Leitura ao vivo · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''}, carga automática às 6h e às 18h · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    `Leitura ao vivo · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''}, carga automática às 6h e às 18h; o dia fecha na planilha só no dia seguinte, então a mídia anda um dia atrás dos leads · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   render();
 }
 
