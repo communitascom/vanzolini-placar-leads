@@ -156,6 +156,7 @@ async function carregarPeriodo(ini, fim) {
     return `<div class="hbar"><span class="nome">${c.curso} <span class="badge ${cls}" style="margin-left:6px">${s}</span></span><span class="val">${N(c.leads)}</span><span class="trilho"><span class="fill" style="display:block;width:${100 * Number(c.leads) / maxC}%"></span></span></div>`;
   }).join('') : '<div class="estado-vazio"><span class="ms">group</span>Sem lead em campanha ativa no período</div>';
 
+  if (window.Dash) Dash.stamp();
   document.getElementById('horaRodape').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   if (window.Dash) Dash.tag('<b>online</b> · ' + ativas.length + ' campanhas ativas');
 }

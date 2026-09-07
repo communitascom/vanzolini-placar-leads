@@ -274,13 +274,18 @@ function renderEvolucao() {
 }
 function desenhaLinha(host, chaves, dados, unidade) {
   const series = EIXOS.map(e => ({ nome: e, valores: chaves.map(k => Math.round(dados[k][e])) }));
-  const max = Math.max(1, ...series.flatMap(s => s.valores)) * 1.15;
-  const passo = passoBonito(max / 4);
-  const passos = []; for (let v = 0; v <= max; v += passo) passos.push(v);
+  // O teto do eixo tem que ser o ULTIMO passo, e o ultimo passo tem que passar do
+  // maior valor. Antes o laco parava no ultimo multiplo <= max, entao com dado de
+  // 12 mil e passo de 5 mil o eixo ia so ate 10 mil e as linhas saiam por cima do
+  // grafico. Agora o topo e arredondado para cima, sempre acima do maior ponto.
+  const maxDado = Math.max(1, ...series.flatMap(s => s.valores));
+  const passo = passoBonito(maxDado / 4);
+  const topo = Math.ceil(maxDado / passo) * passo;
+  const passos = []; for (let v = 0; v <= topo + passo / 1000; v += passo) passos.push(v);
   const n = chaves.length, mostrar = [];
   const salto = Math.max(1, Math.ceil(n / 8));
   for (let i = 0; i < n; i += salto) mostrar.push(i); if (mostrar[mostrar.length - 1] !== n - 1) mostrar.push(n - 1);
-  PaineisCommunitas.linha(host, { rotulos: chaves.map(brCurto), series, max: passos[passos.length - 1] || max, passos, mostrarRotulos: mostrar, sufixo: '', prefixoTooltip: unidade === 'semana' ? 'semana de ' : '' });
+  PaineisCommunitas.linha(host, { rotulos: chaves.map(brCurto), series, max: topo, passos, mostrarRotulos: mostrar, sufixo: '', prefixoTooltip: unidade === 'semana' ? 'semana de ' : '' });
   document.getElementById('legEvolucao').innerHTML = EIXOS.map((e, i) => `<span><i style="background:${['#E56B39', '#1F6FD0', '#0E9E76'][i]}"></i>${e}</span>`).join('');
   document.getElementById('subEvolucao').textContent = 'Investimento por ' + unidade + ', em reais, por eixo';
 }
@@ -428,6 +433,7 @@ function renderTrafego(f) {
 }
 
 function renderRodape(f) {
+  if (window.Dash) Dash.stamp();
   const ultimaFoto = REP.reduce((a, r) => r.carregado_em > a ? r.carregado_em : a, '');
   document.getElementById('rodapeTxt').innerHTML =
     `<b>Fontes.</b> Investimento, impressões e cliques: planilha Campanhas_Vanzolini_Consolidado carregada no Supabase às 6h e às 18h` + (MIDIA_ATE ? `, dados até <b>${br(MIDIA_ATE)}</b>` : '') + `. ` +

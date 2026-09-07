@@ -493,3 +493,71 @@ body.dash{min-height:100vh}
 .tv.noritmo .tv-trilho i{background:var(--sobe)}     .tv.noritmo .tv-selo{color:var(--sobe)}
 .filterbar .chip b{font-weight:700;color:var(--mute)}
 .filterbar .chip.on b{color:var(--azul)}
+
+/* =====================================================================
+   AJUSTES DE 07/09 (2ª rodada)
+   ===================================================================== */
+
+/* uma linha só de controles: filtros à esquerda, atualização e PDF à direita */
+.filtros-topo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.filtros-topo .nav{gap:8px}
+.acoes{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
+.linha-topo{align-items:center}
+.filtros-topo .activeflt{margin-left:4px}
+
+/* caixa da projeção, abaixo da curva */
+.box-proj{gap:12px}
+.pj{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:760px){.pj{grid-template-columns:1fr}}
+.pj-item{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:14px;background:var(--ground)}
+.pj-item.destaque{background:var(--s3-tint)}
+.pj-r{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.pj-v{font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.pj-item.destaque .pj-v{color:var(--sobe)}
+.pj-v.pj-faixa{font-size:20px;color:var(--ink-2)}
+.pj-n{font-size:12px;color:var(--mute);line-height:1.45}
+.pj-aviso{font-size:13px;color:var(--ink-2);line-height:1.5}
+.pj-aviso b{color:var(--ink);font-weight:600}
+
+/* tempo x verba: traço do tempo mais forte e tag de ritmo no nome */
+.tv-tempo{width:3px;top:-6px;bottom:-6px}
+.tv-tempo::before{content:"";position:absolute;left:50%;top:-4px;transform:translateX(-50%);
+  width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.tv-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:2px 8px;border-radius:var(--r-pill);vertical-align:1px;margin-left:6px;white-space:nowrap}
+.tv.atrasada .tv-tag{background:var(--atencao-bg);color:var(--atencao)}
+.tv.estourou .tv-tag{background:var(--desce-bg);color:var(--desce)}
+.tv.adiantada .tv-tag{background:var(--s2-tint);color:var(--azul)}
+.tv.noritmo .tv-tag{background:var(--s3-tint);color:var(--sobe)}
+
+/* alertas: tag do problema em cima, ícone à direita */
+#alertas .alerta{flex-direction:column;gap:4px}
+.al-topo{display:flex;align-items:center;justify-content:space-between;width:100%}
+.al-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-pill)}
+.al-tag.t-verba{background:var(--s4-tint);color:var(--s4)}
+.al-tag.t-leads{background:var(--atencao-bg);color:var(--atencao)}
+.al-tag.t-ok{background:var(--s3-tint);color:var(--sobe)}
+#alertas .alerta b{font-size:13.5px;line-height:1.3}
+#alertas .alerta .txt{font-size:12.5px;color:var(--ink-2);line-height:1.45}
+#alertas .alerta.ok{border-left:3px solid var(--sobe)}
+
+/* tabela de campanhas: 9 colunas, sem rolagem lateral */
+.t-compacta{font-size:12px;table-layout:auto}
+.t-compacta th,.t-compacta td{padding:8px 7px}
+.t-compacta th.nome,.t-compacta td.nome{min-width:0;max-width:230px;padding-left:14px;white-space:normal;position:static}
+.t-compacta td.nome .n1{font-weight:600;font-size:12.5px}
+.t-compacta td.nome .n1 a{color:var(--ink);text-decoration:none}
+.t-compacta td.nome .n1 a:hover{color:var(--azul)}
+.t-compacta td.nome .n2{font-size:11px}
+.t-compacta .leg{display:block;font-size:10px;color:var(--mute);margin-top:1px;text-align:right}
+.t-compacta .barra{min-width:70px;margin-top:3px}
+.t-compacta .badge{font-size:10.5px;padding:2px 8px}
+
+/* placar de leads: 14 colunas cabem sem rolagem lateral */
+.pg-leads table{font-size:12px;min-width:0}
+.pg-leads th,.pg-leads td{padding:7px 6px}
+.pg-leads td.curso,.pg-leads th.curso{min-width:148px;max-width:168px;padding-left:16px}
+.pg-leads .camp{display:flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.15}
+.pg-leads .pill-ativa{font-size:9.5px;padding:2px 7px;letter-spacing:.03em}
+.pg-leads .periodo{font-size:9.5px;color:var(--mute);white-space:nowrap}
+.pg-leads .badge{font-size:10.5px;padding:2px 8px}

@@ -86,6 +86,7 @@ function render(){
  const K = window.Dash && Dash.kpi;
  document.getElementById('kpis').innerHTML = K ? kpis.map(k=>K(k.i,k.c,k.l,k.v,k.s)).join('') : '';
 
+ if(window.Dash) Dash.stamp();
  const af=[];if(state.tema)af.push(state.tema);if(state.curso)af.push('curso selecionado');
  document.getElementById('activeflt').textContent=af.length?('Filtro: '+af.join(' · ')):'Visão geral';
  document.getElementById('tit-mensal').textContent = state.curso? ('Evolução mensal · '+(state.curso.length>50?state.curso.slice(0,50)+'…':state.curso)) : (state.tema? ('Evolução mensal · '+state.tema):'Evolução mensal de leads');
@@ -299,7 +300,7 @@ selF.onchange=e=>{state.fim=+e.target.value;if(state.fim<state.ini){state.ini=st
 document.getElementById('busca').oninput=renderCamp;
 document.getElementById('limpar').onclick=()=>{state.tema='';state.curso='';state.ini=0;state.fim=DATA.months.length-1;document.getElementById('f-tema').value='';selI.value=0;selF.value=DATA.months.length-1;document.getElementById('busca').value='';fillCursos();render();};
 
-document.getElementById('imprimir').onclick=()=>{
+window.imprimirPagina=()=>{
  const periodo = (state.ini===0 && state.fim===DATA.months.length-1)
    ? 'Histórico completo ('+labelsAll[0]+' a '+labelsAll[labelsAll.length-1]+')'
    : (labelsAll[state.ini]===labelsAll[state.fim] ? labelsAll[state.ini] : labelsAll[state.ini]+' a '+labelsAll[state.fim]);

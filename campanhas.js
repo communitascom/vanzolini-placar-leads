@@ -76,19 +76,28 @@ function render(){
   if(sec){
     sec.style.display = 'block';
     document.getElementById('alertas').innerHTML = ALERTAS.length
-      ? ALERTAS.map(a=>`
-        <div class="alerta ${a.severidade}">
-          <span class="ico material-symbols-outlined">${a.tipo_alerta==='verba'?'payments':'trending_down'}</span>
-          <div><b>${a.curso}</b><br><span class="txt">${a.detalhe}</span></div>
-        </div>`).join('')
-      : '<div class="alerta full" style="border-left-color:var(--verde);background:var(--verde-bg)"><span class="ico material-symbols-outlined">check_circle</span><div><b>Nenhuma campanha fora do padrão</b><br><span class="txt">captação e ritmo de verba dentro do esperado</span></div></div>';
+      ? ALERTAS.map(a=>{
+        const verba = a.tipo_alerta==='verba';
+        return `<div class="alerta ${a.severidade}">
+          <div class="al-topo">
+            <span class="al-tag ${verba?'t-verba':'t-leads'}">${verba?'verba':'leads'}</span>
+            <span class="ico material-symbols-outlined">${verba?'payments':'trending_down'}</span>
+          </div>
+          <b>${a.curso}</b><span class="txt">${a.detalhe}</span>
+        </div>`;}).join('')
+      : '<div class="alerta full ok"><div class="al-topo"><span class="al-tag t-ok">tudo certo</span><span class="ico material-symbols-outlined">check_circle</span></div><b>Nenhuma campanha fora do padrão</b><span class="txt">captação e ritmo de verba dentro do esperado</span></div>';
   }
 
   // tabela principal
-  let h = `<table><thead><tr>
-    <th>Curso</th><th>Período</th><th>Tempo</th><th>Leads</th><th>Projeção</th>
-    <th>Faixa</th><th>Histórico</th><th>vs hist.</th>
-    <th>Verba</th><th>Gasto</th><th>Investir/dia</th><th>CTR</th><th>CPL</th>
+  //
+  // Enxugada de 13 para 9 colunas em 07/09: o periodo virou segunda linha do
+  // curso, CTR e CPL dividem uma coluna, "Faixa" saiu (agora vive na caixa
+  // abaixo da curva) e a mediana historica crua saiu tambem — o que informa e a
+  // comparacao (vs hist.), nao o numero de referencia. Com 13 colunas a tabela
+  // so era legivel rolando de lado.
+  let h = `<table class="t-compacta"><thead><tr>
+    <th class="nome">Curso</th><th>Tempo</th><th>Leads</th><th>Projeção</th><th>vs hist.</th>
+    <th>Verba</th><th>Gasto</th><th>Investir<br>/dia</th><th>CTR<br>CPL</th>
   </tr></thead><tbody>`;
   CAMP.forEach(c=>{
     const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
@@ -97,24 +106,20 @@ function render(){
     const estourou = pctG > 100;
     const barra = `<div class="barra"><span class="t" style="width:${Math.min(100,pctT)}%"></span>`
       + `<span class="g" style="width:${Math.min(100,pctG)}%;opacity:.85${estourou?';background:#D64545':''}"></span></div>`
-      + (estourou ? `<div style="font-size:10px;color:#D64545;font-weight:600;margin-top:2px">verba estourada · ${pctG.toFixed(0)}%</div>` : '');
+      + (estourou ? `<div style="font-size:10px;color:#D64545;font-weight:600;margin-top:2px">estourada · ${pctG.toFixed(0)}%</div>` : '');
     const nome = c.monday_item_id
-      ? `<a href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${c.monday_item_id}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600;text-decoration:none">${c.curso}</a>`
-      : `<b>${c.curso}</b>`;
+      ? `<a href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${c.monday_item_id}" target="_blank" rel="noopener">${c.curso}</a>`
+      : c.curso;
     h += `<tr>
-      <td>${nome}</td>
-      <td style="font-size:11px;color:var(--mut)">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)}<br>${c.dias_restantes} dias restantes</td>
-      <td>${PCT(c.pct_tempo)}<br><span class="leg">${c.dias_decorridos}/${c.dias_total} dias</span></td>
-      <td><b>${N(c.leads)}</b></td>
-      <td>${c.proj_leads?'<b>'+N(c.proj_leads)+'</b>':'<span class="z">cedo</span>'}</td>
-      <td style="font-size:11px;color:var(--mut)">${c.proj_min?N(c.proj_min)+' a '+N(c.proj_max):'—'}</td>
-      <td>${c.mediana_historica?N(c.mediana_historica)+'<span class="leg">'+c.turmas_base+' turma(s)</span>':'<span class="z">—</span>'}</td>
+      <td class="nome"><span class="n1">${nome}</span><span class="n2">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · ${c.dias_restantes} dias restantes</span></td>
+      <td>${PCT(c.pct_tempo)}<span class="leg">${c.dias_decorridos}/${c.dias_total} dias</span></td>
+      <td class="destaque">${N(c.leads)}</td>
+      <td>${c.proj_leads?'<b>'+N(c.proj_min)+'</b><span class="leg">piso</span>':'<span class="z">cedo</span>'}</td>
       <td>${selo(c.vs_historico)}</td>
       <td>${c.verba?BRL(c.verba):'<span class="z">—</span>'}</td>
-      <td>${BRL(c.gasto)}<br>${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
+      <td>${BRL(c.gasto)}${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
       <td>${c.investir_por_dia?BRL2(c.investir_por_dia):'<span class="z">—</span>'}</td>
-      <td>${c.ctr?Number(c.ctr).toFixed(2)+'%':'<span class="z">—</span>'}</td>
-      <td>${c.cpl?BRL2(c.cpl):'<span class="z">—</span>'}</td>
+      <td>${c.ctr?Number(c.ctr).toFixed(2)+'%':'<span class="z">—</span>'}<span class="leg">${c.cpl?BRL2(c.cpl):'—'}</span></td>
     </tr>`;
   });
   h += '</tbody></table>';
@@ -192,12 +197,12 @@ function renderVerba(){
   const teto = Math.max(100, ...lista.map(c=>c.pctG));
   host.innerHTML = lista.length ? lista.map(c=>`
     <div class="tv ${c.est.cls}">
-      <div class="tv-nome">${c.curso}</div>
+      <div class="tv-nome">${c.curso} <span class="tv-tag">${c.est.rot}</span></div>
       <div class="tv-num">${c.pctG.toFixed(0)}% <span class="mu">da verba</span></div>
       <div class="tv-trilho"><i style="width:${100*c.pctG/teto}%"></i><span class="tv-tempo" style="left:${100*c.pctT/teto}%"></span></div>
       <div class="tv-pe">
-        <span>${BRL(c.gasto)} de ${BRL(c.verba)} · ${c.pctT.toFixed(0)}% do tempo · faltam ${c.dias_restantes} dias</span>
-        <span class="tv-selo">${c.gap>0?'+':''}${c.gap.toFixed(0)} pts · ${c.est.rot}</span>
+        <span>${BRL(c.gasto)} de ${BRL(c.verba)} · ${c.pctT.toFixed(0)}% do tempo corrido · faltam ${c.dias_restantes} dias</span>
+        <span class="tv-selo">${c.gap>0?'+':''}${c.gap.toFixed(0)} pts</span>
       </div>
     </div>`).join('') : '<div class="empty">Nenhuma campanha neste recorte.</div>';
 }
@@ -254,21 +259,37 @@ function desenhaCurva(curso){
   const vazio = new Array(nR-1).fill(null);
   const emenda = a => vazio.concat([ultimo]).concat(a);
 
-  document.getElementById('hint-curva').innerHTML =
-    `<b>${c.curso}</b>: ${N(c.leads)} leads em ${c.dias_decorridos} de ${c.dias_total} dias (${PCT(c.pct_tempo)} do tempo). ` +
-    (c.proj_leads
-      ? `Projeção de <b>${N(c.proj_leads)}</b> no fechamento em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)}, faixa provável de ${N(c.proj_min)} a ${N(c.proj_max)}. `
-      : 'Ainda cedo para projetar. ') +
-    `A linha esperada é ancorada no ponto de hoje, então ela sempre encosta no real agora: o que informa é o caminho antes e a projeção depois.`;
+  document.getElementById('hint-curva').textContent =
+    'Leads acumulados até hoje contra o caminho esperado, e a faixa provável até o fim da campanha.';
+
+  // Caixa de leitura abaixo do grafico.
+  //
+  // A regra aqui e nao criar expectativa para cima: quem le um numero grande
+  // cobra por ele depois. Entao a ordem e do mais certo para o menos certo:
+  // primeiro o que ja esta captado (fato), depois o piso provavel, e a faixa
+  // como contexto. O numero em destaque nunca e o topo.
+  const box = document.getElementById('box-curva');
+  if(box){
+    box.innerHTML = c.proj_leads
+      ? `<div class="pj">
+           <div class="pj-item"><span class="pj-r">Captados até hoje</span><span class="pj-v">${N(c.leads)}</span><span class="pj-n">${c.dias_decorridos} de ${c.dias_total} dias · ${PCT(c.pct_tempo)} do tempo</span></div>
+           <div class="pj-item destaque"><span class="pj-r">Piso provável no fechamento</span><span class="pj-v">${N(c.proj_min)}</span><span class="pj-n">em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · 3 em cada 4 turmas comparáveis fecharam daqui para cima</span></div>
+           <div class="pj-item"><span class="pj-r">Faixa provável</span><span class="pj-v pj-faixa">${N(c.proj_min)} a ${N(c.proj_max)}</span><span class="pj-n">meio da faixa em ${N(c.proj_leads)}; o topo é cenário, não meta</span></div>
+         </div>
+         <p class="pj-aviso"><b>A projeção muda.</b> Ela vem do ritmo de ${N(c.dias_decorridos)} dias comparado com o de turmas anteriores, e depende de verba, concorrência, sazonalidade e do que acontece fora da campanha. Trabalhe com o piso.</p>`
+      : `<p class="pj-aviso">Campanha com ${PCT(c.pct_tempo)} do tempo corrido. <b>Ainda cedo para projetar</b>: abaixo de 15% do tempo a conta oscila demais para servir. Por enquanto valem os ${N(c.leads)} leads já captados.</p>`;
+  }
 
   mkChart('c-curva','line',{
     labels: labels.concat(labelsFut),
     datasets:[
       {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.2, borderWidth:3, pointRadius:0},
       {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.2, borderWidth:2, pointRadius:0},
-      {label:'Faixa provável', data:emenda(ate(c.proj_min)), borderColor:'rgba(14,158,118,.25)', tension:.2, borderWidth:1, pointRadius:0},
-      {label:'_faixa_topo', data:emenda(ate(c.proj_max)), borderColor:'rgba(14,158,118,.25)', backgroundColor:'rgba(14,158,118,.10)', fill:'-1', tension:.2, borderWidth:1, pointRadius:0},
-      {label:'Projeção', data:emenda(ate(c.proj_leads)), borderColor:VERDE, borderDash:[4,3], tension:.2, borderWidth:2, pointRadius:0}
+      // O piso e a linha grossa; o resto da faixa fica sombreado atras. Destacar a
+      // mediana convidava a ler o meio da faixa como promessa.
+      {label:'Piso provável', data:emenda(ate(c.proj_min)), borderColor:VERDE, borderDash:[4,3], tension:.2, borderWidth:2, pointRadius:0},
+      {label:'_faixa_topo', data:emenda(ate(c.proj_max)), borderColor:'rgba(14,158,118,.22)', backgroundColor:'rgba(14,158,118,.10)', fill:'-1', tension:.2, borderWidth:1, pointRadius:0},
+      {label:'_mediana', data:emenda(ate(c.proj_leads)), borderColor:'rgba(14,158,118,.45)', borderDash:[2,4], tension:.2, borderWidth:1, pointRadius:0}
     ]},
     {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14,
         filter:it=>!String(it.text).startsWith('_')}}},
@@ -276,8 +297,8 @@ function desenhaCurva(curso){
              x:{ticks:{font:{size:9},maxRotation:60,minRotation:0,autoSkip:true,maxTicksLimit:18}}}});
 }
 
-const btnImprimir = document.getElementById('imprimir');
-if(btnImprimir) btnImprimir.onclick = ()=>{
+// o botao vive na casca (shell.js); aqui so o cabecalho de impressao
+window.imprimirPagina = ()=>{
   document.getElementById('ph-titulo').textContent = 'Campanhas em andamento · Fundação Vanzolini';
   document.getElementById('ph-sub').textContent = 'gerado em ' + new Date().toLocaleString('pt-BR');
   window.print();
@@ -310,6 +331,7 @@ async function carregar(){
   }
   CAMP=a.data; RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
   MIDIA_ATE = f.data || null;
+  if(window.Dash) Dash.stamp();
   document.getElementById('rodape').innerHTML =
     `Leitura ao vivo · leads pela regra anti-refire de 90 dias · mídia da planilha Campanhas_Vanzolini_Consolidado${MIDIA_ATE?' (até '+MIDIA_ATE.split('-').reverse().join('/')+')':''}, carga automática às 6h e às 18h; o dia fecha na planilha só no dia seguinte, então a mídia anda um dia atrás dos leads · CTR calculado, nunca importado · consultado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   render();

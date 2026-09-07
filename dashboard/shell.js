@@ -128,8 +128,21 @@
       t.innerHTML = html;
     },
     hora: function(){ return new Date().toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"}); },
+    // "atualizado às HH:MM" na linha de controles; cada pagina chama no fim do render
+    stamp: function(){
+      var el = document.getElementById("atualizado");
+      if (el) el.textContent = "atualizado às " + Dash.hora();
+    },
     anel: ANEL
   };
+
+  // botao Salvar PDF: a pagina pode preparar o cabecalho de impressao definindo
+  // window.imprimirPagina; senao, imprime direto.
+  var btnPdf = document.getElementById("btnPdf");
+  if (btnPdf) btnPdf.addEventListener("click", function(){
+    if (typeof window.imprimirPagina === "function") window.imprimirPagina();
+    else window.print();
+  });
 
   function iniciar(){
     if (typeof window.iniciarPainel === "function") window.iniciarPainel();

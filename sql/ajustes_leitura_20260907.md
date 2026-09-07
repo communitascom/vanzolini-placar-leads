@@ -77,3 +77,82 @@ Sem id de vídeo do YouTube não dá para montar a URL da thumb
 pela Graph API. Os caminhos possíveis, em ordem de esforço: (1) verificar se a
 API do Reportei devolve a URL do criativo e guardar no `m`; (2) puxar direto de
 Meta e Google Ads, que é esteira nova; (3) subir as imagens à mão.
+
+---
+
+# Segunda rodada (07/09/2026, tarde)
+
+Ponto de retorno antes desta rodada: tag **`marco-painel-20260907`** (`01e5a19`).
+
+## O gráfico da institucional que saía por cima
+
+`desenhaLinha` montava os passos do eixo com `for (v = 0; v <= max; v += passo)`,
+o que para no último múltiplo **abaixo** do máximo, e depois usava esse último
+passo como teto do eixo. Com dado de 12 mil e passo de 5 mil, o eixo ia até 10
+mil e as linhas de Cursos e Organizações saíam para fora do gráfico. Agora o
+topo é `ceil(maxDado / passo) * passo`, sempre acima do maior ponto.
+
+## Projeção: nunca pelo topo
+
+A conta continua a mesma (`curva_ritmo()` dá, por faixa de % de tempo, qual
+percentual do total já costuma estar captado; a projeção é `leads ÷ esse
+percentual`), mas **o que aparece em destaque mudou**:
+
+| valor | vem de | como aparece agora |
+|---|---|---|
+| `proj_min` | percentil 75 da curva | **piso provável**, número grande |
+| `proj_leads` | mediana | meio da faixa, texto pequeno |
+| `proj_max` | percentil 25 | topo da faixa, "cenário, não meta" |
+
+O piso é o número honesto para trabalhar: 3 em cada 4 turmas comparáveis
+fecharam dele para cima. A tabela de campanhas também passou a mostrar o piso
+na coluna Projeção, e no gráfico a linha grossa é o piso — a mediana ficou como
+tracejado fino dentro da faixa sombreada.
+
+A leitura saiu de cima do gráfico e virou uma caixa embaixo, na ordem do mais
+certo para o menos certo: captados hoje (fato) → piso → faixa, com o aviso em
+negrito de que a projeção muda e depende de verba, concorrência, sazonalidade e
+do que acontece fora da campanha.
+
+## Layout, agora igual nas dez páginas
+
+- Saiu o bloco `.cab`: o título já está na barra preta, e repetir embaixo era a
+  mesma queixa que valeu para a institucional em 04/09.
+- Filtros, "atualizado às HH:MM" e **Salvar PDF** numa linha só, no topo.
+- Ordem do placar em todas: **primeiro os cards, depois a caixa branca** com o
+  texto ocupando a largura inteira.
+- O botão de PDF passou para a casca (`shell.js`); a página que precisa de
+  cabeçalho de impressão define `window.imprimirPagina`.
+- `Dash.stamp()` carimba a atualização, chamado no fim de cada render.
+
+## Tabelas sem rolagem lateral
+
+**Campanhas no ar**: de 13 para 9 colunas. O período virou segunda linha do
+curso, CTR e CPL dividem uma coluna, "Faixa" saiu (vive na caixa da curva) e a
+mediana histórica crua saiu — o que informa é a comparação (`vs hist.`), não o
+número de referência. Medido: 1.016px de tabela em 1.016px de espaço.
+
+**Placar de leads**: 14 colunas em 1.056px, sem rolagem. Fonte 12px, respiro
+menor, coluna do curso em 148–168px, e a data da campanha em 9,5px embaixo do
+selo ATIVA.
+
+## Tags de leitura rápida
+
+- Cards de alerta: tag do tipo (**verba** ou **leads**) no topo à esquerda,
+  ícone à direita.
+- Tempo x verba: tag do estado ao lado do nome do curso, e o traço do tempo
+  ganhou 3px e um ponto no topo.
+
+## Duas coisas que continuam impossíveis com o dado de hoje
+
+**Thumb e link do anúncio.** `institucional_reportei` não tem coluna de id nem
+de URL, e o `m` guarda só métrica. Google traz `adGroupId~adId` no nome, mas
+sem o customer id não dá para montar link; Meta traz só o nome do anúncio;
+YouTube, só o título. Vale para a thumb e vale para o link, inclusive no
+interno. O conserto é o mesmo nos dois casos: guardar id e URL na carga do
+Reportei.
+
+**CTR no histórico.** `historico_turmas()` devolve leads, investimento, CPL,
+matrícula, CAC e ROI — não devolve impressões nem cliques. O dado existe em
+`midia_diaria`, então é possível, mas exige mexer na RPC que o painel do cliente
+também usa.
