@@ -76,7 +76,7 @@ async function carregarPeriodo(ini, fim) {
     if (window.Dash) Dash.tag('<b>erro de conexão</b>', 'erro');
     return;
   }
-  const placar = pl.data || [], camp = ca.data || [], midia = mi.data || [], serie = inst.data || [], fotos = rep.data || [];
+  const placar = pl.data || [], camp = (ca.data || []).filter(c => !c.encerrada), midia = mi.data || [], serie = inst.data || [], fotos = rep.data || [];
 
   // leads do período (campanhas ativas), como o placar do cliente
   const ativas = placar.filter(r => r.campanha_ativa);

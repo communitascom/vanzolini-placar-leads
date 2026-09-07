@@ -561,3 +561,22 @@ body.dash{min-height:100vh}
 .pg-leads .pill-ativa{font-size:9.5px;padding:2px 7px;letter-spacing:.03em}
 .pg-leads .periodo{font-size:9.5px;color:var(--mute);white-space:nowrap}
 .pg-leads .badge{font-size:10.5px;padding:2px 8px}
+
+/* topo com muitos filtros (histórico): ações em cima, filtros embaixo.
+   Numa linha só a barra de filtros empurrava o "atualizado" e o PDF para uma
+   segunda linha solta, com um vão no meio. */
+.topo-empilhado{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.topo-empilhado .acoes{order:-1;margin-left:auto}
+.topo-empilhado .filtros-topo{width:100%}
+.topo-empilhado .activeflt{margin-left:auto}
+
+/* seta de variação contra o período anterior */
+.var{display:inline-flex;align-items:center;gap:1px;font-weight:600;font-variant-numeric:tabular-nums}
+.var .ms{font-size:14px}
+.var.sobe{color:var(--sobe)} .var.desce{color:var(--desce)}
+.var-neutra{font-weight:600;color:var(--mute)}
+.kpi .nota .var{margin-right:3px}
+/* sanfonas do institucional */
+.anuncios-rec{border-top:1px solid var(--hair);padding-top:10px}
+.anuncios-rec summary .rot{font-weight:600}
+.eixo .anuncios-rec table{font-size:12px}

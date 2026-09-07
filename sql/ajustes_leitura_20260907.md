@@ -156,3 +156,64 @@ Reportei.
 matrícula, CAC e ROI — não devolve impressões nem cliques. O dado existe em
 `midia_diaria`, então é possível, mas exige mexer na RPC que o painel do cliente
 também usa.
+
+---
+
+# Terceira rodada (07/09/2026, noite)
+
+## A projeção estava criando expectativa que o histórico não sustenta
+
+O Junior apontou o risco no IQNET: 266 leads captados e o painel exibindo 354
+como piso, ou seja, prometendo +88 leads em 18 dias. E a faixa não tinha lado de
+baixo — o pior caso já era uma projeção para cima. Faixa que não pode cair não é
+faixa, é promessa.
+
+**A âncora deixou de ser o modelo e passou a ser o ritmo observado.**
+
+| número | de onde vem | papel |
+|---|---|---|
+| Captados até hoje | fato | se a campanha parar agora, é o final |
+| **Mantido o ritmo atual** | leads/dia das últimas 2 semanas × dias restantes | **número em destaque** |
+| Cenário da curva | mediana de 140 turmas | referência, rotulada "não meta" |
+
+Medido nas 17 campanhas no ar, o ritmo recente fica sistematicamente **abaixo**
+da mediana da curva e em geral no nível do antigo "piso" ou abaixo dele:
+Customer Experience 656 contra 794, Básico em Gestão de Projetos 398 contra 469,
+IQNET ISO 9001 Líder 389 contra 446. É a diferença entre extrapolar o que a
+campanha está fazendo e supor que ela vai se comportar como a média das outras.
+
+No gráfico a faixa passou a ir do **pior caso real** (linha reta: a campanha para
+hoje) até o cenário da curva, com a linha do ritmo atual em destaque no meio.
+
+## Recém-encerradas (migration `campanhas_andamento_inclui_recem_encerradas`)
+
+`campanhas_andamento()` passou a devolver também o que encerrou nos últimos 7
+dias, com as colunas novas `encerrada` e `dias_desde_fim`. Tudo que fala de "no
+ar" filtra por `!encerrada`; as encerradas ganharam quadro próprio.
+
+Já na primeira carga apareceu o caso que motivou a mudança: **Interpretação dos
+Requisitos ISO 14001 fechou com 159,7% da verba** e tinha sumido da tela no dia
+em que encerrou.
+
+## Outros
+
+- **Frequência** virou indicador próprio no bloco de cada eixo, e entrou nas
+  tabelas de canais de vídeo e de criativos.
+- **Sanfonas**: campanhas do eixo e criativos de vídeo agora recolhem.
+- **Setas de variação** nos indicadores do consolidado, contra a janela anterior
+  de mesmo tamanho (uma segunda chamada de `institucional_campanhas`). Sem base
+  de comparação, sem seta.
+- **Rodapé da institucional** enxugado: de onde vem cada número está no doc, não
+  na tela. Ficou a data da mídia, a da última foto e a limitação do Google.
+- **Topo do histórico**: com cinco filtros, a linha única quebrava e jogava o
+  "atualizado" e o PDF para uma segunda linha solta. Nessa página as ações vão
+  em cima e os filtros embaixo (`.topo-empilhado`).
+- **Favicon** da Vanzolini (símbolo recortado do logo) nas 24 páginas.
+
+## Engajamento no site: o que falta
+
+O card existe e mostra "sem dado" porque a foto do GA4 no `institucional_reportei`
+traz só `sessoes` e `sessoes_pagas`. Para preencher, a carga precisa passar a
+gravar `sessoes_engajadas` (ou `engajamentos`) e, idealmente, `taxa_engajamento`
+e `duracao_media`. É a mesma frente de enriquecer a carga do Reportei que
+destrava thumb e link de criativo.

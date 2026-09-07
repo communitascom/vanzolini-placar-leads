@@ -55,6 +55,8 @@ function ehVideo(nome) { return /v[ií]deo|_video|youtube|^v\d|^vd|_\d+s\b|thrup
 
 // ---------- estado ----------
 let PLANO = [], REP = [], SERIE = [], CAMP = [], MIDIA_ATE = null;
+// mesmo recorte, deslocado para tras: e contra ele que a seta compara
+let ANTES = null;
 let periodo = { ini: null, fim: null, rot: '' };
 
 // ---------- período ----------
@@ -98,12 +100,28 @@ async function carregarBase() {
   PLANO = p.data || []; REP = r.data || []; MIDIA_ATE = m.data || null;
 }
 async function carregarPeriodo() {
-  const [s, c] = await Promise.all([
+  // janela anterior de mesmo tamanho, terminando na vespera do inicio
+  const dias = Math.round((new Date(periodo.fim) - new Date(periodo.ini)) / 86400000) + 1;
+  const dISO = (base, delta) => { const d = new Date(base + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + delta); return d.toISOString().slice(0, 10); };
+  const antIni = dISO(periodo.ini, -dias), antFim = dISO(periodo.ini, -1);
+  const [s, c, a] = await Promise.all([
     sb.rpc('institucional_serie', { p_ini: periodo.ini, p_fim: periodo.fim }),
-    sb.rpc('institucional_campanhas', { p_ini: periodo.ini, p_fim: periodo.fim })
+    sb.rpc('institucional_campanhas', { p_ini: periodo.ini, p_fim: periodo.fim }),
+    sb.rpc('institucional_campanhas', { p_ini: antIni, p_fim: antFim })
   ]);
   if (s.error || c.error) throw new Error((s.error || c.error).message);
   SERIE = s.data || []; CAMP = c.data || [];
+  ANTES = a.error ? null : { linhas: a.data || [], ini: antIni, fim: antFim, dias };
+}
+
+// Seta de variacao contra o periodo anterior de mesmo tamanho. Sem base, sem
+// seta: inventar uma comparacao e pior do que nao ter nenhuma.
+function variacao(atual, anterior, invertido) {
+  if (!anterior || !isFinite(anterior) || anterior === 0 || !isFinite(atual)) return '';
+  const d = 100 * (atual - anterior) / anterior;
+  if (Math.abs(d) < 1) return '<span class="var-neutra">estável</span>';
+  const subiu = d > 0, bom = invertido ? !subiu : subiu;
+  return `<span class="var ${bom ? 'sobe' : 'desce'}"><span class="ms">${subiu ? 'arrow_upward' : 'arrow_downward'}</span>${Math.abs(Math.round(d))}%</span>`;
 }
 
 // ---------- fotos do Reportei que valem para o período ----------
@@ -193,13 +211,15 @@ function render() {
   document.getElementById('leituraTxt').innerHTML = leitura;
 
   // KPIs consolidados
+  const tA = ANTES && ANTES.linhas.length ? totais(ANTES.linhas) : null;
+  const vs = ANTES ? ' vs. ' + brCurto(ANTES.ini) + '–' + brCurto(ANTES.fim) : '';
   const k = [];
-  k.push(kpi('payments', 'roxo', 'Investimento', BRL(t.inv), 'Google + Meta + LinkedIn'));
-  k.push(kpi('visibility', 'azul', 'Impressões', MI(t.impr), 'CPM ' + BRL2(t.cpm)));
+  k.push(kpi('payments', 'roxo', 'Investimento', BRL(t.inv), (tA ? variacao(t.inv, tA.inv) + vs : 'Google + Meta + LinkedIn')));
+  k.push(kpi('visibility', 'azul', 'Impressões', MI(t.impr), (tA ? variacao(t.impr, tA.impr) + vs : 'CPM ' + BRL2(t.cpm))));
   k.push(kpi('group', 'laranja', 'Alcance', alc ? N(alc) : null, alc ? quem + '; Google só informa impressões' : 'aguardando foto do Reportei', !alc));
   k.push(kpi('repeat', 'verde', 'Frequência média', freq ? N1(freq) + '×' : null, freq ? 'impressões ÷ alcance, ' + quem : 'sem alcance no período', !freq));
-  k.push(kpi('ads_click', 'azul', 'Cliques', N(t.cli), 'CPC ' + BRL2(t.cpc)));
-  k.push(kpi('trending_up', 'verde', 'CTR', PCT(t.ctr), 'cliques ÷ impressões'));
+  k.push(kpi('ads_click', 'azul', 'Cliques', N(t.cli), (tA ? variacao(t.cli, tA.cli) + vs : 'CPC ' + BRL2(t.cpc))));
+  k.push(kpi('trending_up', 'verde', 'CTR', PCT(t.ctr), (tA ? variacao(t.ctr, tA.ctr) + vs : 'cliques ÷ impressões')));
   document.getElementById('kpis').innerHTML = k.join('');
   document.getElementById('notaFotos').innerHTML = f.nota ? `<span class="ms">info</span>${f.nota}` : '';
 
@@ -339,7 +359,8 @@ function renderEixos(porEixo, f) {
         <div><span class="r">Cliques</span><span class="v">${N(d.cli)}</span></div>
         <div><span class="r">CTR</span><span class="v">${PCT(d.ctr)}</span></div>
         <div><span class="r">CPM</span><span class="v">${BRL2(d.cpm)}</span></div>
-        <div><span class="r">Alcance Meta</span><span class="v">${aM ? N(aM.alcance) + '<small>' + N1(aM.freq) + '×</small>' : (semMeta ? '<span class="z">sem campanha Meta</span>' : PEND)}</span></div>
+        <div><span class="r">Alcance Meta</span><span class="v">${aM ? N(aM.alcance) : (semMeta ? '<span class="z">sem campanha Meta</span>' : PEND)}</span></div>
+        <div><span class="r">Frequência Meta</span><span class="v">${aM ? N1(aM.freq) + '×' : (semMeta ? '<span class="z">n/d</span>' : PEND)}</span></div>
       </div>
       <div class="plano">
         <div class="lin"><span>Verba prevista no período</span><b>${pl.temPlano ? BRL(pl.verba) : '<span class="mu">sem plano</span>'}</b></div>
@@ -350,6 +371,7 @@ function renderEixos(porEixo, f) {
       </div>
       <div class="share-bar"><div class="rot"><span>Investimento por canal</span></div>${stack(porPlat, d.inv)}</div>
       <div class="share-bar"><div class="rot"><span>Impressões por canal</span></div>${stack(porPlatImpr, d.impr)}</div>
+      <details class="anuncios-rec"><summary><span class="rot">Campanhas do eixo <small style="color:var(--mute)">${rows.length}</small></span></summary>
       <div style="overflow:auto"><table><thead><tr><th>Campanha</th><th>Invest.</th><th>Impr.</th><th>CTR</th><th>CPM</th><th>Freq.</th></tr></thead><tbody>
         ${rows.length ? rows.map(r => {
           const rCpm = r.impressoes ? 1000 * r.investimento / r.impressoes : 0;
@@ -357,7 +379,7 @@ function renderEixos(porEixo, f) {
           return `<tr><td><span class="n1">${r.campanha}</span><span class="n2" style="font-size:11.5px;color:var(--mute);display:block">${r.plataforma}</span></td><td>${BRL(r.investimento)}</td><td>${N(r.impressoes)}</td><td>${PCT(r.impressoes ? 100 * r.cliques / r.impressoes : 0)}</td><td>${BRL2(rCpm)}</td><td>${aR ? N1(aR.freq) + '×' : '<span class="z">n/d</span>'}</td></tr>`;
         }).join('')
           : '<tr><td colspan="6" class="z">Sem campanha no período</td></tr>'}
-      </tbody></table></div>
+      </tbody></table></div></details>
       <details class="anuncios-rec">
         <summary><span class="rot">Anúncios com mais impressões <small style="color:var(--mute)">Google por campanha; Meta pela conta (Certificação = Organizações)</small></span></summary>
         ${ads.length ? `<div style="overflow:auto;max-height:340px"><table class="tab-anuncios"><thead><tr><th class="nome">Anúncio</th><th>Impr.</th><th>Alcance</th><th>CTR</th><th>CPM</th><th>Freq.</th></tr></thead><tbody>
@@ -376,7 +398,7 @@ function renderVideos(f) {
     { rot: 'LinkedIn Ads', plat: 'LinkedIn', fmt: 'sponsored video' },
     { rot: 'YouTube (Google Ads)', plat: 'Google', fmt: 'in-stream' }
   ];
-  let h = `<table><thead><tr><th>Canal</th><th>Campanhas</th><th>Investido</th><th>Impressões</th><th>Alcance</th><th>Visualizações</th><th>Conclusões</th><th>CTR</th><th>CPM</th></tr></thead><tbody>`;
+  let h = `<table><thead><tr><th>Canal</th><th>Campanhas</th><th>Investido</th><th>Impressões</th><th>Alcance</th><th>Visualizações</th><th>Conclusões</th><th>Freq.</th><th>CTR</th><th>CPM</th></tr></thead><tbody>`;
   let algum = false;
   canais.forEach(c => {
     const rows = CAMP.filter(r => r.plataforma === c.plat && ehVideo(r.campanha));
@@ -399,6 +421,7 @@ function renderVideos(f) {
     h += `<tr><td><b>${c.rot}</b><span style="display:block;font-size:11.5px;color:var(--mute)">${c.fmt}</span></td><td>${rows.length}</td><td>${BRL(t.inv)}</td><td>${N(t.impr)}</td>
       <td>${alc ? N(alc) : '<span class="z">n/d</span>'}</td><td>${views ? N(views) : '<span class="z">n/d</span>'}</td>
       <td>${compl ? N(compl) + (t.impr ? ' <small style="color:var(--mute)">' + PCT(100 * compl / t.impr, 1) + '</small>' : '') : '<span class="z">n/d</span>'}</td>
+      <td>${alc && t.impr ? N1(t.impr / alc) + '×' : '<span class="z">n/d</span>'}</td>
       <td>${PCT(t.ctr)}</td><td>${BRL2(t.cpm)}</td></tr>`;
   });
   h += '</tbody></table>';
@@ -412,9 +435,10 @@ function renderVideos(f) {
     .sort((a, b) => b.impr - a.impr).slice(0, 12);
   const host2 = document.getElementById('criativos');
   host2.innerHTML = cri.length
-    ? `<table class="tab-anuncios"><thead><tr><th class="nome">Criativo</th><th>Investido</th><th>Impressões</th><th>Alcance</th><th>Views</th><th>CTR</th><th>CPM</th></tr></thead><tbody>
-      ${cri.map(a => `<tr><td class="nome"><span class="n1">${a.nome}</span><span class="n2">${a.plat}</span></td><td>${a.inv ? BRL(a.inv) : '<span class="z">n/d</span>'}</td><td>${N(a.impr)}</td><td>${a.alc ? N(a.alc) : '<span class="z">n/d</span>'}</td><td>${a.views ? N(a.views) + (a.rate ? ' <small style="color:var(--mute)">' + PCT(a.rate, 1) + '</small>' : '') : '<span class="z">n/d</span>'}</td><td>${a.ctr ? PCT(a.ctr) : '<span class="z">n/d</span>'}</td><td>${a.cpm ? BRL2(a.cpm) : '<span class="z">n/d</span>'}</td></tr>`).join('')}
-    </tbody></table>`
+    ? `<details class="anuncios-rec" open><summary><span class="rot">Criativos de vídeo <small style="color:var(--mute)">${cri.length} com mais impressões</small></span></summary>
+      <div style="overflow:auto;max-height:360px"><table class="tab-anuncios"><thead><tr><th class="nome">Criativo</th><th>Investido</th><th>Impressões</th><th>Alcance</th><th>Freq.</th><th>Views</th><th>CTR</th><th>CPM</th></tr></thead><tbody>
+      ${cri.map(a => `<tr><td class="nome"><span class="n1">${a.nome}</span><span class="n2">${a.plat}</span></td><td>${a.inv ? BRL(a.inv) : '<span class="z">n/d</span>'}</td><td>${N(a.impr)}</td><td>${a.alc ? N(a.alc) : '<span class="z">n/d</span>'}</td><td>${a.alc && a.impr ? N1(a.impr / a.alc) + '×' : '<span class="z">n/d</span>'}</td><td>${a.views ? N(a.views) + (a.rate ? ' <small style="color:var(--mute)">' + PCT(a.rate, 1) + '</small>' : '') : '<span class="z">n/d</span>'}</td><td>${a.ctr ? PCT(a.ctr) : '<span class="z">n/d</span>'}</td><td>${a.cpm ? BRL2(a.cpm) : '<span class="z">n/d</span>'}</td></tr>`).join('')}
+    </tbody></table></div></details>`
     : '<div class="pend-nota"><span class="ms">info</span>Aguardando a foto de criativos do Reportei para este período.</div>';
 }
 
@@ -434,12 +458,13 @@ function renderTrafego(f) {
 
 function renderRodape(f) {
   if (window.Dash) Dash.stamp();
+  // Rodape curto de proposito: o leitor quer saber de quando e o dado, nao ler a
+  // arquitetura da carga. O detalhe de fonte vive no doc do repositorio.
   const ultimaFoto = REP.reduce((a, r) => r.carregado_em > a ? r.carregado_em : a, '');
   document.getElementById('rodapeTxt').innerHTML =
-    `<b>Fontes.</b> Investimento, impressões e cliques: planilha Campanhas_Vanzolini_Consolidado carregada no Supabase às 6h e às 18h` + (MIDIA_ATE ? `, dados até <b>${br(MIDIA_ATE)}</b>` : '') + `. ` +
-    `Alcance, frequência, vídeos, anúncios, GA4 e busca: fotos do Reportei` + (ultimaFoto ? `, última em <b>${new Date(ultimaFoto).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</b>` : '') + `. ` +
-    `CTR, CPM e CPC calculados dos totais. Eixo definido pelo nome da campanha. Google Ads não informa alcance nem frequência, por isso o consolidado de alcance soma Meta e LinkedIn.` +
-    ` Consultado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.`;
+    `Mídia até <b>${MIDIA_ATE ? br(MIDIA_ATE) : 'n/d'}</b> (a planilha fecha o dia seguinte, então a mídia anda um dia atrás)` +
+    (ultimaFoto ? ` · alcance, vídeos e anúncios da última foto do Reportei em <b>${new Date(ultimaFoto).toLocaleDateString('pt-BR')}</b>` : '') +
+    ` · Google Ads não informa alcance nem frequência.`;
 }
 
 // ---------- início ----------

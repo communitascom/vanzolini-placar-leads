@@ -18,7 +18,10 @@ const BRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{maximumFractionDig
 const BRL2 = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const PCT = v => (v===null||v===undefined) ? '<span class="z">—</span>' : Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
 const NAVY='#E56B39', AZUL='#1F6FD0', CINZA='#C5CAD3', VERDE='#0E9E76'; // paleta Painéis Communitas
-let CAMP=[], RITMO=[], CURVA=[], MIDIA=[], ALERTAS=[], MIDIA_ATE=null, charts={};
+// CAMP traz o que esta no ar e o que encerrou nos ultimos 7 dias. Tudo que fala
+// de "no ar" usa NOAR; as encerradas ganham um quadro proprio, porque quem
+// estoura a verba encerrava e sumia da tela justo quando dava para aprender.
+let CAMP=[], NOAR=[], FIM=[], RITMO=[], CURVA=[], MIDIA=[], ALERTAS=[], MIDIA_ATE=null, charts={};
 Chart.register(ChartDataLabels);
 Chart.defaults.plugins.datalabels.display = false;
 
@@ -37,16 +40,16 @@ function selo(v){
 }
 
 function render(){
-  const totLeads = CAMP.reduce((a,c)=>a+Number(c.leads||0),0);
-  const totVerba = CAMP.reduce((a,c)=>a+Number(c.verba||0),0);
-  const totGasto = CAMP.reduce((a,c)=>a+Number(c.gasto||0),0);
-  const totProj  = CAMP.reduce((a,c)=>a+Number(c.proj_leads||0),0);
+  const totLeads = NOAR.reduce((a,c)=>a+Number(c.leads||0),0);
+  const totVerba = NOAR.reduce((a,c)=>a+Number(c.verba||0),0);
+  const totGasto = NOAR.reduce((a,c)=>a+Number(c.gasto||0),0);
+  const totProj  = NOAR.reduce((a,c)=>a+Number(c.proj_leads||0),0);
   const cplMedio = totLeads ? totGasto/totLeads : 0;
   const pctGasto = totVerba ? 100*totGasto/totVerba : 0;
 
   const K = window.Dash && Dash.kpi;
   document.getElementById('kpis').innerHTML = K
-    ? K('campaign','azul','Campanhas no ar', CAMP.length, CAMP.filter(c=>c.proj_leads).length+' com projeção') +
+    ? K('campaign','azul','Campanhas no ar', NOAR.length, NOAR.filter(c=>c.proj_leads).length+' com projeção') +
       K('group','laranja','Leads captados', N(totLeads), 'projeção de '+N(totProj)+' no fechamento') +
       K('payments','roxo','Verba investida', BRL(totGasto), pctGasto.toFixed(1)+'% de '+BRL(totVerba)) +
       K('account_balance_wallet','verde','Verba a investir', BRL(totVerba-totGasto), 'saldo das campanhas no ar') +
@@ -96,10 +99,10 @@ function render(){
   // comparacao (vs hist.), nao o numero de referencia. Com 13 colunas a tabela
   // so era legivel rolando de lado.
   let h = `<table class="t-compacta"><thead><tr>
-    <th class="nome">Curso</th><th>Tempo</th><th>Leads</th><th>Projeção</th><th>vs hist.</th>
+    <th class="nome">Curso</th><th>Tempo</th><th>Leads</th><th>Projeção<br>no ritmo</th><th>vs hist.</th>
     <th>Verba</th><th>Gasto</th><th>Investir<br>/dia</th><th>CTR<br>CPL</th>
   </tr></thead><tbody>`;
-  CAMP.forEach(c=>{
+  NOAR.forEach(c=>{
     const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
     // A barra so vai ate 100% por limite visual, entao o estouro precisa aparecer
     // pela cor e pelo rotulo, senao some da tela.
@@ -114,7 +117,7 @@ function render(){
       <td class="nome"><span class="n1">${nome}</span><span class="n2">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · ${c.dias_restantes} dias restantes</span></td>
       <td>${PCT(c.pct_tempo)}<span class="leg">${c.dias_decorridos}/${c.dias_total} dias</span></td>
       <td class="destaque">${N(c.leads)}</td>
-      <td>${c.proj_leads?'<b>'+N(c.proj_min)+'</b><span class="leg">piso</span>':'<span class="z">cedo</span>'}</td>
+      <td>${(()=>{const r=projetaPeloRitmo(c); return r?'<b>'+N(r.total)+'</b><span class="leg">no ritmo</span>':'<span class="z">—</span>';})()}</td>
       <td>${selo(c.vs_historico)}</td>
       <td>${c.verba?BRL(c.verba):'<span class="z">—</span>'}</td>
       <td>${BRL(c.gasto)}${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
@@ -124,6 +127,28 @@ function render(){
   });
   h += '</tbody></table>';
   document.getElementById('t-camp').innerHTML = h;
+
+  // recem-encerradas: janela de 7 dias
+  const hostFim = document.getElementById('t-encerradas');
+  const secFim = document.getElementById('sec-encerradas');
+  if(hostFim && secFim){
+    secFim.style.display = FIM.length ? 'flex' : 'none';
+    document.getElementById('n-encerradas').textContent = FIM.length;
+    hostFim.innerHTML = FIM.length ? `<table class="t-compacta"><thead><tr>
+      <th class="nome">Curso</th><th>Encerrou</th><th>Leads</th><th>vs hist.</th><th>Verba</th><th>Gasto</th><th>CTR<br>CPL</th>
+    </tr></thead><tbody>` + FIM.map(c=>{
+      const pctG = Number(c.pct_gasto||0), estourou = pctG > 100;
+      return `<tr>
+        <td class="nome"><span class="n1">${c.curso}</span><span class="n2">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · ${c.dias_total} dias</span></td>
+        <td>há ${c.dias_desde_fim} dia${c.dias_desde_fim===1?'':'s'}</td>
+        <td class="destaque">${N(c.leads)}</td>
+        <td>${selo(c.vs_historico)}</td>
+        <td>${c.verba?BRL(c.verba):'<span class="z">—</span>'}</td>
+        <td>${BRL(c.gasto)}<span class="leg" style="${estourou?'color:#D64545;font-weight:600':''}">${c.pct_gasto?pctG.toFixed(0)+'% da verba':'—'}</span></td>
+        <td>${c.ctr?Number(c.ctr).toFixed(2)+'%':'<span class="z">—</span>'}<span class="leg">${c.cpl?BRL2(c.cpl):'—'}</span></td>
+      </tr>`;
+    }).join('') + '</tbody></table>' : '';
+  }
 
   // Tempo decorrido x verba investida.
   //
@@ -158,9 +183,9 @@ function render(){
 
   // seletor da curva
   const sel = document.getElementById('f-camp');
-  sel.innerHTML = CAMP.map(c=>`<option value="${c.curso.replace(/"/g,'&quot;')}">${c.curso}</option>`).join('');
+  sel.innerHTML = NOAR.map(c=>`<option value="${c.curso.replace(/"/g,'&quot;')}">${c.curso}</option>`).join('');
   sel.onchange = ()=>desenhaCurva(sel.value);
-  if(CAMP.length) desenhaCurva(CAMP[0].curso);
+  if(NOAR.length) desenhaCurva(NOAR[0].curso);
 }
 
 let filtroVerba = 'todas';
@@ -173,7 +198,7 @@ function classeVerba(gap, pctG){
 function renderVerba(){
   const host = document.getElementById('v-verba');
   if(!host) return;
-  const comVerba = CAMP.filter(c=>Number(c.verba||0) > 0).map(c=>{
+  const comVerba = NOAR.filter(c=>Number(c.verba||0) > 0).map(c=>{
     const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
     return Object.assign({}, c, {pctT, pctG, gap: pctG - pctT, est: classeVerba(pctG-pctT, pctG)});
   });
@@ -205,6 +230,18 @@ function renderVerba(){
         <span class="tv-selo">${c.gap>0?'+':''}${c.gap.toFixed(0)} pts</span>
       </div>
     </div>`).join('') : '<div class="empty">Nenhuma campanha neste recorte.</div>';
+}
+
+// Extrapolacao do ritmo recente da propria campanha. E o numero que a gente
+// defende numa reuniao: sai da serie diaria desta campanha, nao de um modelo.
+function projetaPeloRitmo(c){
+  const serie = RITMO.filter(r=>r.curso===c.curso);
+  const rest = Number(c.dias_restantes);
+  if(serie.length < 2 || !rest) return null;
+  const acum = serie.map(r=>Number(r.leads_acum));
+  const n = acum.length, janela = Math.min(14, n-1);
+  const ritmo = (acum[n-1] - acum[n-1-janela]) / janela;
+  return { ritmo, total: Math.round(acum[n-1] + ritmo*rest), janela };
 }
 
 function desenhaCurva(curso){
@@ -241,8 +278,20 @@ function desenhaCurva(curso){
   }
 
   const total = Number(c.dias_total), corridos = Number(c.dias_decorridos);
+  const restantes = Number(c.dias_restantes);
   const pctHoje = pctLeadsEm(Number(c.pct_tempo));
   const sobra = Math.max(0.001, 100 - pctHoje);
+
+  // Ritmo da propria campanha nas ultimas duas semanas.
+  //
+  // A projecao pela curva historica (leads / % esperado) assume que ESTA campanha
+  // vai seguir a forma media de 140 turmas anteriores. Quando ela ja desacelerou,
+  // isso promete leads que o ritmo observado nao sustenta — e quem le o numero
+  // grande cobra por ele. O ritmo recente e verificavel: sai da serie diaria desta
+  // campanha, e qualquer um confere.
+  const janela = Math.min(14, nR - 1);
+  const ritmoDia = janela > 0 ? (ultimo - real[nR-1-janela]) / janela : 0;
+  const noRitmo = Math.round(ultimo + ritmoDia * restantes);
   const dias = [];
   for(let k=corridos+1;k<=total;k++) dias.push(k);
   const labelsFut = dias.map(k=>{
@@ -264,20 +313,20 @@ function desenhaCurva(curso){
 
   // Caixa de leitura abaixo do grafico.
   //
-  // A regra aqui e nao criar expectativa para cima: quem le um numero grande
-  // cobra por ele depois. Entao a ordem e do mais certo para o menos certo:
-  // primeiro o que ja esta captado (fato), depois o piso provavel, e a faixa
-  // como contexto. O numero em destaque nunca e o topo.
+  // Ordem do mais certo para o menos certo, e o numero em destaque nunca e um
+  // modelo: e a extrapolacao do ritmo observado. A curva historica fica em
+  // ultimo, rotulada como cenario.
   const box = document.getElementById('box-curva');
   if(box){
-    box.innerHTML = c.proj_leads
+    const rd = ritmoDia.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+    box.innerHTML = restantes > 0
       ? `<div class="pj">
-           <div class="pj-item"><span class="pj-r">Captados até hoje</span><span class="pj-v">${N(c.leads)}</span><span class="pj-n">${c.dias_decorridos} de ${c.dias_total} dias · ${PCT(c.pct_tempo)} do tempo</span></div>
-           <div class="pj-item destaque"><span class="pj-r">Piso provável no fechamento</span><span class="pj-v">${N(c.proj_min)}</span><span class="pj-n">em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · 3 em cada 4 turmas comparáveis fecharam daqui para cima</span></div>
-           <div class="pj-item"><span class="pj-r">Faixa provável</span><span class="pj-v pj-faixa">${N(c.proj_min)} a ${N(c.proj_max)}</span><span class="pj-n">meio da faixa em ${N(c.proj_leads)}; o topo é cenário, não meta</span></div>
+           <div class="pj-item"><span class="pj-r">Captados até hoje</span><span class="pj-v">${N(c.leads)}</span><span class="pj-n">${c.dias_decorridos} de ${c.dias_total} dias · ${PCT(c.pct_tempo)} do tempo. Se a campanha parasse agora, é o número final.</span></div>
+           <div class="pj-item destaque"><span class="pj-r">Mantido o ritmo atual</span><span class="pj-v">${N(noRitmo)}</span><span class="pj-n">${rd} leads/dia nas últimas ${janela === 14 ? 'duas semanas' : janela + ' dias'} × ${restantes} dias restantes, sem supor aceleração</span></div>
+           ${c.proj_leads ? `<div class="pj-item"><span class="pj-r">Cenário da curva histórica</span><span class="pj-v pj-faixa">${N(c.proj_leads)}</span><span class="pj-n">o que 140 turmas anteriores costumam somar da metade do caminho em diante. É referência de comparação, <b>não meta</b>.</span></div>` : ''}
          </div>
-         <p class="pj-aviso"><b>A projeção muda.</b> Ela vem do ritmo de ${N(c.dias_decorridos)} dias comparado com o de turmas anteriores, e depende de verba, concorrência, sazonalidade e do que acontece fora da campanha. Trabalhe com o piso.</p>`
-      : `<p class="pj-aviso">Campanha com ${PCT(c.pct_tempo)} do tempo corrido. <b>Ainda cedo para projetar</b>: abaixo de 15% do tempo a conta oscila demais para servir. Por enquanto valem os ${N(c.leads)} leads já captados.</p>`;
+         <p class="pj-aviso"><b>Nenhum destes números é promessa.</b> O ritmo muda com verba, concorrência, sazonalidade e com o que acontece fora da campanha. Para combinar meta com o cliente, use os ${N(c.leads)} já captados e o ritmo atual — nunca o cenário da curva.</p>`
+      : `<p class="pj-aviso">Campanha encerrada em ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} com <b>${N(c.leads)} leads</b>. Não há mais o que projetar.</p>`;
   }
 
   mkChart('c-curva','line',{
@@ -285,11 +334,12 @@ function desenhaCurva(curso){
     datasets:[
       {label:'Leads acumulados (real)', data:real, borderColor:NAVY, backgroundColor:'rgba(229,107,57,.16)', fill:true, tension:.2, borderWidth:3, pointRadius:0},
       {label:'Caminho esperado', data:esperado, borderColor:CINZA, borderDash:[6,4], tension:.2, borderWidth:2, pointRadius:0},
-      // O piso e a linha grossa; o resto da faixa fica sombreado atras. Destacar a
-      // mediana convidava a ler o meio da faixa como promessa.
-      {label:'Piso provável', data:emenda(ate(c.proj_min)), borderColor:VERDE, borderDash:[4,3], tension:.2, borderWidth:2, pointRadius:0},
-      {label:'_faixa_topo', data:emenda(ate(c.proj_max)), borderColor:'rgba(14,158,118,.22)', backgroundColor:'rgba(14,158,118,.10)', fill:'-1', tension:.2, borderWidth:1, pointRadius:0},
-      {label:'_mediana', data:emenda(ate(c.proj_leads)), borderColor:'rgba(14,158,118,.45)', borderDash:[2,4], tension:.2, borderWidth:1, pointRadius:0}
+      // A faixa vai do pior caso real (a campanha para hoje, linha reta) ate o
+      // cenario da curva. Antes o piso da faixa ja era uma projecao para cima, e
+      // faixa que nao pode cair nao e faixa, e promessa.
+      {label:'Se parar hoje', data:emenda(dias.map(()=>ultimo)), borderColor:'rgba(138,145,158,.5)', borderDash:[2,3], tension:0, borderWidth:1, pointRadius:0},
+      {label:'_teto_cenario', data:emenda(ate(c.proj_leads)), borderColor:'rgba(14,158,118,.22)', backgroundColor:'rgba(14,158,118,.09)', fill:'-1', tension:.2, borderWidth:1, pointRadius:0},
+      {label:'No ritmo atual', data:emenda(dias.map((k,i)=>Math.round(ultimo + ritmoDia*(i+1)))), borderColor:VERDE, borderDash:[4,3], tension:0, borderWidth:2.5, pointRadius:0}
     ]},
     {plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:14,
         filter:it=>!String(it.text).startsWith('_')}}},
@@ -329,7 +379,7 @@ async function carregar(){
       `<div class="kpi"><div class="v" style="font-size:15px;color:#d64545">Erro ao carregar</div><div class="l">${erro.message}</div></div>`;
     return;
   }
-  CAMP=a.data; RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
+  CAMP=a.data||[]; NOAR=CAMP.filter(c=>!c.encerrada); FIM=CAMP.filter(c=>c.encerrada); RITMO=b.data; CURVA=c.data; MIDIA=d.data; ALERTAS=e.data||[];
   MIDIA_ATE = f.data || null;
   if(window.Dash) Dash.stamp();
   document.getElementById('rodape').innerHTML =
