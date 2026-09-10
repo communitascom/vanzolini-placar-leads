@@ -98,11 +98,35 @@ function render(){
   // abaixo da curva) e a mediana historica crua saiu tambem — o que informa e a
   // comparacao (vs hist.), nao o numero de referencia. Com 13 colunas a tabela
   // so era legivel rolando de lado.
+  // Ordem alfabetica, nao por verba: quem procura um curso na tabela procura
+  // pelo nome. A ordem por verba servia a uma pergunta que os indicadores do
+  // topo ja respondem.
+  const ordenadas = NOAR.slice().sort((a,b)=>
+    String(a.curso||'').localeCompare(String(b.curso||''), 'pt-BR'));
+
+  const grupos = {
+    todas:  ()=>true,
+    mba:    c=>c.tipo==='MBA',
+    curso:  c=>c.tipo!=='MBA',
+    atras:  c=>c.verba && Number(c.pct_gasto) < Number(c.pct_tempo) - 20,
+    abaixo: c=>Number(c.vs_historico) <= -15
+  };
+  const rotulos = {todas:'Todas', mba:'MBA', curso:'Cursos', atras:'Verba atrás', abaixo:'Abaixo do histórico'};
+  const barraF = document.getElementById('f-noar');
+  if(barraF){
+    barraF.innerHTML = Object.keys(grupos).map(id=>{
+      const n = ordenadas.filter(grupos[id]).length;
+      return n ? `<button class="chip${filtroNoar===id?' on':''}" data-f="${id}">${rotulos[id]} <b>${n}</b></button>` : '';
+    }).join('');
+    barraF.querySelectorAll('button').forEach(b=>b.onclick=()=>{ filtroNoar=b.dataset.f; render(); });
+  }
+  const visiveis = ordenadas.filter(grupos[filtroNoar] || grupos.todas);
+
   let h = `<table class="t-compacta"><thead><tr>
-    <th class="nome">Curso</th><th>Tempo</th><th>Leads</th><th>Projeção<br>no ritmo</th><th>vs hist.</th>
+    <th class="nome">Curso</th><th>Tempo</th><th>Leads</th><th>Projeção</th><th>vs hist.</th>
     <th>Verba</th><th>Gasto</th><th>Investir<br>/dia</th><th>CTR<br>CPL</th>
   </tr></thead><tbody>`;
-  NOAR.forEach(c=>{
+  visiveis.forEach(c=>{
     const pctT = Number(c.pct_tempo||0), pctG = Number(c.pct_gasto||0);
     // A barra so vai ate 100% por limite visual, entao o estouro precisa aparecer
     // pela cor e pelo rotulo, senao some da tela.
@@ -117,16 +141,17 @@ function render(){
       <td class="nome"><span class="n1">${nome}</span><span class="n2">${c.data_inicio.slice(8,10)}/${c.data_inicio.slice(5,7)} a ${c.data_fim.slice(8,10)}/${c.data_fim.slice(5,7)} · ${c.dias_restantes} dias restantes</span></td>
       <td>${PCT(c.pct_tempo)}<span class="leg">${c.dias_decorridos}/${c.dias_total} dias</span></td>
       <td class="destaque">${N(c.leads)}</td>
-      <td>${(()=>{const r=projeta(c); return r?'<b>'+N(r.trabalho)+'</b><span class="leg">pela '+r.limite+'</span>':'<span class="z">—</span>';})()}</td>
+      <td>${(()=>{const r=projeta(c); return r?'<b>'+N(r.trabalho)+'</b>':'<span class="z">—</span>';})()}</td>
       <td>${selo(c.vs_historico)}</td>
       <td>${c.verba?BRL(c.verba):'<span class="z">—</span>'}</td>
-      <td>${BRL(c.gasto)}${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
+      <td class="c-gasto"><span class="g-val">${BRL(c.gasto)}</span>${barra}<span class="leg">${pctG.toFixed(0)}% da verba</span></td>
       <td>${c.investir_por_dia?BRL2(c.investir_por_dia):'<span class="z">—</span>'}</td>
       <td>${c.ctr?Number(c.ctr).toFixed(2)+'%':'<span class="z">—</span>'}<span class="leg">${c.cpl?BRL2(c.cpl):'—'}</span></td>
     </tr>`;
   });
   h += '</tbody></table>';
-  document.getElementById('t-camp').innerHTML = h;
+  document.getElementById('t-camp').innerHTML = visiveis.length ? h
+    : '<div class="empty">Nenhuma campanha neste filtro.</div>';
 
   // recem-encerradas: janela de 7 dias
   const hostFim = document.getElementById('t-encerradas');
@@ -188,6 +213,7 @@ function render(){
   if(NOAR.length) desenhaCurva(NOAR[0].curso);
 }
 
+let filtroNoar = 'todas';
 let filtroVerba = 'todas';
 function classeVerba(gap, pctG){
   if(pctG > 100) return {cls:'estourou', rot:'verba estourada'};

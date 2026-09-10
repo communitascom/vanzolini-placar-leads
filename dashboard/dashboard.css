@@ -628,3 +628,10 @@ body.dash{min-height:100vh}
 .pg-performance .g-tt .l i{width:8px;height:8px;border-radius:50%;flex:none}
 .pg-performance .g-tt .l.acum{opacity:.7;margin-top:2px}
 @media print{.pg-performance .g-tt{display:none!important}}
+
+/* Campanhas no ar: o valor gasto e a barra dividiam a mesma linha e se
+   sobrepunham quando o numero era grande (R$ 62.755 no MBA). A barra passa a
+   ocupar a linha de baixo, inteira. */
+.pg-campanhas td.c-gasto{white-space:nowrap}
+.pg-campanhas td.c-gasto .g-val{display:block;font-variant-numeric:tabular-nums}
+.pg-campanhas td.c-gasto .barra{display:block;width:100%;min-width:0;margin:4px 0 2px}
