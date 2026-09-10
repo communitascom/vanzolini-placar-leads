@@ -47,6 +47,18 @@
 -- pelo ritmo 2.636 identica, 13 dias restantes identicos.
 -- =====================================================================
 
+-- ---------------------------------------------------------------------
+-- ATENCAO: a definicao viva das duas funcoes esta nas migrations
+-- performance_campanha_fase2, performance_campanha_sem_projecao_encerrada,
+-- performance_campanha_agregado_bate_com_serie, performance_campanha_data_de_corte,
+-- performance_campanha_bordas e performance_campanha_revisao_codex.
+-- O que segue abaixo e a versao inicial; a revisao do Codex acrescentou
+-- codigos de erro nomeados, guarda de curso sem midia, leads_acumulados na
+-- serie, bloco de referencia, encerrada em duas leituras, saldo e excedido de
+-- verba, sinalizacao de campanhas irmas sobrepostas e datas efetivas na
+-- listagem. Consultar o banco para a versao corrente.
+-- ---------------------------------------------------------------------
+
 create or replace function public.performance_campanhas_lista()
 returns jsonb
 language sql

@@ -26,6 +26,12 @@
     {id:"historico",     href:"historico.html",     ico:"history",  rot:"Histórico e investimento"},
     {id:"institucional", href:"institucional.html", ico:"verified", rot:"Campanha institucional"}
   ];
+  // Só no modo interno: relatórios que ainda não têm versão de cliente. A
+  // performance de campanha entra aqui por decisão de 10/09, "só interna por
+  // enquanto"; no dia em que virar página do cliente, muda de lista.
+  var INTERNAS = [
+    {id:"performance", href:"performance.html", ico:"insights", rot:"Performance de campanha"}
+  ];
   // Só no modo interno: as ferramentas de operação, que nunca tiveram versão de
   // cliente e seguem com a cara antiga por enquanto.
   var FERRAMENTAS = [
@@ -70,6 +76,9 @@
     h += '<a href="' + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
   });
   if (interno){
+    INTERNAS.forEach(function(p){
+      h += '<a href="' + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
+    });
     h += '<div class="sep"></div><div class="titulo">Ferramentas</div>';
     FERRAMENTAS.forEach(function(p){
       h += '<a href="' + p.href + '" class="ferramenta"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
@@ -149,6 +158,13 @@
     else if (typeof window.carregar === "function") window.carregar();
   }
   function injetarNita(){
+    // Pagina pode dispensar a Nita com window.SEM_NITA = true. Existe por causa
+    // da performance de campanha, que imprime: o widget e um div com shadow DOM,
+    // sem id nem classe, entao nenhuma regra de @media print alcanca ele, e a
+    // bolha saia estampada no PDF. Vale notar que a documentacao do painel
+    // interno diz que o interno NAO tem Nita, mas este arquivo injeta nos dois
+    // modos desde sempre; a divergencia fica registrada, sem ser resolvida aqui.
+    if (window.SEM_NITA) return;
     if (document.getElementById("nitaEmbed")) return;
     var s = document.createElement("script");
     s.id = "nitaEmbed";
