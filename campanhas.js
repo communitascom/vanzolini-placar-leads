@@ -69,7 +69,7 @@ function render(){
   if(MIDIA_ATE){
     const diasAtras = Math.round((new Date().setHours(0,0,0,0) - new Date(MIDIA_ATE+'T00:00:00').getTime())/86400000);
     const normal = new Date().getHours() >= 18 ? 1 : 2;
-    if(diasAtras > normal) aviso = `<div class="avisodef"><span class="material-symbols-outlined" style="font-size:15px">warning</span> Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ${diasAtras} dias atrás — acima do normal, que é ${normal}. A carga roda sozinha às 6h e às 18h e o atraso vem da própria planilha, não do placar: parte do gasto pode ser lançamento que ainda não chegou lá, não subinvestimento real. Os leads estão ao vivo.</div>`;
+    if(diasAtras > normal) aviso = `<div class="avisodef"><span class="material-symbols-outlined" style="font-size:15px">warning</span> Os dados de mídia (verba, CTR, CPL) vão até <b>${MIDIA_ATE.slice(8,10)}/${MIDIA_ATE.slice(5,7)}</b>, ${diasAtras} dias atrás, acima do normal, que é ${normal}. A carga roda sozinha às 6h e às 18h e o atraso vem da própria planilha, não do placar: parte do gasto pode ser lançamento que ainda não chegou lá, não subinvestimento real. Os leads estão ao vivo.</div>`;
   }
   const boxAviso = document.getElementById('aviso-midia');
   if(boxAviso) boxAviso.innerHTML = aviso;
@@ -345,7 +345,7 @@ function desenhaCurva(curso){
            <div class="pj-item"><span class="pj-r">Captados até hoje</span><span class="pj-v">${N(c.leads)}</span><span class="pj-n">${corridos} de ${total} dias · ${PCT(c.pct_tempo)} do tempo. Se parar agora, é o número final.</span></div>
            ${cardVerba}${cardRitmo}
          </div>
-         <p class="pj-aviso"><b>Trabalhe com ${N(pj.trabalho)}</b>, a menor das duas: a conta da verba supõe que ela será gasta inteira e ao mesmo custo; a do ritmo ignora que a verba pode acabar antes. <b>Nenhum dos dois é promessa</b> — o custo por lead sobe quando o público satura, e verba, concorrência e sazonalidade mudam o jogo em dias.</p>
+         <p class="pj-aviso"><b>Trabalhe com ${N(pj.trabalho)}</b>, a menor das duas: a conta da verba supõe que ela será gasta inteira e ao mesmo custo; a do ritmo ignora que a verba pode acabar antes. <b>Nenhum dos dois é promessa</b>: o custo por lead sobe quando o público satura, e verba, concorrência e sazonalidade mudam o jogo em dias.</p>
          ${c.proj_leads ? `<p class="pj-ref">Só como referência: no padrão das turmas e campanhas já encerradas deste curso, o fechamento daria <b>${N(c.proj_leads)}</b>. Não é meta nem previsão desta campanha.</p>` : ''}`;
     }
   }
