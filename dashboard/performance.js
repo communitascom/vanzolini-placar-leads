@@ -8,6 +8,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const vazio = txt => { const p = document.createElement('p'); p.className = 'vazio'; p.textContent = txt; return p; };
 const brData = iso => iso ? String(iso).split('-').reverse().join('/') : '';
 const pad = n => String(n).padStart(2, '0');
 const isoDe = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
@@ -115,13 +116,14 @@ async function render() {
   const campanhaId = Number($('fCampanha').value);
   if (!campanhaId) { aviso('selecione uma campanha'); return; }
   const { ini, fim } = periodoEscolhido();
+  const corte = $('fCorte').value || null;
   $('grafico').innerHTML = '<div class="skel"><i></i><i></i><i></i><i></i></div>';
   Dash.tag('<b>consultando</b>');
 
   let data, error;
   try {
     ({ data, error } = await sb.rpc('performance_campanha', {
-      p_campanha_id: campanhaId, p_ini: ini, p_fim: fim, p_corte: null
+      p_campanha_id: campanhaId, p_ini: ini, p_fim: fim, p_corte: corte
     }));
   } catch (e) {
     error = { message: String(e && e.message || e) };
@@ -131,21 +133,24 @@ async function render() {
   if (error) {
     Dash.tag('<b>erro</b>', 'ruim');
     aviso('não consegui ler esta campanha: ' + error.message);
-    $('grafico').innerHTML = '<p class="vazio">sem dado</p>';
+    $('grafico').replaceChildren(vazio('sem dado'));
     ultimo = null;
     return;
   }
-  if (!data || !data.campanha || !data.janela) {
-    Dash.tag('<b>sem dado</b>', 'atencao');
-    aviso('a resposta da API veio em formato inesperado');
-    $('grafico').innerHTML = '<p class="vazio">sem dado</p>';
-    ultimo = null;
-    return;
-  }
+  // O erro nomeado vem PRIMEIRO. A guarda de contrato estava na frente e
+  // engolia CURSO_SEM_MIDIA, CAMPANHA_FUTURA e companhia, trocando a mensagem
+  // certa por "formato inesperado".
   if (data && data.erro) {
     Dash.tag('<b>sem dado</b>', 'atencao');
     aviso(data.erro);
-    $('grafico').innerHTML = '<p class="vazio">' + data.erro + '</p>';
+    $('grafico').replaceChildren(vazio(data.erro));
+    ultimo = null;
+    return;
+  }
+  if (!data || !data.campanha || !data.janela || !data.realizado || !Array.isArray(data.serie)) {
+    Dash.tag('<b>sem dado</b>', 'atencao');
+    aviso('a resposta da API veio em formato inesperado');
+    $('grafico').replaceChildren(vazio('sem dado'));
     ultimo = null;
     return;
   }
@@ -200,6 +205,7 @@ async function carregarTela() {
   });
   $('fIni').addEventListener('change', render);
   $('fFim').addEventListener('change', render);
+  $('fCorte').addEventListener('change', render);
 
   // abre na campanha vigente se houver, senao na mais recente
   const vig = CAMPANHAS.find(c => c.situacao === 'vigente' && c.tipo === 'MBA')

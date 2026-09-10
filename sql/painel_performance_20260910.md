@@ -25,8 +25,12 @@ A divisão de fontes, decidida em 10/09:
 | Curso | `campanhas` (sync do Monday) |
 
 `campanha_plano` é transitória por desenho: some no dia em que o board
-padronizar os campos e o sync passar a trazer os dois. **Enquanto isso, curso
-comum desenha o gráfico sem linha de meta e sem entrega projetada.**
+padronizar os campos e o sync passar a trazer os dois.
+
+Enquanto isso, curso comum desenha o gráfico **sem linha de meta**, e sem o
+percentual contra a meta nos indicadores. A projeção continua existindo quando
+há verba, porque ela só depende de verba e CPL: são 15 campanhas de curso comum
+no ar hoje nessa situação. O que falta é a régua para comparar, não o número.
 
 ## As quatro camadas
 
@@ -64,7 +68,19 @@ Contra a soma crua da view isso dá alguns centavos, o que é preferível a uma
 tela que não fecha consigo mesma.
 
 **`p_ini`/`p_fim` recortam período e desligam a projeção; `p_corte` é data de
-referência e mantém.** Projetar um pedaço de campanha é extrapolar pedaço.
+referência e mantém.** Projetar um pedaço de campanha é extrapolar pedaço. Os
+dois estão na tela: o período nos filtros, e a data de referência no campo
+"Leitura em", que vazio significa o dado mais recente.
+
+**Recorte não fala em nome da campanha.** Com período recortado, o gráfico troca
+o subtítulo, a nota do painel, o indicador de entrega e a leitura, todos para a
+linguagem de período. Sem isso, escolher agosto dentro de uma campanha de três
+meses fazia a tela afirmar que "a campanha gastou e entregou" os números de
+agosto.
+
+**A marca do eixo só diz "hoje" quando o corte é hoje.** Nos outros casos ela diz
+"dados até DD/MM". Rotular de hoje o último dia carregado escondia exatamente o
+que precisa aparecer: atraso na carga de mídia.
 
 **Campanha sobreposta é sinalizada, não resolvida.** Mídia e leads são
 atribuídos por curso e data, então duas campanhas do mesmo curso com janelas em
@@ -109,6 +125,17 @@ nova.
    poder dispensá-lo com `window.SEM_NITA`. Vale registrar a divergência que
    apareceu no caminho: a documentação do painel interno diz que o interno não
    tem Nita, mas o `shell.js` injeta nos dois modos desde sempre.
+
+## Teste de regressão
+
+`node tests/grafico-campanha.test.js`, sem rede e sem navegador. Roda o gerador
+contra três respostas reais da RPC (campanha vigente inteira, recorte de mês e
+campanha encerrada) e cobre também o contrato: resposta de erro, resposta fora
+do formato, série sem `leads_acumulados`, aspas no nome do curso e as bordas da
+escala do eixo. São 20 asserções.
+
+Existe porque a quebra mais provável deste conjunto é silenciosa: a RPC muda um
+campo, o gráfico cai no fallback e o PDF continua saindo bonito e errado.
 
 ## O que segue aberto
 

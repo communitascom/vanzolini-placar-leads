@@ -87,6 +87,11 @@
     var xd = function (ms) { return X(Math.round((ms - INI) / DIA)); };
     var ys = function (v, vmax, p) { return p[1] - (p[1] - p[0]) * Math.min(v, vmax) / vmax; };
 
+    // Recorte não autoriza falar da campanha: com p_ini/p_fim os totais são do
+    // período, e dizer "a campanha entregou X" seria mentira com cara de número.
+    var inteira = jan.campanha_inteira !== false;
+    var fechada = inteira && camp.encerrada_hoje === true;
+    var noDia = !!(d.referencia && d.referencia.hoje === jan.corte);
     var meta = plano.meta_ajustada == null ? null : Number(plano.meta_ajustada);
     var temProj = !!proj;
     var pv = temProj && proj.pela_verba != null ? Number(proj.pela_verba) : null;
@@ -95,15 +100,21 @@
     // O acumulado vem pronto da RPC (serie[].leads_acumulados). Refazer a soma
     // aqui seria justamente a matematica no JavaScript que a RPC existe para
     // evitar; o fallback so cobre resposta antiga.
-    var acum = [], soma = 0, maxDia = 0, maxCusto = 0;
+    var acum = [], soma = 0, maxDia = 0, maxCusto = 0, faltaContrato = false;
     serie.forEach(function (r) {
       var l = Number(r.leads || 0), c = Number(r.custo || 0);
+      if (r.leads_acumulados == null) faltaContrato = true;
       soma = r.leads_acumulados != null ? Number(r.leads_acumulados) : soma + l;
       acum.push({ ms: dia(r.dia), v: soma, leads: l, custo: c });
       if (l > maxDia) maxDia = l;
       if (c > maxCusto) maxCusto = c;
     });
     var totalLeads = Number(real.leads != null ? real.leads : soma);
+    // O fallback continua existindo para a tela nao morrer, mas para de ser
+    // silencioso: serie sem leads_acumulados significa contrato mudado.
+    if (faltaContrato && window.console && window.console.warn) {
+      window.console.warn('grafico-campanha: serie sem leads_acumulados, acumulado refeito no navegador. A RPC mudou de contrato.');
+    }
 
     var teto1 = Math.max(meta || 0, totalLeads, pv || 0, pr || 0);
     var e1 = escala(teto1 * 1.08, 3);
@@ -126,8 +137,9 @@
 
     // ---------- painel 1: leads acumulados ----------
     add(txt(PX0 - 53, P1[0] - 9, 'Leads acumulados', { fs: 9.5, cor: INK, peso: 700 }));
-    add(txt(PX0 + 50, P1[0] - 9, camp.encerrada_hoje
-      ? 'curva fechada, a campanha encerrou em ' + dm(jan.campanha_fim)
+    add(txt(PX0 + 50, P1[0] - 9,
+      !inteira ? 'recorte de ' + dm(jan.ini) + ' a ' + dm(jan.corte) + ', não é a campanha inteira'
+      : fechada ? 'curva fechada, a campanha encerrou em ' + dm(jan.campanha_fim)
       : 'linha cheia o realizado até ' + dm(jan.corte) + ', tracejado a projeção até ' + dm(jan.campanha_fim)));
     e1.passos.forEach(function (v) {
       var y = ys(v, e1.max, P1);
@@ -178,7 +190,9 @@
       add(linha(PX0, y, PX1, y, BORDER, 1));
       add(txt(PX0 - 8, y + 3, br(v), { anc: 'end' }));
     });
-    var bw = Math.max((PX1 - PX0) / TOT - 2.4, 2);
+    // Teto de largura: com janela de um dia TOT vale 1 e a barra ocupava o
+    // painel inteiro, sugerindo volume que não existe e vazando pelos rótulos.
+    var bw = Math.min(Math.max((PX1 - PX0) / TOT - 2.4, 2), 18);
     acum.forEach(function (p) {
       if (p.leads <= 0) return;
       var y = ys(p.leads, e2.max, P2);
@@ -227,8 +241,13 @@
       }
     }
     if (CORTE < FIM) {
+      // Rotular de "hoje" o último dia carregado escondia atraso de ingestão:
+      // com a carga parada, a linha andava para trás e ninguém via.
       add(linha(xc, P1[0], xc, P3[1] + 4, MUTED, 1, '2 3'));
-      add(txt(xc + 4, P3[1] + 14, 'hoje', { peso: 700 }));
+      // No pe do eixo o rotulo batia no marcador de data seguinte, porque
+      // "dados ate 08/09" e bem mais largo que "hoje". Vai para o topo da
+      // propria linha tracejada, onde a faixa esta livre.
+      add(txt(xc + 4, P1[0] - 3, noDia ? 'hoje' : 'dados até ' + dm(jan.corte), { peso: 700 }));
     }
 
     // ---------- indicadores ----------
@@ -245,9 +264,14 @@
       k4 = ['ENTREGA PROJETADA', lo2 === hi2 ? br(hi2) : br(lo2) + ' a ' + br(hi2),
         meta ? (lo2 === hi2 ? pc(hi2 / meta * 100) + ' da meta'
                             : pc(lo2 / meta * 100) + ' a ' + pc(hi2 / meta * 100) + ' da meta') : 'sem meta definida'];
-    } else {
+    } else if (fechada) {
       k4 = ['ENTREGA REALIZADA', meta ? pc(totalLeads / meta * 100) : br(totalLeads),
         meta ? 'da meta ajustada de ' + br(meta) : 'leads captados, sem meta definida'];
+    } else {
+      // Campanha no ar sem projeção (sem plano, sem verba ou sem CPL) não pode
+      // dizer "realizada": ela não acabou.
+      k4 = ['CAPTADO ATÉ AQUI', meta ? pc(totalLeads / meta * 100) : br(totalLeads),
+        !inteira ? 'no período selecionado' : 'projeção indisponível: falta plano ou verba'];
     }
     var kpis = [
       ['LEADS CAPTADOS', br(totalLeads), dm(jan.ini) + ' a ' + dm(jan.corte)],
@@ -271,13 +295,19 @@
       L1 = 'a campanha não tem CPL de plano registrado, então a comparação com o planejamento fica de fora.';
       L2 = 'Foram ' + br(totalLeads) + ' leads a ' + (cpl == null ? 'custo não apurado' : brl(cpl) + ' cada') +
            ', com ' + brl(invest, false) + ' investidos.';
-    } else if (camp.encerrada_hoje) {
+    } else if (fechada) {
       L1 = 'o custo por lead fechou em ' + brl(cpl) + ' contra os ' + brl(cplP) + ' previstos no planejamento, ' +
            pc(Math.abs(desvio)) + (desvio >= 0 ? ' acima.' : ' abaixo.');
       L2 = verba && meta
         ? 'A campanha gastou ' + pc(invest / verba * 100) + ' da verba de ' + brl(verba, false) + ' e entregou ' +
           br(totalLeads) + ' leads, ' + pc(totalLeads / meta * 100) + ' da meta ajustada de ' + br(meta) + '.'
         : 'A campanha entregou ' + br(totalLeads) + ' leads com ' + brl(invest, false) + ' investidos.';
+    } else if (!inteira) {
+      L1 = 'no período selecionado o custo por lead ficou em ' + brl(cpl) + ' contra os ' +
+           brl(cplP) + ' previstos, ' + pc(Math.abs(desvio)) + (desvio >= 0 ? ' acima.' : ' abaixo.');
+      L2 = 'São ' + br(totalLeads) + ' leads e ' + brl(invest, false) + ' investidos entre ' +
+           dm(jan.ini) + ' e ' + dm(jan.corte) +
+           '. Este recorte não fecha a campanha, então não há projeção.';
     } else {
       L1 = 'o custo por lead está em ' + brl(cpl) + ' contra os ' + brl(cplP) + ' previstos, ' +
            pc(Math.abs(desvio)) + (desvio >= 0 ? ' acima do planejamento.' : ' abaixo do planejamento.');
@@ -293,7 +323,10 @@
     add(txt(139, 482, L1, { fs: 9.5, cor: BODY }));
     add(txt(94, 497, L2, { fs: 9.5, cor: BODY }));
 
-    var sub = 'Captação x investimento | campanha de ' + dm(jan.campanha_ini) + ' a ' + dmy(jan.campanha_fim) +
+    var sub = (inteira ? 'Captação x investimento | campanha de '
+                       : 'Captação x investimento | recorte dentro da campanha de ') +
+      dm(jan.campanha_ini) + ' a ' + dmy(jan.campanha_fim) +
+      (inteira ? '' : ', vendo ' + dm(jan.ini) + ' a ' + dm(jan.corte)) +
       (verba ? ' | verba oficial de ' + brl(verba, false) : '') +
       (meta ? ' | meta ajustada a ' + br(meta) + ' leads' : '');
 
