@@ -645,3 +645,55 @@ body.dash{min-height:100vh}
   color:var(--ink);width:100%;outline:none}
 .pg-campanhas .nota-tabela{margin:10px 2px 0;font-size:12.5px;color:var(--mute);max-width:92ch}
 .pg-campanhas .nota-tabela b{color:var(--ink-2);font-weight:600}
+
+/* ---------- ferramentas de operação (conversões, gestão, réguas) ----------
+   São telas de edição, não de leitura: precisam de botão secundário, campo de
+   busca, tabela dentro de card e caixa de diálogo. Vivem aqui, e não num CSS
+   próprio, pela mesma regra que impede duplicar placar.css: o que muda entre
+   as telas vem do DOM. */
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--hair)}
+.btn.ghost:hover{background:var(--ground)}
+.btn.mini{height:30px;padding:0 13px;font-size:12.5px}
+.btn.perigo{background:var(--card);color:var(--desce);border:1px solid #F3D6D6}
+.btn.perigo:hover{background:var(--desce-bg)}
+.campo.busca{padding-left:12px;min-width:260px}
+.campo.busca .ms{font-size:18px;color:var(--mute)}
+.campo.busca input{width:100%;font-weight:500}
+.campo.busca input::placeholder{color:var(--mute);font-weight:400}
+
+/* tabela dentro de card: sem borda própria, para não virar caixa dentro de caixa */
+.rolagem{overflow:auto;max-height:46vh;margin:0 -20px -16px}
+.rolagem table th{background:var(--card)}
+.rolagem td.esq,.rolagem th.esq{text-align:left;white-space:normal;padding-left:20px}
+.card table td:last-child,.card table th:last-child{padding-right:20px}
+/* botão dentro de célula: sem esticar na largura da coluna */
+td .btn{display:inline-flex;align-items:center;justify-content:center;width:auto}
+.conv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink-2);word-break:break-all;white-space:normal}
+.sem{color:var(--mute);font-style:italic}
+tr.curso td{font-weight:600;border-top:1px solid var(--hair);padding-top:14px}
+tr.curso td .qtd{font-weight:400;color:var(--mute);font-size:12px;margin-left:8px}
+
+/* caixa de diálogo */
+.overlay{position:fixed;inset:0;background:rgba(23,26,31,.5);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.overlay.on{display:flex}
+.modal{background:var(--card);border-radius:var(--r-card);padding:24px;width:100%;max-width:540px;display:flex;flex-direction:column;gap:4px}
+.modal h3{font-size:20px;font-weight:600}
+.modal .exp{font-size:13.5px;color:var(--mute);margin-bottom:12px}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.fld label{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.fld input,.fld select{border:1px solid var(--hair);border-radius:12px;background:var(--card);color:var(--ink);
+  font:inherit;font-size:13.5px;height:40px;padding:0 12px;outline:none;width:100%}
+.fld input:focus,.fld select:focus{border-color:var(--azul)}
+.fld .ajuda{font-size:12px;color:var(--mute);line-height:1.5}
+.fld .ajuda code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--ink-2)}
+.foot{display:flex;justify-content:flex-end;gap:9px;margin-top:8px}
+.msg{padding:10px 13px;border-radius:12px;font-size:13px;margin-top:4px}
+.msg.ok{background:var(--s3-tint);color:var(--sobe)}
+.msg.err{background:var(--desce-bg);color:var(--desce)}
+
+/* Conversões por curso: a coluna do nome é sticky, então a faixa do curso
+   precisa repintar o fundo dela, e a conversão entra indentada sob o curso. */
+.pg-conversoes tbody td.nome{min-width:340px}
+.pg-conversoes tbody td.conv,.pg-conversoes tbody td.sem{padding-left:38px}
+.pg-conversoes .card-head .sub{max-width:88ch}
+.pg-conversoes .tabela{max-height:68vh}

@@ -33,16 +33,24 @@
     {id:"performance", href:"performance.html", ico:"insights", rot:"Performance de campanha"}
   ];
   // Só no modo interno: as ferramentas de operação, que nunca tiveram versão de
-  // cliente e seguem com a cara antiga por enquanto.
+  // cliente. Conversões por curso já roda nesta casca (mora na raiz e se declara
+  // com data-dir/data-raiz); gestão e réguas seguem com a cara antiga.
   var FERRAMENTAS = [
-    {href:"../conversoes.html", ico:"link",             rot:"Conversões por curso"},
-    {href:"../admin.html",      ico:"tune",             rot:"Gestão de conversões"},
-    {href:"../reguas.html",     ico:"forward_to_inbox", rot:"Réguas e e-mails"}
+    {id:"conversoes", href:"conversoes.html", ico:"link",             rot:"Conversões por curso"},
+    {id:"admin",      href:"admin.html",      ico:"tune",             rot:"Gestão de conversões"},
+    {id:"reguas",     href:"reguas.html",     ico:"forward_to_inbox", rot:"Réguas e e-mails"}
   ];
   var ANEL = '<svg><use href="#anel"/></svg>';
   var pagina = document.body.dataset.pagina || "inicio";
   var titulo = document.body.dataset.titulo || "Dashboard";
   var interno = document.body.dataset.modo === "interno";
+  // Onde a página está em relação ao site. As páginas de dashboard/ e interno/
+  // ficam nos defaults; uma ferramenta que mora na raiz (conversoes.html) diz
+  // data-dir="interno/" data-raiz="" e o mesmo menu continua servindo.
+  var DIR = document.body.dataset.dir;   // até a pasta de páginas deste modo
+  var RAIZ = document.body.dataset.raiz; // até a raiz do site
+  if (DIR === undefined) DIR = "";
+  if (RAIZ === undefined) RAIZ = "../";
   // pasta desta casca, para a logo servir as duas pastas sem cópia
   var BASE = (document.currentScript && document.currentScript.src || "").replace(/[^\/]*$/, "");
 
@@ -73,15 +81,15 @@
   menu.setAttribute("aria-label", "Relatórios");
   var h = '<div class="titulo">Relatórios</div>';
   PAGINAS.forEach(function(p){
-    h += '<a href="' + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
+    h += '<a href="' + DIR + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
   });
   if (interno){
     INTERNAS.forEach(function(p){
-      h += '<a href="' + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
+      h += '<a href="' + DIR + p.href + '" class="' + (p.id === pagina ? "on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
     });
     h += '<div class="sep"></div><div class="titulo">Ferramentas</div>';
     FERRAMENTAS.forEach(function(p){
-      h += '<a href="' + p.href + '" class="ferramenta"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
+      h += '<a href="' + RAIZ + p.href + '" class="ferramenta' + (p.id === pagina ? " on" : "") + '"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
     });
   }
   h += '<div class="rodape-menu">' + (interno ? 'Versão interna.' : 'Dados ao vivo, leitura apenas.') +

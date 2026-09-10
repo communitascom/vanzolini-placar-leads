@@ -5,129 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<title>Conversões por curso · Fundação Vanzolini</title>
+<title>Conversões por curso · Painel interno Vanzolini</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet">
-<style>
-:root{
-  --md-primary:#32327F; --md-primary-hover:#4848B5; --md-background:#F3F3FB;
-  --md-surface-container:#F8F7FC; --md-on-surface:#1D1B2C; --md-on-surface-variant:#5F5E76;
-  --md-outline:#DEDDEE; --md-outline-variant:#EDECF6; --md-shape-xs:4px; --md-shape-sm:8px;
-  --md-shape-md:12px; --md-shape-lg:16px; --md-shape-full:999px;
-  --md-elev-1:0 1px 2px rgba(6,6,83,.06),0 1px 3px rgba(6,6,83,.08);
-  --md-error-container:#FBEAE8; --md-on-error-container:#7A241D;
-  --md-success-container:#E3F5EA; --md-on-success-container:#0F5C30;
-  --azul:var(--md-primary);--azul2:var(--md-primary-hover);--claro:var(--md-background);--linha:var(--md-outline);--txt:var(--md-on-surface);--sub:var(--md-on-surface-variant);
-  --verde:#218A4E;--verde-bg:var(--md-success-container);--amar:#9A6B0A;--amar-bg:#FBF1DC;--verm:#C23B34;--verm-bg:var(--md-error-container);--zebra:var(--md-surface-container);}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Work Sans',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--md-background);color:var(--txt);font-size:13px;padding:20px}
-h1,h2,h3{font-family:'Inter Tight','Work Sans',sans-serif}
-.material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;display:inline-block;line-height:1;vertical-align:middle;-webkit-font-smoothing:antialiased;font-size:16px}
-.wrap{max-width:1180px;margin:0 auto}
-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;
-  background:transparent;border-bottom:1px solid var(--linha);padding:10px 2px 14px}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{height:59px;width:auto}
-.brand .divisor{width:1px;align-self:stretch;background:var(--linha)}
-h1{font-size:15px;color:var(--azul);font-weight:600;line-height:1.2}
-.brand small{color:var(--sub);font-size:11px;display:block;margin-top:1px}
-.btn{background:var(--azul);color:#fff;border:none;border-radius:var(--md-shape-full);padding:8px 18px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
-.btn:hover{background:var(--azul2)}
-.btn.ghost{background:#fff;color:var(--azul);border:1px solid var(--linha)}
-.btn.ghost:hover{background:var(--md-background)}
-.btn.mini{padding:4px 12px;font-size:11.5px}
-.btn.perigo{background:#fff;color:var(--verm);border:1px solid #f0c9c9}
-.btn.perigo:hover{background:var(--verm-bg)}
-.chip{border:1px solid var(--linha);background:#fff;color:var(--sub);border-radius:var(--md-shape-full);
-  padding:5px 12px 5px 10px;font-size:11.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;
-  gap:5px;text-decoration:none;line-height:1.3;transition:background .12s,border-color .12s,color .12s;font-family:inherit}
-.chip:hover{background:var(--md-background);border-color:var(--azul2);color:var(--azul)}
-.card{background:#fff;border:1px solid var(--linha);border-radius:var(--md-shape-md);padding:16px 18px;margin-bottom:14px;box-shadow:var(--md-elev-1)}
-.card h2{font-size:13.5px;color:var(--azul);margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:600}
-.card .hint{font-size:11.5px;color:var(--sub);margin-bottom:11px}
-input,select{border:1px solid var(--linha);border-radius:var(--md-shape-xs);padding:8px 10px;font-size:13px;font-family:inherit;background:#fff;color:var(--txt);width:100%}
-input:focus,select:focus{outline:none;border-color:var(--azul);border-width:1.5px}
-.busca{max-width:330px}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--md-outline-variant);vertical-align:top}
-th{background:var(--md-surface-container);color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;font-weight:700;border-bottom:1px solid var(--linha)}
-td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-tr.curso td{background:var(--claro);font-weight:700;color:var(--azul);border-top:1px solid var(--linha)}
-tr.curso td .qtd{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px}
-.conv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#3c3b52;word-break:break-all}
-.sem{color:#9b9ab0;font-style:italic}
-.badge{display:inline-block;padding:2px 9px;border-radius:var(--md-shape-full);font-size:10.5px;font-weight:600}
-.b-verde{background:var(--verde-bg);color:var(--md-on-success-container)} .b-amar{background:var(--amar-bg);color:#6B4A05}
-.b-verm{background:var(--verm-bg);color:var(--md-on-error-container)} .b-cinza{background:var(--md-surface-container);color:var(--sub)}
-.overlay{position:fixed;inset:0;background:rgba(29,27,44,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
-.overlay.on{display:flex}
-.modal{background:#fff;border-radius:var(--md-shape-lg);padding:20px 22px;width:100%;max-width:520px;box-shadow:0 8px 28px rgba(6,6,83,.22)}
-.modal h3{font-size:15px;color:var(--azul);margin-bottom:4px;font-weight:600}
-.modal .exp{font-size:11.5px;color:var(--sub);margin-bottom:14px}
-.fld{margin-bottom:11px}
-.fld label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);margin-bottom:4px;font-weight:600}
-.foot{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
-.msg{padding:9px 12px;border-radius:var(--md-shape-sm);font-size:12px;margin-top:10px}
-.msg.ok{background:var(--verde-bg);color:var(--md-on-success-container)} .msg.err{background:var(--verm-bg);color:var(--md-on-error-container)}
-.login{max-width:400px;margin:70px auto;background:#fff;border:1px solid var(--linha);border-radius:var(--md-shape-lg);padding:26px}
-.login h2{font-size:16px;color:var(--azul);margin-bottom:6px}
-.login p{font-size:12.5px;color:var(--sub);margin-bottom:14px}
-.tag{background:#fff;border:1px solid var(--linha);border-radius:var(--md-shape-full);padding:5px 12px;font-size:11px;color:var(--sub)}
-.carregando{padding:30px;text-align:center;color:var(--sub)}
-.scroll{max-height:62vh;overflow:auto;border:1px solid var(--linha);border-radius:var(--md-shape-sm)}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&icon_names=add,campaign,check_circle,forward_to_inbox,group,history,home,insights,link,school,search,tune,verified,warning&display=block">
+<link rel="stylesheet" href="dashboard/dashboard.css?v=20260911b">
 </head>
-<body>
-<div class="wrap">
+<body class="dash pg-conversoes" data-pagina="conversoes" data-modo="interno" data-dir="interno/" data-raiz="" data-titulo="Conversões por curso">
+<main>
 
-<div id="telaApp">
-  <header>
-    <div class="brand">
-      <img class="logo" src="logo_horizontal_v1.png" alt="Fundação Vanzolini">
-      <div class="divisor"></div>
-      <div><h1>Conversões por curso</h1>
-        <small>o que entra na contagem de cada curso</small></div>
+  <div class="linha-topo">
+    <div class="filtros-topo">
+      <div class="campo busca"><span class="ms">search</span>
+        <input id="busca" type="text" placeholder="Buscar curso ou conversão" oninput="render()" aria-label="Buscar curso ou conversão">
+      </div>
     </div>
-    <nav style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <a class="chip" href="interno/index.html"><span class="material-symbols-outlined">arrow_back</span>Placar</a>
-    </nav>
-  </header>
+    <div class="acoes">
+      <span class="tag" id="atualizado"></span>
+      <button class="chip" onclick="abrirNovoCurso()"><span class="ms">add</span>Novo curso</button>
+    </div>
+  </div>
+
+  <p class="leitura leitura-box" id="leitura"><span class="ms">insights</span><span id="leituraTxt">Carregando o mapa de conversões…</span></p>
 
   <div class="card" id="cardOrfas" style="display:none">
-    <h2><span style="display:inline-flex;align-items:center;gap:6px"><span class="material-symbols-outlined" style="color:var(--amar)">warning</span>Conversões entrando sem curso</span><span class="tag" id="tagOrfas"></span></h2>
-    <div class="hint">Estão chegando leads com estes identificadores sem curso associado, então não contam em lugar nenhum. Vincule os que forem de um curso específico e os leads passam a contar, inclusive os que já entraram.<br><b>Nem toda linha aqui é um erro:</b> conversões genéricas como download de programa, início de chat e negociação criada no CRM não pertencem a um curso e devem continuar sem vínculo.</div>
-    <div class="scroll" style="max-height:34vh"><table>
-      <thead><tr><th>Conversão</th><th class="num">Leads parados</th><th class="num">Pessoas</th><th class="num">Último</th><th></th></tr></thead>
-      <tbody id="corpoOrfas"></tbody>
-    </table></div>
+    <div class="card-head">
+      <div>
+        <h4>Conversões entrando sem curso</h4>
+        <div class="sub">Vincule as que pertencem a um curso e os leads passam a contar, inclusive os que já entraram. Nem toda linha aqui é erro: download de programa, início de chat e negociação criada no CRM não pertencem a curso nenhum e devem continuar sem vínculo.</div>
+      </div>
+      <span class="badge b-amar" id="tagOrfas"></span>
+    </div>
+    <div class="rolagem">
+      <table>
+        <thead><tr><th class="esq">Conversão</th><th>Leads parados</th><th>Pessoas</th><th>Último</th><th></th></tr></thead>
+        <tbody id="corpoOrfas"></tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>
-      <span>Cursos e suas conversões</span>
-      <span style="display:flex;gap:9px;align-items:center">
-        <input class="busca" id="busca" type="text" placeholder="Buscar curso ou conversão…" oninput="render()">
-        <button class="btn" onclick="abrirNovoCurso()">+ Novo curso</button>
-      </span>
-    </h2>
-    <div class="hint" id="resumo"></div>
-    <div class="scroll"><table>
-      <thead><tr><th style="width:46%">Curso e conversões</th><th class="num">Leads já trazidos</th><th class="num">Último lead</th><th style="width:150px"></th></tr></thead>
-      <tbody id="corpo"><tr><td colspan="4" class="carregando">Carregando…</td></tr></tbody>
-    </table></div>
+  <div class="tabela">
+    <table>
+      <thead><tr>
+        <th class="nome">Curso e conversões</th>
+        <th>Leads já trazidos</th>
+        <th>Último lead</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="corpo"><tr><td colspan="4" class="loading">Carregando…</td></tr></tbody>
+    </table>
   </div>
-</div>
+  <div class="tab-nota" id="resumo"></div>
+
+  <div class="rodape">
+    <div>Ferramenta de operação: o que é vinculado aqui muda a contagem do <a href="interno/leads.html">placar de leads</a> daqui para a frente e para trás.</div>
+    <div>Fonte: Supabase Communitas (leads do RD Station). Conversões sem curso consideram os últimos 120 dias. Consultado às <span id="horaRodape"></span>.</div>
+    <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
+  </div>
+</main>
 
 <div class="overlay" id="ovConv">
   <div class="modal">
     <h3 id="tituloConv">Vincular conversão</h3>
     <div class="exp" id="expConv"></div>
-    <div class="fld"><label>Identificador da conversão no RD</label>
+    <div class="fld"><label for="cConversao">Identificador da conversão no RD</label>
       <input id="cConversao" type="text" placeholder="MBA-LIDERANCA-ESTRATEGICA-RD">
-      <div style="font-size:11px;color:var(--sub);margin-top:5px">Cole exatamente como aparece no RD. O sufixo numérico e o texto entre colchetes são ignorados automaticamente, então uma variação como <code>-2</code> ou <code>[NOVOS-CAMPOS]</code> já fica coberta.</div>
+      <div class="ajuda">Cole exatamente como aparece no RD. O sufixo numérico e o texto entre colchetes são ignorados automaticamente, então uma variação como <code>-2</code> ou <code>[NOVOS-CAMPOS]</code> já fica coberta.</div>
     </div>
-    <div class="fld"><label>Curso que vai receber os leads</label><select id="cCurso"></select></div>
+    <div class="fld"><label for="cCurso">Curso que vai receber os leads</label><select id="cCurso"></select></div>
     <div id="msgConv"></div>
     <div class="foot">
       <button class="btn ghost" onclick="fechar('ovConv')">Cancelar</button>
@@ -140,11 +86,11 @@ tr.curso td .qtd{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px
   <div class="modal">
     <h3>Novo curso</h3>
     <div class="exp">Cadastre o curso e, logo em seguida, vincule as conversões que trazem os leads dele.</div>
-    <div class="fld"><label>Nome do curso</label><input id="nCurso" type="text" placeholder="Nome como aparece no site e no Monday"></div>
-    <div class="fld"><label>Tipo</label>
+    <div class="fld"><label for="nCurso">Nome do curso</label><input id="nCurso" type="text" placeholder="Nome como aparece no site e no Monday"></div>
+    <div class="fld"><label for="nTipo">Tipo</label>
       <select id="nTipo"><option value="Curso">Curso</option><option value="MBA">MBA</option><option value="Institucional">Institucional</option></select>
     </div>
-    <div class="fld"><label>Primeira conversão (opcional)</label><input id="nConversao" type="text" placeholder="deixe em branco para vincular depois"></div>
+    <div class="fld"><label for="nConversao">Primeira conversão (opcional)</label><input id="nConversao" type="text" placeholder="deixe em branco para vincular depois"></div>
     <div id="msgCurso"></div>
     <div class="foot">
       <button class="btn ghost" onclick="fechar('ovCurso')">Cancelar</button>
@@ -153,7 +99,7 @@ tr.curso td .qtd{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px
   </div>
 </div>
 
-</div>
+<script>window.AGUARDA_PIN = true;</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL="https://ltasijrhkotyyrxnavab.supabase.co";
@@ -163,33 +109,53 @@ const N=v=>Number(v||0).toLocaleString('pt-BR');
 const dt=s=>s?s.split('-').reverse().join('/'):'';
 let LINHAS=[], ORFAS=[], CURSOS=[];
 
-async function iniciar(){
-  await carregar();
-}
-
 async function carregar(){
   const [a,b]=await Promise.all([sb.rpc('de_para_por_curso'), sb.rpc('conversoes_orfas',{p_dias:120})]);
-  if(a.error){document.getElementById('corpo').innerHTML=`<tr><td colspan="4" class="carregando">Erro: ${a.error.message}</td></tr>`;return;}
+  if(a.error){
+    document.getElementById('corpo').innerHTML=`<tr><td colspan="4" class="loading">Erro: ${a.error.message}</td></tr>`;
+    if(window.Dash) Dash.tag('<b>sem conexão</b>','erro');
+    return;
+  }
   LINHAS=a.data||[]; ORFAS=b.data||[];
+  // ?q=texto abre a tela já filtrada, para mandar link direto de um curso
+  const q=new URLSearchParams(location.search).get('q');
+  if(q) document.getElementById('busca').value=q;
   CURSOS=[...new Map(LINHAS.map(l=>[l.curso_id,{id:l.curso_id,nome:l.curso,tipo:l.tipo}])).values()]
           .sort((x,y)=>x.nome.localeCompare(y.nome,'pt'));
   document.getElementById('cCurso').innerHTML=CURSOS.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
-  renderOrfas(); render();
+  renderOrfas(); render(); atualizarLeitura();
+  if(window.Dash){ Dash.tag('<b>dados ao vivo</b>'); Dash.stamp(); }
+}
+
+// Leitura da tela em texto corrido, com os números que acabaram de ser lidos.
+function atualizarLeitura(){
+  document.getElementById('horaRodape').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const cursos=new Set(LINHAS.map(l=>l.curso_id)).size;
+  const convs=LINHAS.filter(l=>l.conversao).length;
+  const semConv=[...new Map(LINHAS.map(l=>[l.curso_id,l])).values()]
+    .filter(c=>!LINHAS.some(l=>l.curso_id===c.curso_id&&l.conversao)).length;
+  const leadsOrfaos=ORFAS.reduce((a,o)=>a+Number(o.linhas),0);
+  let t=`<b>${N(convs)} conversões</b> vinculadas a ${N(cursos)} cursos alimentam o placar de leads`;
+  t+= semConv ? `, e ${N(semConv)} curso${semConv===1?'':'s'} ainda não recebe${semConv===1?'':'m'} lead automaticamente por não ter conversão vinculada.` : '.';
+  t+= ORFAS.length
+      ? ` Nos últimos 120 dias, <b>${N(ORFAS.length)} conversões chegaram sem curso</b> e deixaram ${N(leadsOrfaos)} leads parados fora da contagem.`
+      : ' Nenhuma conversão chegou sem curso nos últimos 120 dias.';
+  document.getElementById('leituraTxt').innerHTML=t;
 }
 
 function renderOrfas(){
   const box=document.getElementById('cardOrfas');
   if(!ORFAS.length){box.style.display='none';return;}
-  box.style.display='block';
+  box.style.display='flex';
   const totalLeads=ORFAS.reduce((a,o)=>a+Number(o.linhas),0);
-  document.getElementById('tagOrfas').textContent=`${ORFAS.length} conversões · ${N(totalLeads)} leads sem curso`;
+  document.getElementById('tagOrfas').textContent=`${ORFAS.length} conversões, ${N(totalLeads)} leads sem curso`;
   document.getElementById('corpoOrfas').innerHTML=ORFAS.map(o=>`
     <tr>
-      <td class="conv">${o.conversao}</td>
-      <td class="num"><b>${N(o.linhas)}</b></td>
-      <td class="num">${N(o.emails)}</td>
-      <td class="num">${dt(o.ultimo)}</td>
-      <td style="text-align:right"><button class="btn mini" onclick="abrirConv('${o.conversao.replace(/'/g,"\\'")}')">Vincular a um curso</button></td>
+      <td class="esq conv">${o.conversao}</td>
+      <td class="destaque">${N(o.linhas)}</td>
+      <td>${N(o.emails)}</td>
+      <td>${dt(o.ultimo)}</td>
+      <td><button class="btn mini ghost" onclick="abrirConv('${o.conversao.replace(/'/g,"\\'")}')">Vincular a um curso</button></td>
     </tr>`).join('');
 }
 
@@ -208,28 +174,31 @@ function render(){
       if(!bate) return;
       nCursos++; nConvs+=c.convs.length;
       const total=c.convs.reduce((a,v)=>a+Number(v.leads_total),0);
-      html+=`<tr class="curso"><td>${c.nome}
-        <span class="qtd">${c.tipo||''}${c.ativo?'':' · inativo'} · ${c.convs.length} conversão(ões)</span></td>
-        <td class="num">${N(total)}</td><td></td>
-        <td style="text-align:right"><button class="btn mini ghost" onclick="abrirConv('',${id})">+ conversão</button></td></tr>`;
+      html+=`<tr class="curso"><td class="nome">${c.nome}
+        <span class="qtd">${c.tipo||''}${c.ativo?'':', inativo'}, ${c.convs.length} conversão(ões)</span></td>
+        <td class="destaque">${N(total)}</td><td></td>
+        <td><button class="btn mini ghost" onclick="abrirConv('',${id})">+ conversão</button></td></tr>`;
       if(!c.convs.length){
-        html+=`<tr><td colspan="4" class="sem" style="padding-left:22px">nenhuma conversão vinculada, este curso não recebe leads automaticamente</td></tr>`;
+        html+=`<tr><td class="nome sem" colspan="4">nenhuma conversão vinculada, este curso não recebe leads automaticamente</td></tr>`;
       }
       c.convs.sort((a,b)=>a.conversao.localeCompare(b.conversao))
         .forEach(v=>{
           const zero=Number(v.leads_total)===0;
           html+=`<tr>
-            <td style="padding-left:22px" class="conv">${v.conversao}${zero?' <span class="badge b-cinza">sem leads ainda</span>':''}</td>
-            <td class="num">${N(v.leads_total)}</td>
-            <td class="num">${dt(v.ultimo_lead)}</td>
-            <td style="text-align:right"><button class="btn mini perigo" onclick="desvincular('${v.conversao.replace(/'/g,"\\'")}',${Number(v.leads_total)})">Remover</button></td>
+            <td class="nome conv">${v.conversao}${zero?' <span class="badge b-cinza">sem leads ainda</span>':''}</td>
+            <td class="${zero?'z':''}">${N(v.leads_total)}</td>
+            <td>${dt(v.ultimo_lead)}</td>
+            <td><button class="btn mini perigo" onclick="desvincular('${v.conversao.replace(/'/g,"\\'")}',${Number(v.leads_total)})">Remover</button></td>
           </tr>`;
         });
     });
-  document.getElementById('corpo').innerHTML=html||'<tr><td colspan="4" class="carregando">Nada encontrado.</td></tr>';
-  document.getElementById('resumo').textContent=
-    `${nCursos} cursos e ${nConvs} conversões vinculadas. Em ordem alfabética; use a busca para filtrar por curso ou por identificador.`;
+  document.getElementById('corpo').innerHTML=html||'<tr><td colspan="4" class="loading">Nada encontrado.</td></tr>';
+  document.getElementById('resumo').textContent = nCursos
+    ? `${nCursos} curso${nCursos===1?'':'s'} e ${nConvs} conversão${nConvs===1?'':'ões'} ${nConvs===1?'vinculada':'vinculadas'}. Em ordem alfabética; use a busca para filtrar por curso ou por identificador.`
+    : 'Nenhum curso ou conversão bate com a busca.';
 }
+
+function fechar(id){ document.getElementById(id).classList.remove('on'); }
 
 function abrirConv(conversao, cursoId){
   document.getElementById('cConversao').value=conversao||'';
@@ -291,7 +260,10 @@ async function salvarCurso(){
   setTimeout(()=>fechar('ovCurso'),1800);
 }
 
-iniciar();
+// fechar a caixa clicando fora ou com Esc, como as demais telas de edição
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('on'); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.on').forEach(o=>o.classList.remove('on')); });
 </script>
+<script src="dashboard/shell.js?v=20260911b"></script>
 </body>
 </html>
