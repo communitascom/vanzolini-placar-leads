@@ -32,8 +32,25 @@
 --    pedaco de campanha e extrapolar pedaco. p_corte e data DE REFERENCIA: a
 --    campanha inteira como estava naquele dia, com projecao viva.
 --
--- 6. Projecao so com dia pela frente. Campanha encerrada devolve projecao nula
---    e a tela mostra entrega realizada no lugar.
+-- 6. Projecao so com dia pela frente e CPL apurado maior que zero. Campanha
+--    encerrada devolve projecao nula e a tela mostra entrega realizada.
+--
+-- 7. Erro tem codigo nomeado, nao so mensagem: CAMPANHA_INEXISTENTE,
+--    PERIODO_INVALIDO, JANELA_SEM_INTERSECAO, CORTE_ANTES_DA_JANELA,
+--    SEM_CARGA_DE_MIDIA e CURSO_SEM_MIDIA. Antes tudo caia em "sem dado de
+--    midia", que era diagnostico errado para parametro invalido.
+--
+-- 8. Verba nula propaga nula. greatest() IGNORA nulo em Postgres, entao
+--    greatest(null - custo, 0) dava zero e um MBA sem plano aparecia com a
+--    verba esgotada, em silencio.
+--
+-- 9. A serie carrega leads_acumulados, para o desenho nao refazer a soma no
+--    JavaScript, que e o que esta funcao existe para evitar.
+--
+-- 10. Sobreposicao de campanhas do mesmo curso e SINALIZADA em
+--     campanha.sobreposta_com, nao resolvida: midia e leads sao atribuidos por
+--     curso e data, entao no trecho em comum os dois lados contam o mesmo.
+--     Decidir quem fica com o dia sobreposto e convencao de negocio.
 --
 -- LIMITE CONHECIDO DO p_corte
 -- Ele reproduz a MIDIA de uma data passada com fidelidade, porque midia_diaria
@@ -47,17 +64,9 @@
 -- pelo ritmo 2.636 identica, 13 dias restantes identicos.
 -- =====================================================================
 
--- ---------------------------------------------------------------------
--- ATENCAO: a definicao viva das duas funcoes esta nas migrations
--- performance_campanha_fase2, performance_campanha_sem_projecao_encerrada,
--- performance_campanha_agregado_bate_com_serie, performance_campanha_data_de_corte,
--- performance_campanha_bordas e performance_campanha_revisao_codex.
--- O que segue abaixo e a versao inicial; a revisao do Codex acrescentou
--- codigos de erro nomeados, guarda de curso sem midia, leads_acumulados na
--- serie, bloco de referencia, encerrada em duas leituras, saldo e excedido de
--- verba, sinalizacao de campanhas irmas sobrepostas e datas efetivas na
--- listagem. Consultar o banco para a versao corrente.
--- ---------------------------------------------------------------------
+-- =====================================================================
+-- Estas sao as definicoes VIVAS, iguais as que estao no banco em 10/09/2026.
+-- =====================================================================
 
 create or replace function public.performance_campanhas_lista()
 returns jsonb
@@ -73,17 +82,22 @@ as $$
       'curso_id', cu.id,
       'curso', cu.nome,
       'tipo', cu.tipo,
-      'data_inicio', c.data_inicio,
-      'data_fim', c.data_fim,
-      'rotulo', to_char(c.data_inicio,'DD/MM/YYYY')||' a '||to_char(c.data_fim,'DD/MM/YYYY'),
+      -- override do plano coluna a coluna, igual a analitica: sem isso o
+      -- Engenharia aparecia no filtro terminando em 16/08 e a analitica lia 15/08
+      'data_inicio', coalesce(pl.data_inicio, c.data_inicio),
+      'data_fim',    coalesce(pl.data_fim,    c.data_fim),
+      'rotulo', to_char(coalesce(pl.data_inicio, c.data_inicio),'DD/MM/YYYY')||' a '||
+                to_char(coalesce(pl.data_fim,    c.data_fim),'DD/MM/YYYY'),
       'situacao', case
-        when current_date between c.data_inicio and c.data_fim then 'vigente'
-        when c.data_fim < current_date then 'encerrada'
+        when current_date between coalesce(pl.data_inicio, c.data_inicio)
+                              and coalesce(pl.data_fim, c.data_fim) then 'vigente'
+        when coalesce(pl.data_fim, c.data_fim) < current_date then 'encerrada'
         else 'futura' end,
-      'tem_plano', exists (select 1 from public.campanha_plano pl where pl.campanha_id = c.id)
+      'tem_plano', pl.campanha_id is not null
     ) as x
     from public.campanhas c
     join public.cursos cu on cu.id = c.curso_id
+    left join public.campanha_plano pl on pl.campanha_id = c.id
   ) t;
 $$;
 
@@ -108,8 +122,9 @@ as $$
 declare
   r record; v_ini date; v_fim date; v_corte date; v_dias_rest integer;
   v_leads bigint; v_custo numeric; v_cpl numeric; v_ritmo numeric;
-  v_custo_dia numeric; v_restante numeric; v_serie jsonb; v_completa boolean;
-  v_fim_camp date; v_ini_camp date;
+  v_custo_dia numeric; v_saldo numeric; v_serie jsonb; v_completa boolean;
+  v_fim_camp date; v_ini_camp date; v_verba numeric; v_dias integer;
+  v_dias_ritmo integer; v_tem_midia boolean; v_irmas jsonb;
 begin
   select c.id, c.nome, c.curso_id, c.data_inicio, c.data_fim, c.verba, c.meta,
          cu.nome as curso, cu.tipo,
@@ -124,10 +139,16 @@ begin
    where c.id = p_campanha_id;
 
   if not found then
-    return jsonb_build_object('erro', 'campanha nao encontrada', 'campanha_id', p_campanha_id);
+    return jsonb_build_object('erro', 'campanha nao encontrada',
+      'codigo', 'CAMPANHA_INEXISTENTE', 'campanha_id', p_campanha_id);
   end if;
 
-  -- Janela da campanha: override do plano vale coluna a coluna.
+  if p_ini is not null and p_fim is not null and p_ini > p_fim then
+    return jsonb_build_object('erro', 'periodo invalido: inicio depois do fim',
+      'codigo', 'PERIODO_INVALIDO', 'campanha_id', p_campanha_id,
+      'p_ini', p_ini, 'p_fim', p_fim);
+  end if;
+
   v_ini_camp := coalesce(r.plano_inicio, r.data_inicio);
   v_fim_camp := coalesce(r.plano_fim,    r.data_fim);
   v_ini := v_ini_camp;
@@ -135,17 +156,40 @@ begin
   if p_ini is not null then v_ini := greatest(v_ini, p_ini); end if;
   if p_fim is not null then v_fim := least(v_fim, p_fim);    end if;
 
-  -- Corte: ultimo dia fechado. A midia atrasa um dia, entao e ela quem manda.
-  -- p_corte puxa a leitura para tras, para reproduzir uma data passada.
+  if v_ini > v_fim then
+    return jsonb_build_object('erro', 'o recorte nao encosta na janela da campanha',
+      'codigo', 'JANELA_SEM_INTERSECAO', 'campanha_id', p_campanha_id,
+      'janela_ini', v_ini_camp, 'janela_fim', v_fim_camp);
+  end if;
+
+  if p_corte is not null and p_corte < v_ini then
+    return jsonb_build_object('erro', 'data de referencia anterior ao inicio da janela',
+      'codigo', 'CORTE_ANTES_DA_JANELA', 'campanha_id', p_campanha_id,
+      'janela_ini', v_ini, 'p_corte', p_corte);
+  end if;
+
+  -- Corte global de proposito: ele mede ate onde a CARGA chegou, nao ate onde o
+  -- curso anunciou. Assim lead que entra depois do ultimo dia de anuncio segue
+  -- aparecendo, em vez de a curva parar junto com a midia.
   select least(v_fim, max(m.data)) into v_corte from public.midia_diaria m;
   if p_corte is not null then v_corte := least(v_corte, p_corte); end if;
   if v_corte is null or v_corte < v_ini then
-    return jsonb_build_object(
-      'erro', 'sem dado de midia carregado para esta janela',
-      'campanha_id', p_campanha_id, 'janela_ini', v_ini, 'janela_fim', v_fim);
+    return jsonb_build_object('erro', 'sem dado de midia carregado para esta janela',
+      'codigo', 'SEM_CARGA_DE_MIDIA', 'campanha_id', p_campanha_id,
+      'janela_ini', v_ini, 'janela_fim', v_fim);
   end if;
 
-  -- Projeta quando a janela e a campanha inteira. Data de corte nao tira isso.
+  -- Guarda separada: a carga chegou, mas este curso nao tem uma linha sequer.
+  select exists (
+    select 1 from public.midia_diaria m
+     where m.curso_id = r.curso_id and m.data between v_ini and v_corte
+  ) into v_tem_midia;
+  if not v_tem_midia then
+    return jsonb_build_object('erro', 'a campanha nao tem midia registrada nesta janela',
+      'codigo', 'CURSO_SEM_MIDIA', 'campanha_id', p_campanha_id,
+      'curso', r.curso, 'janela_ini', v_ini, 'janela_fim', v_corte);
+  end if;
+
   v_completa  := (v_ini = v_ini_camp) and (v_fim = v_fim_camp);
   v_dias_rest := greatest((v_fim_camp - v_corte), 0);
 
@@ -169,54 +213,90 @@ begin
       from dias d
       left join midia m on m.dia = d.dia
       left join leads l on l.dia = d.dia
+  ),
+  acum as (
+    select dia, leads, custo,
+           sum(leads) over (order by dia) as leads_acumulados,
+           sum(custo) over (order by dia) as custo_acumulado
+      from linha
   )
-  select jsonb_agg(jsonb_build_object('dia', dia, 'leads', leads, 'custo', custo) order by dia),
-         coalesce(sum(leads), 0), coalesce(sum(custo), 0)
-    into v_serie, v_leads, v_custo
-    from linha;
+  select jsonb_agg(jsonb_build_object(
+           'dia', dia, 'leads', leads, 'custo', custo,
+           'leads_acumulados', leads_acumulados,
+           'custo_acumulado', custo_acumulado) order by dia),
+         coalesce(sum(leads), 0), coalesce(sum(custo), 0), count(*)
+    into v_serie, v_leads, v_custo, v_dias
+    from acum;
 
   v_cpl := round(v_custo / nullif(v_leads, 0), 2);
 
-  select round(avg(x.leads), 2), round(avg(x.custo), 2)
-    into v_ritmo, v_custo_dia
-    from (select (e->>'leads')::numeric as leads, (e->>'custo')::numeric as custo
-            from jsonb_array_elements(v_serie) e
-           order by e->>'dia' desc limit 14) x;
+  -- Media dos ultimos 14 dias, so quando existem 14 dias para medir.
+  if v_dias >= 14 then
+    select round(avg(x.leads), 2), round(avg(x.custo), 2), count(*)
+      into v_ritmo, v_custo_dia, v_dias_ritmo
+      from (select (e->>'leads')::numeric as leads, (e->>'custo')::numeric as custo
+              from jsonb_array_elements(v_serie) e
+             order by (e->>'dia')::date desc limit 14) x;
+  end if;
 
-  v_restante := greatest(
-    case when r.tipo = 'MBA' then r.verba_oficial else r.verba end - v_custo, 0);
+  v_verba := case when r.tipo = 'MBA' then r.verba_oficial else r.verba end;
+  v_saldo := case when v_verba is null then null else v_verba - v_custo end;
+
+  -- Campanhas irmas com janela sobreposta: sinalizo, nao reatribuo.
+  select case when count(*) = 0 then null else jsonb_agg(jsonb_build_object(
+           'campanha_id', x.id, 'ini', x.ini, 'fim', x.fim)) end
+    into v_irmas
+    from (
+      select c2.id,
+             coalesce(pl2.data_inicio, c2.data_inicio) as ini,
+             coalesce(pl2.data_fim,    c2.data_fim)    as fim
+        from public.campanhas c2
+        left join public.campanha_plano pl2 on pl2.campanha_id = c2.id
+       where c2.curso_id = r.curso_id and c2.id <> r.id
+         and coalesce(pl2.data_inicio, c2.data_inicio) <= v_fim_camp
+         and coalesce(pl2.data_fim,    c2.data_fim)    >= v_ini_camp
+    ) x;
 
   return jsonb_build_object(
     'campanha', jsonb_build_object(
       'id', r.id, 'nome', r.nome, 'curso_id', r.curso_id, 'curso', r.curso,
-      'tipo', r.tipo, 'data_inicio', r.data_inicio, 'data_fim', r.data_fim,
+      'tipo', r.tipo,
+      'data_inicio_monday', r.data_inicio, 'data_fim_monday', r.data_fim,
       'tem_plano', r.tem_plano,
-      'encerrada', v_fim_camp < current_date),
+      'encerrada_hoje', v_fim_camp < current_date,
+      'encerrada_na_referencia', v_fim_camp <= v_corte,
+      'sobreposta_com', v_irmas),
     'plano', jsonb_build_object(
       'fonte', case when r.tipo = 'MBA' then 'plano de midia' else 'Monday' end,
-      'verba_oficial', case when r.tipo = 'MBA' then r.verba_oficial else r.verba end,
+      'verba_oficial', v_verba,
       'verba_plano',   case when r.tipo = 'MBA' then r.verba_plano   else null end,
       'meta_original', case when r.tipo = 'MBA' then r.meta_original else null end,
       'cpl_plano',     case when r.tipo = 'MBA' then r.cpl_plano
                             else round(r.verba / nullif(r.meta, 0), 4) end,
       'meta_ajustada', case when r.tipo = 'MBA' then r.meta_ajustada else r.meta end),
+    'referencia', jsonb_build_object(
+      'hoje', current_date, 'corte', v_corte,
+      'modo', case when p_corte is null then 'atual' else 'historico' end),
     'janela', jsonb_build_object(
       'ini', v_ini, 'fim', v_fim, 'corte', v_corte,
       'campanha_ini', v_ini_camp, 'campanha_fim', v_fim_camp,
-      'dias_corridos', (v_corte - v_ini) + 1,
+      'dias_corridos', v_dias,
       'dias_restantes', v_dias_rest,
       'campanha_inteira', v_completa),
     'realizado', jsonb_build_object(
       'leads', v_leads, 'investimento', v_custo, 'cpl_real', v_cpl,
       'ritmo_14', v_ritmo, 'custo_dia_14', v_custo_dia,
-      'verba_restante', round(v_restante, 2)),
-    -- Projecao so com dia pela frente e CPL apurado. Campanha encerrada devolve
-    -- nulo, e a tela mostra entrega realizada no lugar.
-    'projecao', case when v_completa and v_dias_rest > 0 and v_cpl is not null
+      'dias_base_ritmo', v_dias_ritmo,
+      'verba_restante', case when v_saldo is null then null else round(greatest(v_saldo, 0), 2) end,
+      'verba_excedida', case when v_saldo is null then null else round(greatest(-v_saldo, 0), 2) end,
+      'saldo_verba', round(v_saldo, 2)),
+    'projecao', case
+      when v_completa and v_dias_rest > 0 and v_cpl is not null and v_cpl > 0 and v_saldo is not null
       then jsonb_build_object(
-        'teto_dia', round(v_restante / v_dias_rest, 2),
-        'pela_verba', v_leads + round(v_restante / nullif(v_cpl, 0)),
-        'pelo_ritmo', v_leads + round(coalesce(v_ritmo, 0) * v_dias_rest))
+        'teto_dia', round(greatest(v_saldo, 0) / v_dias_rest, 2),
+        'pela_verba', v_leads + round(greatest(v_saldo, 0) / v_cpl),
+        'pelo_ritmo', case when v_ritmo is null then null
+                           else v_leads + round(v_ritmo * v_dias_rest) end)
       else null end,
     'serie', coalesce(v_serie, '[]'::jsonb));
 end;
