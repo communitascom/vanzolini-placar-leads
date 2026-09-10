@@ -80,7 +80,7 @@ h1,h2,h3,h4{line-height:1.15;letter-spacing:-.015em}
 .kpi .topo{display:flex;align-items:center;gap:10px}
 .tile{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .tile .ms{font-size:28px}
-.tile.laranja{color:var(--s1)} .tile.azul{color:var(--s2)} .tile.verde{color:var(--s3)} .tile.roxo{color:var(--s4)} .tile.amarelo{color:var(--s5)}
+.tile.laranja{color:var(--s1)} .tile.azul{color:var(--s2)} .tile.verde{color:var(--s3)} .tile.roxo{color:var(--s4)} .tile.amarelo{color:var(--s5)} .tile.cinza{color:var(--mute)}
 .kpi .rot,.kpi .lbl{font-size:16px;font-weight:600;color:var(--ink)}
 .kpi .valor{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
 .kpi .n,.kpi .val{font-size:38px;font-weight:600;letter-spacing:-.02em;line-height:1;color:var(--ink)}
@@ -645,6 +645,12 @@ body.dash{min-height:100vh}
   color:var(--ink);width:100%;outline:none}
 .pg-campanhas .nota-tabela{margin:10px 2px 0;font-size:12.5px;color:var(--mute);max-width:92ch}
 .pg-campanhas .nota-tabela b{color:var(--ink-2);font-weight:600}
+
+/* aviso de esboço/estado provisório da tela, no topo do conteúdo */
+.estado-aviso{display:flex;gap:10px;align-items:flex-start;background:var(--atencao-bg);border:1px solid #F0DFB0;
+  border-radius:var(--r-card);padding:13px 16px;font-size:13px;color:#6B4A05;max-width:none}
+.estado-aviso .ms{color:var(--atencao);flex:none;margin-top:1px}
+.estado-aviso b{color:#4A3400}
 
 /* ---------- ferramentas de operação (conversões, gestão, réguas) ----------
    São telas de edição, não de leitura: precisam de botão secundário, campo de
