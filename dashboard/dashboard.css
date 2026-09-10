@@ -635,3 +635,13 @@ body.dash{min-height:100vh}
 .pg-campanhas td.c-gasto{white-space:nowrap}
 .pg-campanhas td.c-gasto .g-val{display:block;font-variant-numeric:tabular-nums}
 .pg-campanhas td.c-gasto .barra{display:block;width:100%;min-width:0;margin:4px 0 2px}
+
+/* busca de curso na tabela de campanhas no ar */
+.pg-campanhas .buscabar{display:flex;align-items:center;gap:8px;margin:8px 0 0;
+  border:1px solid var(--hair);border-radius:var(--r-pill);background:var(--card);
+  padding:0 14px;height:36px;max-width:280px}
+.pg-campanhas .buscabar .ms{font-size:18px;color:var(--mute)}
+.pg-campanhas .buscabar input{border:0;background:transparent;font:inherit;font-size:13px;
+  color:var(--ink);width:100%;outline:none}
+.pg-campanhas .nota-tabela{margin:10px 2px 0;font-size:12.5px;color:var(--mute);max-width:92ch}
+.pg-campanhas .nota-tabela b{color:var(--ink-2);font-weight:600}

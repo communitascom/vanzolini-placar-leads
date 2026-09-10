@@ -84,7 +84,7 @@
       h += '<a href="' + p.href + '" class="ferramenta"><span class="ms">' + p.ico + '</span>' + p.rot + '</a>';
     });
   }
-  h += '<div class="rodape-menu">' + (interno ? 'Versão interna: leitura completa, sem PIN.' : 'Dados ao vivo, leitura apenas.') +
+  h += '<div class="rodape-menu">' + (interno ? 'Versão interna.' : 'Dados ao vivo, leitura apenas.') +
        '<br><span class="credito">' + ANEL + 'por Communitas</span></div>';
   menu.innerHTML = h;
   main.parentNode.insertBefore(layout, main);
