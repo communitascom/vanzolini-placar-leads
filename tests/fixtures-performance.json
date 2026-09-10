@@ -1,41 +1,243 @@
 {
   "vigente_inteira": {
-    "plano": {"fonte":"plano de midia","cpl_plano":23.6407,"verba_plano":70000.00,"meta_ajustada":2876,"meta_original":2961,"verba_oficial":68000.00},
+    "plano": {
+      "fonte": "plano de midia",
+      "cpl_plano": 23.6407,
+      "verba_plano": 70000.0,
+      "meta_ajustada": 2876,
+      "meta_original": 2961,
+      "verba_oficial": 68000.0
+    },
     "serie": [
-      {"dia":"2026-06-25","custo":330.90,"leads":24,"custo_acumulado":330.90,"leads_acumulados":24},
-      {"dia":"2026-06-26","custo":642.14,"leads":32,"custo_acumulado":973.04,"leads_acumulados":56},
-      {"dia":"2026-06-27","custo":892.51,"leads":37,"custo_acumulado":1865.55,"leads_acumulados":93}
+      {
+        "dia": "2026-06-25",
+        "custo": 330.9,
+        "leads": 24,
+        "custo_acumulado": 330.9,
+        "leads_acumulados": 24
+      },
+      {
+        "dia": "2026-06-26",
+        "custo": 642.14,
+        "leads": 32,
+        "custo_acumulado": 973.04,
+        "leads_acumulados": 56
+      },
+      {
+        "dia": "2026-06-27",
+        "custo": 892.51,
+        "leads": 37,
+        "custo_acumulado": 1865.55,
+        "leads_acumulados": 93
+      }
     ],
-    "janela": {"fim":"2026-09-20","ini":"2026-06-25","corte":"2026-09-08","campanha_fim":"2026-09-20","campanha_ini":"2026-06-25","dias_corridos":76,"dias_restantes":12,"campanha_inteira":true},
-    "campanha": {"id":59,"nome":"ATIVA (Monday)","tipo":"MBA","curso":"MBA em Liderança, IA e Execução Estratégica","curso_id":43,"tem_plano":true,"encerrada_hoje":false,"sobreposta_com":null,"data_fim_monday":"2026-09-20","data_inicio_monday":"2026-06-25","encerrada_na_referencia":false},
-    "projecao": {"teto_dia":503.91,"pela_verba":2556,"pelo_ritmo":2637},
-    "realizado": {"leads":2329,"cpl_real":26.60,"ritmo_14":25.64,"saldo_verba":6046.91,"custo_dia_14":780.60,"investimento":61953.09,"verba_excedida":0.00,"verba_restante":6046.91,"dias_base_ritmo":14},
-    "referencia": {"hoje":"2026-09-10","modo":"atual","corte":"2026-09-08"}
+    "janela": {
+      "fim": "2026-09-20",
+      "ini": "2026-06-25",
+      "corte": "2026-09-08",
+      "campanha_fim": "2026-09-20",
+      "campanha_ini": "2026-06-25",
+      "dias_corridos": 76,
+      "dias_restantes": 12,
+      "campanha_inteira": true
+    },
+    "campanha": {
+      "id": 59,
+      "nome": "ATIVA (Monday)",
+      "tipo": "MBA",
+      "curso": "MBA em Liderança, IA e Execução Estratégica",
+      "curso_id": 43,
+      "tem_plano": true,
+      "encerrada_hoje": false,
+      "sobreposta_com": null,
+      "data_fim_monday": "2026-09-20",
+      "data_inicio_monday": "2026-06-25",
+      "encerrada_na_referencia": false
+    },
+    "projecao": {
+      "teto_dia": 503.91,
+      "pela_verba": 2556,
+      "pelo_ritmo": 2637
+    },
+    "realizado": {
+      "leads": 2329,
+      "cpl_real": 26.6,
+      "ritmo_14": 25.64,
+      "saldo_verba": 6046.91,
+      "custo_dia_14": 780.6,
+      "investimento": 61953.09,
+      "verba_excedida": 0.0,
+      "verba_restante": 6046.91,
+      "dias_base_ritmo": 14
+    },
+    "referencia": {
+      "hoje": "2026-09-10",
+      "modo": "atual",
+      "corte": "2026-09-08"
+    },
+    "mediana": {
+      "curso": null,
+      "campanha": 30,
+      "turmas_base": 0,
+      "usar": "campanha"
+    }
   },
   "recorte_mes": {
-    "plano": {"fonte":"plano de midia","cpl_plano":23.6407,"verba_plano":70000.00,"meta_ajustada":2876,"meta_original":2961,"verba_oficial":68000.00},
+    "plano": {
+      "fonte": "plano de midia",
+      "cpl_plano": 23.6407,
+      "verba_plano": 70000.0,
+      "meta_ajustada": 2876,
+      "meta_original": 2961,
+      "verba_oficial": 68000.0
+    },
     "serie": [
-      {"dia":"2026-08-01","custo":1205.61,"leads":57,"custo_acumulado":1205.61,"leads_acumulados":57},
-      {"dia":"2026-08-02","custo":1021.29,"leads":40,"custo_acumulado":2226.90,"leads_acumulados":97},
-      {"dia":"2026-08-03","custo":1014.26,"leads":45,"custo_acumulado":3241.16,"leads_acumulados":142}
+      {
+        "dia": "2026-08-01",
+        "custo": 1205.61,
+        "leads": 57,
+        "custo_acumulado": 1205.61,
+        "leads_acumulados": 57
+      },
+      {
+        "dia": "2026-08-02",
+        "custo": 1021.29,
+        "leads": 40,
+        "custo_acumulado": 2226.9,
+        "leads_acumulados": 97
+      },
+      {
+        "dia": "2026-08-03",
+        "custo": 1014.26,
+        "leads": 45,
+        "custo_acumulado": 3241.16,
+        "leads_acumulados": 142
+      }
     ],
-    "janela": {"fim":"2026-08-31","ini":"2026-08-01","corte":"2026-08-31","campanha_fim":"2026-09-20","campanha_ini":"2026-06-25","dias_corridos":31,"dias_restantes":20,"campanha_inteira":false},
-    "campanha": {"id":59,"nome":"ATIVA (Monday)","tipo":"MBA","curso":"MBA em Liderança, IA e Execução Estratégica","curso_id":43,"tem_plano":true,"encerrada_hoje":false,"sobreposta_com":null,"data_fim_monday":"2026-09-20","data_inicio_monday":"2026-06-25","encerrada_na_referencia":false},
+    "janela": {
+      "fim": "2026-08-31",
+      "ini": "2026-08-01",
+      "corte": "2026-08-31",
+      "campanha_fim": "2026-09-20",
+      "campanha_ini": "2026-06-25",
+      "dias_corridos": 31,
+      "dias_restantes": 20,
+      "campanha_inteira": false
+    },
+    "campanha": {
+      "id": 59,
+      "nome": "ATIVA (Monday)",
+      "tipo": "MBA",
+      "curso": "MBA em Liderança, IA e Execução Estratégica",
+      "curso_id": 43,
+      "tem_plano": true,
+      "encerrada_hoje": false,
+      "sobreposta_com": null,
+      "data_fim_monday": "2026-09-20",
+      "data_inicio_monday": "2026-06-25",
+      "encerrada_na_referencia": false
+    },
     "projecao": null,
-    "realizado": {"leads":939,"cpl_real":26.55,"ritmo_14":28.07,"saldo_verba":43070.36,"custo_dia_14":759.53,"investimento":24929.64,"verba_excedida":0.00,"verba_restante":43070.36,"dias_base_ritmo":14},
-    "referencia": {"hoje":"2026-09-10","modo":"atual","corte":"2026-08-31"}
+    "realizado": {
+      "leads": 939,
+      "cpl_real": 26.55,
+      "ritmo_14": 28.07,
+      "saldo_verba": 43070.36,
+      "custo_dia_14": 759.53,
+      "investimento": 24929.64,
+      "verba_excedida": 0.0,
+      "verba_restante": 43070.36,
+      "dias_base_ritmo": 14
+    },
+    "referencia": {
+      "hoje": "2026-09-10",
+      "modo": "atual",
+      "corte": "2026-08-31"
+    },
+    "mediana": {
+      "curso": null,
+      "campanha": 30,
+      "turmas_base": 0,
+      "usar": "campanha"
+    }
   },
   "encerrada": {
-    "plano": {"fonte":"plano de midia","cpl_plano":16.0000,"verba_plano":30768.00,"meta_ajustada":1938,"meta_original":1923,"verba_oficial":31000.00},
+    "plano": {
+      "fonte": "plano de midia",
+      "cpl_plano": 16.0,
+      "verba_plano": 30768.0,
+      "meta_ajustada": 1938,
+      "meta_original": 1923,
+      "verba_oficial": 31000.0
+    },
     "serie": [
-      {"dia":"2026-05-25","custo":77.40,"leads":15,"custo_acumulado":77.40,"leads_acumulados":15},
-      {"dia":"2026-05-26","custo":180.07,"leads":15,"custo_acumulado":257.47,"leads_acumulados":30},
-      {"dia":"2026-05-27","custo":175.98,"leads":12,"custo_acumulado":433.45,"leads_acumulados":42}
+      {
+        "dia": "2026-05-25",
+        "custo": 77.4,
+        "leads": 15,
+        "custo_acumulado": 77.4,
+        "leads_acumulados": 15
+      },
+      {
+        "dia": "2026-05-26",
+        "custo": 180.07,
+        "leads": 15,
+        "custo_acumulado": 257.47,
+        "leads_acumulados": 30
+      },
+      {
+        "dia": "2026-05-27",
+        "custo": 175.98,
+        "leads": 12,
+        "custo_acumulado": 433.45,
+        "leads_acumulados": 42
+      }
     ],
-    "janela": {"fim":"2026-08-15","ini":"2026-05-25","corte":"2026-08-15","campanha_fim":"2026-08-15","campanha_ini":"2026-05-25","dias_corridos":83,"dias_restantes":0,"campanha_inteira":true},
-    "campanha": {"id":63,"nome":"ATIVA (Monday)","tipo":"MBA","curso":"MBA em Engenharia da Qualidade","curso_id":3,"tem_plano":true,"encerrada_hoje":true,"sobreposta_com":null,"data_fim_monday":"2026-08-16","data_inicio_monday":"2026-05-25","encerrada_na_referencia":true},
+    "janela": {
+      "fim": "2026-08-15",
+      "ini": "2026-05-25",
+      "corte": "2026-08-15",
+      "campanha_fim": "2026-08-15",
+      "campanha_ini": "2026-05-25",
+      "dias_corridos": 83,
+      "dias_restantes": 0,
+      "campanha_inteira": true
+    },
+    "campanha": {
+      "id": 63,
+      "nome": "ATIVA (Monday)",
+      "tipo": "MBA",
+      "curso": "MBA em Engenharia da Qualidade",
+      "curso_id": 3,
+      "tem_plano": true,
+      "encerrada_hoje": true,
+      "sobreposta_com": null,
+      "data_fim_monday": "2026-08-16",
+      "data_inicio_monday": "2026-05-25",
+      "encerrada_na_referencia": true
+    },
     "projecao": null,
-    "realizado": {"leads":1819,"cpl_real":16.79,"ritmo_14":39.64,"saldo_verba":450.02,"custo_dia_14":662.25,"investimento":30549.98,"verba_excedida":0.00,"verba_restante":450.02,"dias_base_ritmo":14},
-    "referencia": {"hoje":"2026-09-10","modo":"atual","corte":"2026-08-15"}
+    "realizado": {
+      "leads": 1819,
+      "cpl_real": 16.79,
+      "ritmo_14": 39.64,
+      "saldo_verba": 450.02,
+      "custo_dia_14": 662.25,
+      "investimento": 30549.98,
+      "verba_excedida": 0.0,
+      "verba_restante": 450.02,
+      "dias_base_ritmo": 14
+    },
+    "referencia": {
+      "hoje": "2026-09-10",
+      "modo": "atual",
+      "corte": "2026-08-15"
+    },
+    "mediana": {
+      "curso": 12.0,
+      "campanha": 21,
+      "turmas_base": 3,
+      "usar": "curso"
+    }
   }
 }

@@ -118,7 +118,12 @@
 
     var teto1 = Math.max(meta || 0, totalLeads, pv || 0, pr || 0);
     var e1 = escala(teto1 * 1.08, 3);
-    var e2 = escala(maxDia * 1.15, 3);
+    // So a mediana historica do CURSO vira linha. Curso sem turma fechada nao
+    // ganha regua inventada a partir dele mesmo: ganha uma tag dizendo que nao
+    // ha com o que comparar.
+    var med = d.mediana || {};
+    var medValor = (med.curso == null || !isFinite(Number(med.curso))) ? null : Number(med.curso);
+    var e2 = escala(Math.max(maxDia, medValor || 0) * 1.15, 3);
     var e3 = escala(maxCusto * 1.14, 3);
 
     var s = [];
@@ -199,6 +204,18 @@
       add('<rect x="' + (xd(p.ms) - bw / 2).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) +
           '" height="' + (P2[1] - y).toFixed(1) + '" rx="2" fill="' + VIOL + '" opacity="0.30"/>');
     });
+    if (medValor != null && medValor > 0) {
+      var ymed = ys(medValor, e2.max, P2);
+      add(linha(PX0, ymed, PX1, ymed, MUTED, 1.5, '6 4'));
+      add(txt(PX1 + 8, ymed + 3, 'mediana do curso ' + br(medValor), { fs: 8, cor: MUTED, peso: 700 }));
+      if (med.turmas_base) {
+        add(txt(PX1 + 8, ymed + 12, 'base de ' + br(med.turmas_base) +
+              (Number(med.turmas_base) === 1 ? ' turma' : ' turmas'), { fs: 7.5, cor: MUTED }));
+      }
+    } else {
+      add(txt(PX1 + 8, ys(e2.max * 0.62, e2.max, P2), 'sem histórico', { fs: 8, cor: MUTED, peso: 700 }));
+      add(txt(PX1 + 8, ys(e2.max * 0.62, e2.max, P2) + 9, 'primeira turma do curso', { fs: 7.5, cor: MUTED }));
+    }
     var mm = acum.map(function (_, i) {
       var jan7 = acum.slice(Math.max(0, i - 6), i + 1);
       var m = jan7.reduce(function (a, b) { return a + b.leads; }, 0) / jan7.length;
@@ -330,6 +347,11 @@
       (verba ? ' | verba oficial de ' + brl(verba, false) : '') +
       (meta ? ' | meta ajustada a ' + br(meta) + ' leads' : '');
 
+    var pontos = acum.map(function (p) {
+      return { x: xd(p.ms), dia: new Date(p.ms).toISOString().slice(0, 10),
+               leads: p.leads, custo: p.custo, acum: p.v };
+    });
+
     host.innerHTML =
       '<svg class="g-campanha" viewBox="0 0 960 540" xmlns="' + NS + '" role="img" aria-labelledby="gcT gcD">' +
       '<title id="gcT">' + esc(camp.curso + ': captação x investimento') + '</title>' +
@@ -344,6 +366,53 @@
       txt(75, 92, sub, { fs: 12, cor: BODY }) +
       s.join('\n') +
       '</svg>';
+
+    if (typeof host.querySelector === 'function') ligarTooltip(host, pontos, P1[0], P3[1]);
+  }
+
+  // Tooltip sobre o dia inteiro, nao sobre a barra: a barra de um dia fraco tem
+  // poucos pixels de altura e seria quase impossivel de acertar com o mouse.
+  function ligarTooltip(host, pontos, topo, base) {
+    var svg = host.querySelector('svg');
+    if (!svg || !pontos.length) return;
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+    var tt = document.createElement('div');
+    tt.className = 'g-tt';
+    tt.setAttribute('aria-hidden', 'true');
+    host.appendChild(tt);
+
+    var guia = document.createElementNS(NS, 'line');
+    guia.setAttribute('y1', topo); guia.setAttribute('y2', base);
+    guia.setAttribute('stroke', INK); guia.setAttribute('stroke-width', '1');
+    guia.setAttribute('stroke-dasharray', '3 3');
+    guia.setAttribute('opacity', '0');
+    guia.setAttribute('pointer-events', 'none');
+    svg.appendChild(guia);
+
+    function esconder() { tt.style.opacity = 0; guia.setAttribute('opacity', '0'); }
+
+    svg.addEventListener('mousemove', function (e) {
+      var r = svg.getBoundingClientRect();
+      if (!r.width) return;
+      var xSvg = (e.clientX - r.left) / r.width * 960;
+      var melhor = 0, dist = 1e9;
+      for (var i = 0; i < pontos.length; i++) {
+        var dd = Math.abs(pontos[i].x - xSvg);
+        if (dd < dist) { dist = dd; melhor = i; }
+      }
+      if (dist > 14) { esconder(); return; }
+      var p = pontos[melhor];
+      guia.setAttribute('x1', p.x); guia.setAttribute('x2', p.x); guia.setAttribute('opacity', '1');
+      tt.innerHTML = '<b>' + dmy(p.dia) + '</b>' +
+        '<div class="l"><i style="background:' + VIOL + '"></i>' + br(p.leads) + ' leads no dia</div>' +
+        '<div class="l"><i style="background:' + TEAL + '"></i>' + brl(p.custo) + ' investidos</div>' +
+        '<div class="l acum">' + br(p.acum) + ' leads acumulados</div>';
+      tt.style.left = (p.x / 960 * r.width) + 'px';
+      tt.style.top = (topo / 540 * r.height) + 'px';
+      tt.style.opacity = 1;
+    });
+    svg.addEventListener('mouseleave', esconder);
   }
 
   window.GraficoCampanha = { desenha: desenha, escala: escala };

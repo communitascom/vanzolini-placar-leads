@@ -46,6 +46,11 @@ console.log('\ncampanha vigente, janela inteira');
   });
   t('linha de meta presente', () => assert.ok(tx.includes('Meta ajustada 2.876')));
   t('leitura cita o CPL do plano', () => assert.ok(tx.includes('R$ 26,60') && tx.includes('R$ 23,64')));
+  t('curso sem turma fechada ganha tag, não régua inventada', () => {
+    assert.ok(tx.includes('sem histórico'), 'esperava a tag');
+    assert.ok(tx.includes('primeira turma do curso'));
+    assert.ok(!tx.includes('mediana do curso'), 'não podia desenhar mediana sem histórico');
+  });
 }
 
 console.log('\nrecorte de mês dentro de campanha em andamento');
@@ -70,6 +75,10 @@ console.log('\ncampanha encerrada');
   const svg = desenhar(F.encerrada), tx = texto(svg);
   t('indicador é entrega realizada', () => assert.ok(tx.includes('ENTREGA REALIZADA')));
   t('nota diz que a curva fechou', () => assert.ok(tx.includes('curva fechada')));
+  t('curso com histórico desenha a mediana e diz a base', () => {
+    assert.ok(tx.includes('mediana do curso 12'), 'esperava a mediana de 12/dia');
+    assert.ok(tx.includes('base de 3 turmas'));
+  });
   t('leitura fala no passado', () => assert.ok(tx.includes('fechou em') && tx.includes('A campanha gastou')));
   t('sem projeção', () => assert.ok(!tx.includes('gastando a verba toda')));
 }

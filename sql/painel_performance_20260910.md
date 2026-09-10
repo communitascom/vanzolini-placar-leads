@@ -126,6 +126,39 @@ nova.
    apareceu no caminho: a documentação do painel interno diz que o interno não
    tem Nita, mas o `shell.js` injeta nos dois modos desde sempre.
 
+## Mediana da captação diária
+
+O painel de leads por dia traz a **mediana histórica do curso** em traço cinza,
+a mesma régua que o placar usa (`cursos.mediana_dia`), com a base de turmas que
+a sustenta escrita embaixo.
+
+Curso sem turma fechada **não ganha régua inventada**: ganha a tag "sem
+histórico, primeira turma do curso". É o caso do Liderança, que é justamente a
+campanha mais olhada. Preferir a tag a um número derivado da própria campanha
+foi decisão de 10/09: uma mediana calculada sobre a própria série responde
+"está dentro do normal dela mesma", que não é a pergunta.
+
+## Tooltip
+
+O hover é sobre o dia inteiro, não sobre a barra: a barra de um dia fraco tem
+poucos pixels e seria quase impossível de acertar com o mouse. Mostra data,
+leads do dia, investimento do dia e leads acumulados. Não sai na impressão.
+
+## Alinhamento do custo real nas outras telas
+
+Em 10/09, `campanhas_andamento` e `midia_por_curso` passaram a ler
+`vw_midia_custo_real`. Antes somavam `midia_diaria.custo`, o custo de
+plataforma, e por isso a tela discordava dos decks aprovados: o Liderança
+aparecia com CPL de R$ 22,13 na tela e R$ 26,60 no slide.
+
+O que mudou para a cliente, nas 16 campanhas no ar: o gasto somado subiu de
+R$ 79.128,33 para R$ 95.056,57, e o CPL médio de R$ 11,56 para R$ 13,89. CTR e
+impressões não mudaram, porque encargo não mexe em inventário.
+
+**Ainda restam 15 RPCs somando custo cru**, todas ligadas a relatórios mensais,
+históricos e ao eixo institucional. Não foram migradas porque reescrevem números
+de relatórios já entregues, o que é decisão separada.
+
 ## Teste de regressão
 
 `node tests/grafico-campanha.test.js`, sem rede e sem navegador. Roda o gerador
@@ -141,6 +174,11 @@ campo, o gráfico cai no fallback e o PDF continua saindo bonito e errado.
 
 1. Verba e meta no board do Monday, e no payload do sync. É o item de maior
    alcance e não depende de código.
+1. As 15 RPCs que ainda somam custo cru, e se os relatórios já entregues devem
+   ser reescritos junto.
+1. O corte da `campanhas_andamento`, que conta lead até hoje com mídia até
+   ontem. É o que sobra de diferença entre as duas telas: R$ 26,55 contra
+   R$ 26,65 de CPL no Liderança, mesmo dinheiro e 9 leads a mais.
 2. A regra de desempate para campanhas sobrepostas.
 3. Historização da verba, se o PDF for registro e não foto do momento.
 4. A página é pública para quem tem o endereço: chave anon, sem PIN no interno,

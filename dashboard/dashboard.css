@@ -617,3 +617,14 @@ body.dash{min-height:100vh}
   body.pg-performance .g-campanha{width:100%;height:auto;
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* tooltip do grafico de performance: seque o mouse pelo dia, nao pela barra */
+.pg-performance #grafico{position:relative}
+.pg-performance .g-tt{position:absolute;transform:translate(-50%,-100%);pointer-events:none;
+  background:var(--ink);color:#fff;border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.45;
+  white-space:nowrap;opacity:0;transition:opacity .12s;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.pg-performance .g-tt b{display:block;font-size:12.5px;margin-bottom:3px}
+.pg-performance .g-tt .l{display:flex;align-items:center;gap:6px;opacity:.92}
+.pg-performance .g-tt .l i{width:8px;height:8px;border-radius:50%;flex:none}
+.pg-performance .g-tt .l.acum{opacity:.7;margin-top:2px}
+@media print{.pg-performance .g-tt{display:none!important}}
