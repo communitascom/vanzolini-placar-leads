@@ -29,9 +29,13 @@
   var dia = function (iso) { var p = String(iso).split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); };
   var DIA = 86400000;
 
+  // Escapa tambem aspas: o resultado entra em atributo delimitado por aspas
+  // (aria-label), onde so & < > deixaria um nome de curso com aspa fechar o
+  // atributo e abrir outro.
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   // Escala com passos legiveis. O teto e o valor pedido, nao um multiplo
@@ -47,8 +51,12 @@
     else if (norm < 3) passo = 2 * mag;
     else if (norm < 7) passo = 5 * mag;
     else passo = 10 * mag;
+    // Passo nao finito ou zero (valor subnormal, Infinity) travaria o laco.
+    if (!isFinite(passo) || passo <= 0) return { max: maxValor, passos: [0] };
     var passos = [];
-    for (var v = 0; v <= maxValor + 1e-9; v += passo) passos.push(Math.round(v * 1e6) / 1e6);
+    for (var v = 0; v <= maxValor + 1e-9 && passos.length < 1000; v += passo) {
+      passos.push(Math.round(v * 1e6) / 1e6);
+    }
     return { max: maxValor, passos: passos };
   }
 
@@ -59,8 +67,12 @@
       return;
     }
 
+    if (!d.campanha || !d.plano || !d.janela || !d.realizado || !Array.isArray(d.serie)) {
+      host.innerHTML = '<p class="vazio">a resposta da API veio em formato inesperado</p>';
+      return;
+    }
     var camp = d.campanha, plano = d.plano, jan = d.janela, real = d.realizado;
-    var proj = d.projecao, serie = d.serie || [];
+    var proj = d.projecao, serie = d.serie;
     if (!serie.length) {
       host.innerHTML = '<p class="vazio">a campanha ainda nao tem dia com dado carregado</p>';
       return;
@@ -136,8 +148,9 @@
         '" stroke-width="2.5" stroke-linejoin="round"/>');
 
     var xc = xd(CORTE), yc = ys(totalLeads, e1.max, P1), XF = X(TOT);
-    if (temProj && (pv != null || pr != null)) {
-      var alvos = [pv, pr].filter(function (v) { return v != null; });
+    var alvosProj = [pv, pr].filter(function (v) { return v != null && isFinite(v); });
+    if (temProj && alvosProj.length) {
+      var alvos = alvosProj;
       alvos.forEach(function (v) {
         var yy = ys(v, e1.max, P1);
         add(linha(xc, yc, XF, yy, VIOL, 2, '4 3', 0.8));
@@ -226,8 +239,8 @@
     var desvio = (cpl != null && cplP) ? (cpl / cplP - 1) * 100 : null;
 
     var k4;
-    if (temProj) {
-      var alvos2 = [pv, pr].filter(function (v) { return v != null; });
+    if (temProj && alvosProj.length) {
+      var alvos2 = alvosProj;
       var lo2 = Math.min.apply(null, alvos2), hi2 = Math.max.apply(null, alvos2);
       k4 = ['ENTREGA PROJETADA', lo2 === hi2 ? br(hi2) : br(lo2) + ' a ' + br(hi2),
         meta ? (lo2 === hi2 ? pc(hi2 / meta * 100) + ' da meta'
@@ -285,8 +298,14 @@
       (meta ? ' | meta ajustada a ' + br(meta) + ' leads' : '');
 
     host.innerHTML =
-      '<svg class="g-campanha" viewBox="0 0 960 540" xmlns="' + NS + '" role="img" aria-label="' +
-        esc(camp.curso + ': captação x investimento') + '">' +
+      '<svg class="g-campanha" viewBox="0 0 960 540" xmlns="' + NS + '" role="img" aria-labelledby="gcT gcD">' +
+      '<title id="gcT">' + esc(camp.curso + ': captação x investimento') + '</title>' +
+      '<desc id="gcD">' + esc(
+        br(totalLeads) + ' leads captados de ' + dm(jan.ini) + ' a ' + dm(jan.corte) + '. ' +
+        'Investimento real de ' + brl(invest) + (verba ? ' sobre verba de ' + brl(verba, false) : '') + '. ' +
+        'CPL real de ' + (cpl == null ? 'nao apurado' : brl(cpl)) +
+        (cplP ? ', contra ' + brl(cplP) + ' do plano' : '') + '. ' +
+        (meta ? 'Meta ajustada de ' + br(meta) + ' leads. ' : '') + L1 + ' ' + L2) + '</desc>' +
       '<rect x="0" y="0" width="960" height="540" fill="#fff"/>' +
       txt(75, 70, camp.curso, { fs: 24, cor: PRIM, peso: 700 }) +
       txt(75, 92, sub, { fs: 12, cor: BODY }) +

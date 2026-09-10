@@ -6,6 +6,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const brData = iso => iso ? String(iso).split('-').reverse().join('/') : '';
 const pad = n => String(n).padStart(2, '0');
 const isoDe = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
@@ -22,13 +24,23 @@ function cursosUnicos() {
   });
   // MBA primeiro, porque e onde existe plano de midia e a tela fica completa
   return [...vistos.values()].sort((a, b) =>
-    (a.tipo === 'MBA' ? 0 : 1) - (b.tipo === 'MBA' ? 0 : 1) || a.nome.localeCompare(b.nome, 'pt-BR'));
+    (a.tipo === 'MBA' ? 0 : 1) - (b.tipo === 'MBA' ? 0 : 1) ||
+    String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'));
+}
+
+// Monto as opções por DOM, com textContent. Antes o nome do curso e o rótulo da
+// campanha, que vêm do banco, entravam direto em innerHTML.
+function opcao(valor, texto) {
+  const o = document.createElement('option');
+  o.value = String(valor);
+  o.textContent = texto;
+  return o;
 }
 
 function pintaCursos() {
   const sel = $('fCurso');
-  sel.innerHTML = cursosUnicos().map(c =>
-    `<option value="${c.id}">${c.tipo === 'MBA' ? 'MBA | ' : ''}${c.nome}</option>`).join('');
+  sel.replaceChildren(...cursosUnicos().map(c =>
+    opcao(c.id, (c.tipo === 'MBA' ? 'MBA | ' : '') + c.nome)));
 }
 
 function pintaCampanhas() {
@@ -37,8 +49,9 @@ function pintaCampanhas() {
     .filter(c => c.curso_id === cursoId)
     .sort((a, b) => String(b.data_inicio).localeCompare(String(a.data_inicio)));
   const rot = { vigente: 'vigente', encerrada: 'encerrada', futura: 'ainda não começou' };
-  $('fCampanha').innerHTML = lista.map(c =>
-    `<option value="${c.campanha_id}">${c.rotulo} (${rot[c.situacao] || c.situacao})${c.tem_plano ? '' : ' | sem plano'}</option>`).join('');
+  $('fCampanha').replaceChildren(...lista.map(c =>
+    opcao(c.campanha_id,
+      c.rotulo + ' (' + (rot[c.situacao] || c.situacao) + ')' + (c.tem_plano ? '' : ' | sem plano'))));
 }
 
 function periodoEscolhido() {
@@ -60,8 +73,14 @@ function periodoEscolhido() {
 
 // ---------- avisos ----------
 function aviso(txt, tipo) {
-  $('aviso').innerHTML = txt
-    ? `<p class="alerta ${tipo || ''}"><span class="ms">warning</span>${txt}</p>` : '';
+  const host = $('aviso');
+  if (!txt) { host.replaceChildren(); return; }
+  const p = document.createElement('p');
+  p.className = 'alerta ' + (tipo || '');
+  const i = document.createElement('span');
+  i.className = 'ms'; i.textContent = 'warning';
+  p.append(i, document.createTextNode(txt));
+  host.replaceChildren(p);
 }
 
 function avisosDa(d) {
@@ -87,21 +106,40 @@ function avisosDa(d) {
 }
 
 // ---------- carga ----------
+// Contador de sequência: trocar de curso duas vezes rápido fazia a resposta
+// lenta da primeira chegar depois e sobrescrever a segunda na tela.
+let sequencia = 0;
+
 async function render() {
+  const meu = ++sequencia;
   const campanhaId = Number($('fCampanha').value);
   if (!campanhaId) { aviso('selecione uma campanha'); return; }
   const { ini, fim } = periodoEscolhido();
   $('grafico').innerHTML = '<div class="skel"><i></i><i></i><i></i><i></i></div>';
   Dash.tag('<b>consultando</b>');
 
-  const { data, error } = await sb.rpc('performance_campanha', {
-    p_campanha_id: campanhaId, p_ini: ini, p_fim: fim, p_corte: null
-  });
+  let data, error;
+  try {
+    ({ data, error } = await sb.rpc('performance_campanha', {
+      p_campanha_id: campanhaId, p_ini: ini, p_fim: fim, p_corte: null
+    }));
+  } catch (e) {
+    error = { message: String(e && e.message || e) };
+  }
+  if (meu !== sequencia) return;  // já saiu outra consulta na frente
 
   if (error) {
     Dash.tag('<b>erro</b>', 'ruim');
     aviso('não consegui ler esta campanha: ' + error.message);
     $('grafico').innerHTML = '<p class="vazio">sem dado</p>';
+    ultimo = null;
+    return;
+  }
+  if (!data || !data.campanha || !data.janela) {
+    Dash.tag('<b>sem dado</b>', 'atencao');
+    aviso('a resposta da API veio em formato inesperado');
+    $('grafico').innerHTML = '<p class="vazio">sem dado</p>';
+    ultimo = null;
     return;
   }
   if (data && data.erro) {
@@ -120,7 +158,7 @@ async function render() {
   $('ph-sub').textContent = 'Captação x investimento | ' + brData(data.janela.campanha_ini) +
     ' a ' + brData(data.janela.campanha_fim) + ' | leitura até ' + brData(data.janela.corte);
 
-  Dash.tag('<b>' + data.campanha.curso.slice(0, 28) + '</b>');
+  Dash.tag('<b>' + esc(String(data.campanha.curso || '').slice(0, 28)) + '</b>');
   Dash.stamp();
   const hr = $('horaRodape'); if (hr) hr.textContent = Dash.hora();
 }
@@ -133,9 +171,14 @@ window.imprimirPagina = function () {
   window.print();
 };
 
-async function iniciarPainel() {
+async function carregarTela() {
   Dash.tag('<b>conectando</b>');
-  const { data, error } = await sb.rpc('performance_campanhas_lista');
+  let data, error;
+  try {
+    ({ data, error } = await sb.rpc('performance_campanhas_lista'));
+  } catch (e) {
+    error = { message: String(e && e.message || e) };
+  }
   if (error) {
     Dash.tag('<b>erro</b>', 'ruim');
     aviso('não consegui carregar a lista de campanhas: ' + error.message);
@@ -168,4 +211,14 @@ async function iniciarPainel() {
   }
   render();
 }
-window.iniciarPainel = iniciarPainel;
+// O shell chama sem await, então qualquer exceção viraria rejeição não tratada
+// e a tela ficaria em "conectando" para sempre, sem dizer o porquê.
+// A função interna tem nome próprio de propósito: declaração de função no topo
+// cria binding global, e window.iniciarPainel = ... sobrescrevia esse binding,
+// fazendo o wrapper chamar a si mesmo até estourar a pilha.
+window.iniciarPainel = function () {
+  carregarTela().catch(e => {
+    Dash.tag('<b>erro</b>', 'ruim');
+    aviso('falha ao iniciar a tela: ' + String(e && e.message || e));
+  });
+};
