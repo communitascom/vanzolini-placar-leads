@@ -33,8 +33,8 @@
     {id:"performance", href:"performance.html", ico:"insights", rot:"Performance de campanha"}
   ];
   // Só no modo interno: as ferramentas de operação, que nunca tiveram versão de
-  // cliente. Conversões por curso já roda nesta casca (mora na raiz e se declara
-  // com data-dir/data-raiz); gestão e réguas seguem com a cara antiga.
+  // cliente. Conversões por curso e Gestão de conversões já rodam nesta casca
+  // (moram na raiz e se declaram com data-dir/data-raiz); réguas segue antiga.
   var FERRAMENTAS = [
     {id:"conversoes", href:"conversoes.html", ico:"link",             rot:"Conversões por curso"},
     {id:"admin",      href:"admin.html",      ico:"tune",             rot:"Gestão de conversões"},

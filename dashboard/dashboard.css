@@ -252,18 +252,18 @@ body.dash{min-height:100vh}
 .barra-topo .tag.erro b::before{background:#E06767}
 
 /* trava de PIN (mesmo PIN e mesma sessão das páginas antigas do cliente) */
-#pinGate{position:fixed;inset:0;background:var(--ground);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
-#pinGate .caixa{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-card);padding:34px 36px 30px;text-align:center;max-width:340px;width:100%;display:flex;flex-direction:column;gap:10px;align-items:center}
-#pinGate .logo-pin{height:40px;width:auto;display:block;filter:invert(1);margin-bottom:6px}
-#pinGate h2{font-size:18px;font-weight:600}
-#pinGate p{font-size:13px;color:var(--mute)}
+#pinGate,.gate{position:fixed;inset:0;background:var(--ground);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+#pinGate .caixa,.gate .caixa{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-card);padding:34px 36px 30px;text-align:center;max-width:340px;width:100%;display:flex;flex-direction:column;gap:10px;align-items:center}
+#pinGate .logo-pin,.gate .logo-pin{height:40px;width:auto;display:block;filter:invert(1);margin-bottom:6px}
+#pinGate h2,.gate h2{font-size:18px;font-weight:600}
+#pinGate p,.gate p{font-size:13px;color:var(--mute)}
 #pinGate input{border:1px solid var(--hair);border-radius:14px;padding:12px;font-size:24px;letter-spacing:10px;text-align:center;width:100%;font-family:inherit;color:var(--ink);background:var(--ground);margin-top:8px}
 #pinGate input:focus{outline:none;border-color:var(--ink)}
-#pinGate .btn{width:100%;margin-top:4px}
+#pinGate .btn,.gate .btn{width:100%;margin-top:4px}
 #pinGate .erroPin{color:var(--desce);font-size:12.5px;min-height:16px}
-#pinGate .credito{justify-content:center;margin-top:10px}
+#pinGate .credito,.gate .credito{justify-content:center;margin-top:10px}
 .oculto{display:none!important}
-@media print{#pinGate,.menu{display:none!important}.layout{display:block;padding:0}}
+@media print{#pinGate,.gate,.menu{display:none!important}.layout{display:block;padding:0}}
 
 /* cabeçalho de página e leitura */
 .cab .tit h2{font-size:24px}
@@ -664,11 +664,23 @@ body.dash{min-height:100vh}
 /* tabela dentro de card: sem borda própria, para não virar caixa dentro de caixa */
 .rolagem{overflow:auto;max-height:46vh;margin:0 -20px -16px}
 .rolagem table th{background:var(--card)}
-.rolagem td.esq,.rolagem th.esq{text-align:left;white-space:normal;padding-left:20px}
+.rolagem td.esq,.rolagem th.esq{padding-left:20px}
+td.esq,th.esq{text-align:left;white-space:normal}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+td.acoes-linha{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}
+td.data{white-space:nowrap}
+td.acoes-linha .ms{font-size:16px}
+.grid2 .larga{grid-column:1/-1}
+/* caixa de entrada por e-mail (login da equipe): o input do PIN é espaçado para
+   quatro dígitos, este é campo de texto normal */
+.gate input[type="email"]{border:1px solid var(--hair);border-radius:14px;padding:12px 14px;font:inherit;font-size:14px;
+  width:100%;color:var(--ink);background:var(--ground);margin-top:8px;text-align:left;letter-spacing:normal}
+.gate input[type="email"]:focus{outline:none;border-color:var(--ink)}
+.gate .msg{width:100%;text-align:left}
 .card table td:last-child,.card table th:last-child{padding-right:20px}
 /* botão dentro de célula: sem esticar na largura da coluna */
 td .btn{display:inline-flex;align-items:center;justify-content:center;width:auto}
-.conv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink-2);word-break:break-all;white-space:normal}
+.conv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink-2);white-space:normal;overflow-wrap:break-word}
 .sem{color:var(--mute);font-style:italic}
 tr.curso td{font-weight:600;border-top:1px solid var(--hair);padding-top:14px}
 tr.curso td .qtd{font-weight:400;color:var(--mute);font-size:12px;margin-left:8px}
