@@ -312,7 +312,10 @@ window.imprimirPagina=()=>{
 
 async function carregarDados(){
  document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v">…</div><div class="l">carregando leitura ao vivo…</div></div>';
- const [m1,m2]=await Promise.all([sb.rpc('historico_mensal'),sb.rpc('historico_turmas')]);
+ // O PostgREST corta cada resposta em 1000 linhas; historico_mensal passa disso
+ // (1658 em set/26) e, vindo em ordem de curso, perdia tudo depois do "I".
+ const tudo=async fn=>{let out=[];for(let o=0;;o+=1000){const r=await sb.rpc(fn).range(o,o+999);if(r.error)return r;out=out.concat(r.data);if(r.data.length<1000)return {data:out};}};
+ const [m1,m2]=await Promise.all([tudo('historico_mensal'),tudo('historico_turmas')]);
  if(m1.error||m2.error){
    document.getElementById('kpis').innerHTML='<div class="kpi"><div class="v" style="color:#d64545;font-size:16px">Erro ao carregar</div><div class="l">'+((m1.error&&m1.error.message)||(m2.error&&m2.error.message))+'</div></div>';
    return;
