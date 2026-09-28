@@ -163,7 +163,6 @@ tbody tr:hover td{background:#FAFBFC}
 .b-verm{background:var(--desce-bg);color:var(--desce)}
 .b-cinza{background:var(--ground);color:var(--mute)}
 .pill-ativa{background:var(--s2-tint);color:var(--azul);padding:3px 10px;border-radius:var(--r-pill);font-size:10.5px;font-weight:700;display:inline-block;text-decoration:none;letter-spacing:.04em}
-.pill-ativa.encerrada{background:var(--ground);color:var(--mute)}
 .total td{background:var(--ground)!important;font-weight:600;border-top:1px solid var(--hair);position:sticky;bottom:0}
 .loading{padding:40px;text-align:center;color:var(--mute)}
 .erro{padding:14px 18px;background:var(--desce-bg);color:var(--desce);border-radius:14px}
