@@ -39,6 +39,8 @@ function canaisDaLinha(r){
   return v;
 }
 
+const HOJE = new Date().toISOString().slice(0,10);
+
 const botaoAtivas = document.getElementById('fAtivas');
 // Sem o botao, a pagina e a versao do cliente: so campanhas ativas, fixo.
 let soAtivas = !botaoAtivas;
@@ -115,7 +117,7 @@ function renderizar(data, midia){
   corpo.innerHTML = '';
   let tipoAtual='';
   const soma={}; CANAIS.forEach(c=>soma[c]=0); soma.leads=0;
-  let ativos=0, leadsAtivos=0, semLeadAtiva=0;
+  let ativos=0, leadsAtivos=0, semLeadAtiva=0, noArHoje=0;
   // CPL medio: so os cursos que estao na tabela (mesmo recorte da tela) e que
   // tiveram midia no periodo. Institucional e "SEM CURSO IDENTIFICADO" ficam de
   // fora porque nao aparecem no placar.
@@ -148,14 +150,21 @@ function renderizar(data, midia){
       soma.leads+=Number(r.leads)||0;
       ativos++; leadsAtivos+=Number(r.leads)||0;
       if(r.leads===0) semLeadAtiva++;
+      if(!r.campanha_fim || r.campanha_fim >= HOJE) noArHoje++;
     }
     const [sit,cls] = situacao(r.media_dia, r.mediana_dia);
     const dpct = r.delta_pct;
     const dstr = (dpct===null||dpct===undefined) ? '<span class="z">—</span>'
         : `<span class="${dpct>=0?'up':'down'}">${dpct>=0?'+':''}${dpct}%</span>`;
+    // "Ativa" no dado quer dizer que a campanha entra no periodo consultado, nao que
+    // ela esteja no ar hoje: campanha encerrada continua no sync do Monday e seguia
+    // recebendo o selo ATIVA semanas depois de acabar. Quem manda e a data de fim.
+    const noAr = r.campanha_fim ? r.campanha_fim >= HOJE : true;
+    const rot = noAr ? 'ATIVA' : 'ENCERRADA';
+    const cls_pill = noAr ? 'pill-ativa' : 'pill-ativa encerrada';
     const pill = r.monday_item_id
-        ? `<a class="pill-ativa" href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${r.monday_item_id}" target="_blank" rel="noopener" title="Abrir no Monday">ATIVA</a>`
-        : `<span class="pill-ativa">ATIVA</span>`;
+        ? `<a class="${cls_pill}" href="https://communitascom.monday.com/boards/${MONDAY_BOARD}/pulses/${r.monday_item_id}" target="_blank" rel="noopener" title="Abrir no Monday">${rot}</a>`
+        : `<span class="${cls_pill}">${rot}</span>`;
     const camp = r.campanha_ativa
         ? `<div class="camp">${pill}
            <span class="periodo">${fmtDate(r.campanha_inicio)}–${fmtDate(r.campanha_fim)}</span></div>`
@@ -178,7 +187,7 @@ function renderizar(data, midia){
   });
 
   const totais = {
-    curso: `<td class="curso">Total · campanhas ativas (${ativos})</td>`,
+    curso: `<td class="curso">Total · campanhas no período (${ativos})</td>`,
     campanha: '<td></td>',
     leads: `<td class="leads">${fmt(soma.leads)}</td>`,
     delta: '<td></td>', media: '<td></td>', mediana: '<td></td>', situacao: '<td></td>'
@@ -189,9 +198,12 @@ function renderizar(data, midia){
 
   const K = window.Dash && Dash.kpi;
   document.getElementById('cards').innerHTML = K
-    ? K('group','laranja','Leads · ativas', fmt(leadsAtivos), ativos+' cursos') +
-      K('campaign','azul','Campanhas ativas', ativos, 'no período') +
-      K('leaderboard','verde','Canal líder', 'Meta', soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos leads ativos`:'—') +
+    ? K('group','laranja','Leads no período', fmt(leadsAtivos), ativos+' cursos') +
+      K('campaign','azul','Campanhas no período', ativos,
+        noArHoje===ativos ? 'todas no ar hoje'
+        : noArHoje ? noArHoje+(noArHoje===1?' ainda no ar hoje':' ainda no ar hoje')
+        : 'nenhuma no ar hoje') +
+      K('leaderboard','verde','Canal líder', 'Meta', soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos leads`:'—') +
       K('payments','roxo','CPL médio',
         leadsComInvest ? 'R$ '+(investTotal/leadsComInvest).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : null,
         leadsComInvest ? `${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads` : 'sem curso com mídia no período')
@@ -200,8 +212,8 @@ function renderizar(data, midia){
   const alertaBox = document.getElementById('alerta');
   alertaBox.style.display = 'flex';
   document.getElementById('alertaTxt').innerHTML = semLeadAtiva>0
-    ? `<b>${semLeadAtiva} campanha(s) ativa(s) sem lead</b> no período selecionado.`
-    : `<b>Todas as ${ativos} campanhas ativas tiveram lead</b> em algum dia do período selecionado.`;
+    ? `<b>${semLeadAtiva} campanha(s) sem lead</b> no período selecionado.`
+    : `<b>Todas as ${ativos} campanhas tiveram lead</b> em algum dia do período selecionado.`;
 }
 
 if(!window.AGUARDA_PIN) carregar();

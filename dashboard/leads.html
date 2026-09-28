@@ -49,8 +49,8 @@
       <span class="badge b-amar">Estável</span>
       <span class="badge b-verm">Abaixo</span>
       <span class="badge b-cinza">sem histórico</span>.
-      O selo <b>ATIVA</b> marca campanha em andamento no período escolhido. <b>Δ%</b> compara os leads do período com os do período anterior de mesma duração.</div>
-    <div>Dados ao vivo, leitura apenas. 1 lead = 1 e-mail por curso no período. CPL médio cobre só os cursos com mídia no período, no mesmo recorte da tabela. Exibindo somente campanhas ativas.</div>
+      A tabela traz as campanhas que rodaram no período: <b>ATIVA</b> é a que ainda está no ar hoje, <b>ENCERRADA</b> é a que já terminou, com a data de fim ao lado. <b>Δ%</b> compara os leads do período com os do período anterior de mesma duração.</div>
+    <div>Dados ao vivo, leitura apenas. 1 lead = 1 e-mail por curso no período. CPL médio cobre só os cursos com mídia no período, no mesmo recorte da tabela. Exibindo as campanhas que rodaram no período.</div>
     <div>Fonte: Supabase Communitas (leads do RD Station, mídia da planilha consolidada). Atualizado às <span id="horaRodape"></span>.</div>
     <span class="credito"><svg><use href="#anel"/></svg>por Communitas</span>
   </div>
@@ -66,15 +66,17 @@ window.iniciarPainel = async function(){
   document.getElementById('horaRodape').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   const dados = (typeof ultimoData !== 'undefined' && ultimoData) ? ultimoData : [];
   const ativas = dados.filter(r => r.campanha_ativa);
+  const hoje = new Date().toISOString().slice(0,10);
+  const noAr = ativas.filter(r => !r.campanha_fim || r.campanha_fim >= hoje).length;
   const leads = ativas.reduce((a,r)=>a+(Number(r.leads)||0),0);
   const meta = ativas.reduce((a,r)=>a+(Number(r.meta_ads)||0),0);
   const acima = ativas.filter(r=>Number(r.mediana_dia)&&Number(r.media_dia)>=Number(r.mediana_dia)).length;
   const abaixo = ativas.filter(r=>Number(r.mediana_dia)&&Number(r.media_dia)<Number(r.mediana_dia)*0.7).length;
   const semLead = ativas.filter(r=>!Number(r.leads)).length;
   let t;
-  if(!ativas.length) t = 'Nenhuma campanha ativa no período selecionado.';
+  if(!ativas.length) t = 'Nenhuma campanha no período selecionado.';
   else {
-    t = `No período, <b>${leads.toLocaleString('pt-BR')} leads</b> em ${ativas.length} campanhas ativas`;
+    t = `No período, <b>${leads.toLocaleString('pt-BR')} leads</b> em ${ativas.length} campanhas` + (noAr ? ` (${noAr} ainda no ar hoje)` : ' (nenhuma ainda no ar hoje)');
     if(leads) t += `, com o Meta respondendo por <b>${Math.round(100*meta/leads)}%</b> dos leads`;
     t += `. ${acima} campanha${acima===1?'':'s'} acima da mediana histórica`;
     if(abaixo) t += `, ${abaixo} abaixo`;
