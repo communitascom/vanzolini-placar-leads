@@ -56,6 +56,17 @@ function alternarAtivas(){
   if(ultimoData) renderizar(ultimoData, ultimaMidia);
 }
 
+// Filtro separado do de cima: aquele escolhe o recorte do periodo, este corta
+// so o que ainda esta no ar hoje. Existe so na versao interna.
+const botaoNoAr = document.getElementById('fNoAr');
+let soNoAr = false;
+function alternarNoAr(){
+  if(!botaoNoAr) return;
+  soNoAr = !soNoAr;
+  botaoNoAr.classList.toggle('on', soNoAr);
+  if(ultimoData) renderizar(ultimoData, ultimaMidia);
+}
+
 (function setDefaultDates(){
   const hoje = new Date();
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
@@ -109,6 +120,7 @@ function renderizar(data, midia){
   const corpo = document.getElementById('corpo');
   const rows = data
     .filter(r => soAtivas ? r.campanha_ativa : (r.leads > 0 || r.campanha_ativa))
+    .filter(r => soNoAr ? (r.campanha_ativa && emVeiculacao(r)) : true)
     .sort((a,b)=>{
       if(tipoOrder[a.tipo]!==tipoOrder[b.tipo]) return tipoOrder[a.tipo]-tipoOrder[b.tipo];
       // Quem esta no ar hoje sobe: e a campanha sobre a qual ainda da para agir.
