@@ -40,6 +40,8 @@ function canaisDaLinha(r){
 }
 
 const HOJE = new Date().toISOString().slice(0,10);
+// No ar hoje. Campanha sem data de fim conta como no ar.
+const emVeiculacao = r => !r.campanha_fim || r.campanha_fim >= HOJE;
 
 const botaoAtivas = document.getElementById('fAtivas');
 // Sem o botao, a pagina e a versao do cliente: so campanhas ativas, fixo.
@@ -109,7 +111,11 @@ function renderizar(data, midia){
     .filter(r => soAtivas ? r.campanha_ativa : (r.leads > 0 || r.campanha_ativa))
     .sort((a,b)=>{
       if(tipoOrder[a.tipo]!==tipoOrder[b.tipo]) return tipoOrder[a.tipo]-tipoOrder[b.tipo];
-      if(a.campanha_ativa!==b.campanha_ativa) return a.campanha_ativa?-1:1;
+      // Quem esta no ar hoje sobe: e a campanha sobre a qual ainda da para agir.
+      // O campo campanha_ativa nao serve para isso, e true para tudo que entrou
+      // no periodo, inclusive o que ja encerrou.
+      const na=emVeiculacao(a), nb=emVeiculacao(b);
+      if(na!==nb) return na?-1:1;
       if(a.campanha_ativa && b.campanha_ativa) return String(a.curso).localeCompare(String(b.curso),'pt-BR');
       return b.leads-a.leads;
     });
@@ -150,7 +156,7 @@ function renderizar(data, midia){
       soma.leads+=Number(r.leads)||0;
       ativos++; leadsAtivos+=Number(r.leads)||0;
       if(r.leads===0) semLeadAtiva++;
-      if(!r.campanha_fim || r.campanha_fim >= HOJE) noArHoje++;
+      if(emVeiculacao(r)) noArHoje++;
     }
     const [sit,cls] = situacao(r.media_dia, r.mediana_dia);
     const dpct = r.delta_pct;
@@ -159,7 +165,7 @@ function renderizar(data, midia){
     // "Ativa" no dado quer dizer que a campanha entra no periodo consultado, nao que
     // ela esteja no ar hoje: campanha encerrada continua no sync do Monday e seguia
     // recebendo o selo ATIVA semanas depois de acabar. Quem manda e a data de fim.
-    const noAr = r.campanha_fim ? r.campanha_fim >= HOJE : true;
+    const noAr = emVeiculacao(r);
     const rot = noAr ? 'ATIVA' : 'ENCERRADA';
     const cls_pill = noAr ? 'pill-ativa' : 'pill-ativa encerrada';
     const pill = r.monday_item_id
