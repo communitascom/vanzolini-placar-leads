@@ -44,6 +44,7 @@ const botaoAtivas = document.getElementById('fAtivas');
 let soAtivas = !botaoAtivas;
 let ultimoData = null;
 let ultimaMidia = null;
+let midiaErro = null;
 
 function alternarAtivas(){
   if(!botaoAtivas) return;
@@ -82,7 +83,9 @@ async function carregar(){
     sb.rpc('placar', { p_inicio: ini, p_fim: fim }),
     sb.rpc('midia_por_curso', { p_inicio: ini, p_fim: fim })
   ]);
-  ultimaMidia = resMidia.error ? null : resMidia.data;
+  // Falha na mídia não pode virar "sem mídia": avisa e deixa o CPL indisponível (29/10/2026).
+  midiaErro = resMidia.error ? resMidia.error.message : null;
+  ultimaMidia = midiaErro ? null : resMidia.data;
   if(error){
     erroBox.innerHTML = `<div class="erro">Erro ao carregar: ${error.message}</div>`;
     corpo.innerHTML = '';
@@ -90,7 +93,10 @@ async function carregar(){
     return;
   }
   ultimoData = data;
-  document.getElementById('tagTopo').innerHTML = `<b>online</b> · ${data.length} cursos`;
+  document.getElementById('tagTopo').innerHTML = midiaErro
+    ? `<b>mídia indisponível</b> · ${data.length} cursos`
+    : `<b>online</b> · ${data.length} cursos`;
+  if(midiaErro) erroBox.innerHTML = `<div class="erro">Não foi possível carregar a mídia (${midiaErro}). Leads estão corretos; investimento e CPL ficam indisponíveis até recarregar.</div>`;
   document.getElementById('atualizado').textContent =
     `atualizado às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   const br = iso => iso ? iso.split('-').reverse().join('/') : '';
@@ -194,7 +200,8 @@ function renderizar(data, midia){
       K('leaderboard','verde','Canal líder', 'Meta', soma.leads?`${Math.round(100*soma.meta_ads/soma.leads)}% dos leads ativos`:'—') +
       K('payments','roxo','CPL médio',
         leadsComInvest ? 'R$ '+(investTotal/leadsComInvest).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : null,
-        leadsComInvest ? `${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads` : 'sem curso com mídia no período')
+        midiaErro ? 'mídia indisponível: falha ao carregar'
+          : leadsComInvest ? `${fmtR(investTotal)} investidos ÷ ${fmt(leadsComInvest)} leads` : 'sem curso com mídia no período')
     : '';
 
   const alertaBox = document.getElementById('alerta');

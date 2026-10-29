@@ -85,9 +85,12 @@ Detalhes em `sql/automacao_diaria_20260824.md`.
 | `carga-midia-tarde` | 18:00 (Brasília) | idem, para o caso de a planilha ter atualizado depois |
 | `refresh-leads-validos` | de hora em hora | atualiza a materialized view `leads_validos` |
 
-Acompanhar por `select * from midia_carga_log order by id desc`. O campo
-`detalhe` avisa quando aparece campanha sem curso identificado, que é o sinal de
-que falta cadastrar o padrão em `de_para_campanha`.
+Acompanhar por `select * from midia_carga_log order by id desc`. Desde 29/10/2026 o
+`status` não é mais sempre `ok`: vira `alerta` quando há campanha sem curso (o
+`detalhe` mostra quantas e quanto em R$, sinal de que falta cadastrar o padrão em
+`de_para_campanha`) ou conta ativa sem dado até D-2. A carga também remove, dentro da
+janela, a linha que sumiu da planilha (campanha renomeada), com cópia em
+`midia_diaria_removida`. Detalhes em `sql/confiabilidade_20261029.md`.
 
 **O que ainda é manual e envelhece sozinho:**
 

@@ -85,8 +85,13 @@ async function carregarPeriodo(ini, fim) {
   const acima = ativas.filter(r => Number(r.mediana_dia) && Number(r.media_dia) >= Number(r.mediana_dia)).length;
   const abaixo = ativas.filter(r => Number(r.mediana_dia) && Number(r.media_dia) < Number(r.mediana_dia) * 0.7).length;
 
-  // investimento do período: captação (midia_por_curso) + institucional (institucional_serie)
-  const invCapt = midia.reduce((a, m) => a + (Number(m.investimento) || 0), 0);
+  // investimento do período, em custo real e de uma fonte só (midia_por_curso), que já
+  // traz institucional e sem curso. Até 29/10/2026 a tela somava institucional_serie por
+  // cima e contava o institucional duas vezes. A série institucional (custo de
+  // plataforma) segue só para CPM, CPC e impressões do bloco institucional.
+  const invTotal = midia.reduce((a, m) => a + (Number(m.investimento) || 0), 0);
+  const invInstReal = midia.filter(m => m.tipo === 'Institucional').reduce((a, m) => a + (Number(m.investimento) || 0), 0);
+  const invCapt = invTotal - invInstReal;
   const invInst = serie.reduce((a, r) => a + (Number(r.investimento) || 0), 0);
   const imprInst = serie.reduce((a, r) => a + (Number(r.impressoes) || 0), 0);
   const cliInst = serie.reduce((a, r) => a + (Number(r.cliques) || 0), 0);
@@ -109,7 +114,7 @@ async function carregarPeriodo(ini, fim) {
   let t = `No período, <b>${N(leads)} leads</b> em ${ativas.length} campanhas de captação ativas`;
   if (leads) t += ` (Meta responde por ${Math.round(100 * metaLeads / leads)}%)`;
   t += `, ${acima} acima da mediana histórica` + (abaixo ? ` e ${abaixo} abaixo` : '') + '. ';
-  t += `Mídia: <b>${BRL(invCapt + invInst)}</b>, sendo ${BRL(invCapt)} em captação e ${BRL(invInst)} na campanha institucional`;
+  t += `Mídia: <b>${BRL(invTotal)}</b> em custo real, sendo ${BRL(invCapt)} em captação e ${BRL(invInstReal)} na campanha institucional`;
   t += imprInst ? `, que entregou ${MI(imprInst)} impressões` + (alc ? ` e alcançou ${N(alc)} pessoas em Meta e LinkedIn.` : '.') : '.';
   document.getElementById('leituraTxt').innerHTML = t;
 
@@ -117,7 +122,7 @@ async function carregarPeriodo(ini, fim) {
   document.getElementById('kpis').innerHTML =
     kpi('group', 'laranja', 'Leads no período', N(leads), ativas.length + ' campanhas de captação ativas') +
     kpi('campaign', 'azul', 'Campanhas no ar', N(camp.length), camp.filter(c => c.proj_leads).length + ' com projeção de fechamento') +
-    kpi('payments', 'roxo', 'Mídia investida', BRL(invCapt + invInst), BRL(invCapt) + ' captação · ' + BRL(invInst) + ' institucional') +
+    kpi('payments', 'roxo', 'Mídia investida', BRL(invTotal), BRL(invCapt) + ' captação · ' + BRL(invInstReal) + ' institucional') +
     kpi('leaderboard', 'verde', 'Situação das campanhas', acima + '/' + ativas.length, acima + ' acima da mediana histórica');
 
   // indicadores institucionais (números grandes: alcance, impressões, cliques, CPM, CPC)
