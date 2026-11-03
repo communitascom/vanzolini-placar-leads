@@ -131,7 +131,14 @@ function fotos() {
   const ini = periodo.ini, fim = periodo.fim;
   const acum = REP.filter(r => r.granularidade === 'acumulado' && r.periodo_ini === ini && r.periodo_fim >= addDias(fim, -4));
   if (acum.length) return { linhas: acum, modo: 'acumulado', meses: 1, nota: '' };
-  const meses = REP.filter(r => r.granularidade === 'mes' && r.periodo_ini >= ini.slice(0, 7) + '-01' && r.periodo_ini <= fim);
+  // A tarefa grava uma foto nova a cada refresh (a chave inclui periodo_fim): vale só a mais recente de cada linha no mês.
+  const mm = new Map();
+  REP.filter(r => r.granularidade === 'mes' && r.periodo_ini >= ini.slice(0, 7) + '-01' && r.periodo_ini <= fim).forEach(r => {
+    const k = [r.periodo_ini, r.plataforma, r.conta, r.nivel, r.nome, r.campanha].join('|');
+    const a = mm.get(k);
+    if (!a || r.periodo_fim > a.periodo_fim) mm.set(k, r);
+  });
+  const meses = [...mm.values()];
   const chaves = [...new Set(meses.map(r => r.periodo_ini.slice(0, 7)))];
   if (!chaves.length) return { linhas: [], modo: 'nenhum', meses: 0, nota: 'Sem foto do Reportei para este período.' };
   const cobreIni = chaves.includes(ini.slice(0, 7)), cobreFim = chaves.includes(fim.slice(0, 7));
