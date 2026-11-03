@@ -99,13 +99,23 @@ async function carregarBase() {
   if (p.error || r.error) throw new Error((p.error || r.error).message);
   PLANO = p.data || []; REP = r.data || []; MIDIA_ATE = m.data || null;
 }
+// O PostgREST corta a resposta em 1000 linhas; a série diária do período inteiro passa disso.
+async function rpcPaginado(fn, args) {
+  const TAM = 1000; let tudo = [];
+  for (let de = 0; ; de += TAM) {
+    const r = await sb.rpc(fn, args).range(de, de + TAM - 1);
+    if (r.error) return r;
+    tudo = tudo.concat(r.data || []);
+    if (!r.data || r.data.length < TAM) return { data: tudo, error: null };
+  }
+}
 async function carregarPeriodo() {
   // janela anterior de mesmo tamanho, terminando na vespera do inicio
   const dias = Math.round((new Date(periodo.fim) - new Date(periodo.ini)) / 86400000) + 1;
   const dISO = (base, delta) => { const d = new Date(base + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + delta); return d.toISOString().slice(0, 10); };
   const antIni = dISO(periodo.ini, -dias), antFim = dISO(periodo.ini, -1);
   const [s, c, a] = await Promise.all([
-    sb.rpc('institucional_serie', { p_ini: periodo.ini, p_fim: periodo.fim }),
+    rpcPaginado('institucional_serie', { p_ini: periodo.ini, p_fim: periodo.fim }),
     sb.rpc('institucional_campanhas', { p_ini: periodo.ini, p_fim: periodo.fim }),
     sb.rpc('institucional_campanhas', { p_ini: antIni, p_fim: antFim })
   ]);
