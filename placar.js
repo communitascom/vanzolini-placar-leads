@@ -16,8 +16,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const MONDAY_BOARD = "935301050";
-const tipoOrder = {MBA:0, Curso:1, Institucional:2};
-const rotulos = {MBA:'MBAs', Curso:'Cursos', Institucional:'Campanha de captação'};
+const tipoOrder = {MBA:0, 'Mini curso':1, Curso:2, Institucional:3};
+const rotulos = {MBA:'MBAs', 'Mini curso':'Mini cursos', Curso:'Cursos', Institucional:'Campanha de captação'};
 const fmt = n => Number(n||0).toLocaleString('pt-BR');
 const fmtR = n => 'R$ ' + Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:0});
 const fmtDate = iso => iso ? iso.split('-').reverse().slice(0,2).join('/') : '';

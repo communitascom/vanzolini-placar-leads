@@ -12,9 +12,14 @@ Sync n8n segue parado. Comparados os 12 itens ATIVA! do board 935301050 com `cam
 
 - MBA em IA Aplicada (curso 1) nao esta mais ATIVA! no Monday; mantido como estava.
 
+## Mini curso (09/11, tarde)
+
+- Nova categoria `Mini curso` (constraint `cursos_tipo_check` ampliada); curso 135 passou a ela. `placar.js` e `campanhas.js`: ordem MBA, Mini curso, Curso, Institucional.
+- `vincula_conversao` para `pop-up-saida-do-corredor-ao-porto-lp` (6) e `lp-capex-portuario-garanta-sua-vaga` (142). Placar de 01 a 09/11: 45 leads.
+
 ## Pendente (RD)
 
-- De-para do RD do curso 135, senao as conversoes ficam orfas.
+- Conferir se `lp-capex-portuario-garanta-sua-vaga` (142 conversoes) e mesmo do minicurso; foi vinculada por ser a LP do tema, com inicio em 21/10.
 
 ## Rollback
 

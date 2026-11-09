@@ -177,8 +177,8 @@ function renderNoAr(){
   // E a mesma organizacao do placar de leads, para as duas telas se lerem do
   // mesmo jeito. A ordem por verba, que era a anterior, respondia uma pergunta
   // que os indicadores do topo ja respondem.
-  const tipoOrder = {MBA:0, Curso:1, Institucional:2};
-  const rotuloTipo = {MBA:'MBAs', Curso:'Cursos', Institucional:'Campanha de captação'};
+  const tipoOrder = {MBA:0, 'Mini curso':1, Curso:2, Institucional:3};
+  const rotuloTipo = {MBA:'MBAs', 'Mini curso':'Mini cursos', Curso:'Cursos', Institucional:'Campanha de captação'};
   const ordenadas = NOAR.slice().sort((a,b)=>
     (tipoOrder[a.tipo] ?? 9) - (tipoOrder[b.tipo] ?? 9) ||
     String(a.curso||'').localeCompare(String(b.curso||''), 'pt-BR'));
